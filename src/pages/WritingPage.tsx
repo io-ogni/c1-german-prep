@@ -2,31 +2,27 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRequiredAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { TelcBadge } from '@/components/shared/TelcBadge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { ArrowLeft, Loader2, PenLine, FileText, GraduationCap } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ArrowLeft, Loader2, PenLine, FileText, GraduationCap, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
 import type { Tables } from '@/integrations/supabase/types';
 
 type WritingPrompt = Tables<'writing_prompts'>;
 type WritingSubmission = Tables<'writing_submissions'>;
-
 type WritingLevel = 'rusty' | 'solid_b2' | 'almost_c1';
 
-interface EvaluationResult {
-  score_aufgabengerechtheit: string;
-  score_korrektheit: string;
-  score_repertoire: string;
-  score_kommunikative_gestaltung: string;
-  total_points: number;
-  llm_feedback_de: string;
-  llm_feedback_en: string;
-  llm_corrections: Correction[];
-  improved_version: string;
+interface CriterionResult {
+  grade: string;
+  feedback_de: string;
+  feedback_en: string;
+  corrections?: Correction[];
 }
 
 interface Correction {
@@ -37,10 +33,43 @@ interface Correction {
   explanation_en: string;
 }
 
+interface EvaluationResponse {
+  aufgabengerechtheit: CriterionResult;
+  korrektheit: CriterionResult & { corrections?: Correction[] };
+  repertoire: CriterionResult;
+  kommunikative_gestaltung: CriterionResult;
+  overall_feedback_de: string;
+  overall_feedback_en: string;
+  improved_version: string;
+  total_points: number;
+  max_points: number;
+  error?: string;
+  code?: string;
+}
+
+// ─── API Key Banner ───────────────────────────────────
+
+function ApiKeyBanner() {
+  const { t } = useTranslation();
+  return (
+    <Alert className="border-amber-300 bg-amber-50 dark:bg-amber-950/30">
+      <AlertCircle className="h-4 w-4 text-amber-600" />
+      <AlertDescription className="flex items-center justify-between">
+        <span className="text-sm">{t('writing_api_key_needed')}</span>
+        <Link to="/settings">
+          <Button variant="outline" size="sm">{t('nav_settings')}</Button>
+        </Link>
+      </AlertDescription>
+    </Alert>
+  );
+}
+
 // ─── Level Selector ───────────────────────────────────
 
 function LevelSelector({ onSelect }: { onSelect: (level: WritingLevel) => void }) {
   const { t } = useTranslation();
+  const { profile } = useRequiredAuth();
+  const lang = profile?.ui_language || 'de';
 
   const levels: { key: WritingLevel; icon: React.ReactNode; subtitle_de: string; subtitle_en: string }[] = [
     {
@@ -62,9 +91,6 @@ function LevelSelector({ onSelect }: { onSelect: (level: WritingLevel) => void }
       subtitle_en: 'Full texts in telc format (~350 words each)',
     },
   ];
-
-  const { profile } = useRequiredAuth();
-  const lang = profile?.ui_language || 'de';
 
   return (
     <div className="space-y-6">
@@ -100,10 +126,12 @@ function LevelSelector({ onSelect }: { onSelect: (level: WritingLevel) => void }
 function PromptList({
   prompts,
   submissions,
+  hasApiKey,
   onSelect,
 }: {
   prompts: WritingPrompt[];
   submissions: Map<string, WritingSubmission>;
+  hasApiKey: boolean;
   onSelect: (p: WritingPrompt) => void;
 }) {
   const { t } = useTranslation();
@@ -113,6 +141,7 @@ function PromptList({
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold text-foreground">{t('page_writing')}</h1>
+      {!hasApiKey && <ApiKeyBanner />}
       <div className="grid gap-3">
         {prompts.map((p) => {
           const sub = submissions.get(p.id);
@@ -157,9 +186,10 @@ function PromptList({
 
 // ─── Grade helpers ────────────────────────────────────
 
+const GRADE_POINTS: Record<string, number> = { A: 12, B: 8, C: 4, D: 0 };
+
 function gradeColor(grade: string) {
-  const letter = grade?.charAt(0)?.toUpperCase();
-  switch (letter) {
+  switch (grade) {
     case 'A': return 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30';
     case 'B': return 'text-primary bg-primary/10';
     case 'C': return 'text-amber-600 bg-amber-100 dark:bg-amber-900/30';
@@ -168,49 +198,60 @@ function gradeColor(grade: string) {
   }
 }
 
-function ScoreCard({ label, score }: { label: string; score: string }) {
-  if (!score) return null;
+function ScoreCard({ label, grade }: { label: string; grade: string }) {
+  if (!grade) return null;
+  const points = GRADE_POINTS[grade] ?? 0;
   return (
-    <div className={`rounded-lg p-3 text-center ${gradeColor(score)}`}>
+    <div className={`rounded-lg p-3 text-center ${gradeColor(grade)}`}>
       <div className="text-xs font-medium opacity-80">{label}</div>
-      <div className="text-lg font-bold">{score}</div>
+      <div className="text-lg font-bold">{grade} ({points}/12)</div>
     </div>
   );
 }
 
 // ─── Evaluation Display ──────────────────────────────
 
-function EvaluationDisplay({ submission }: { submission: WritingSubmission }) {
+function EvaluationDisplay({ evaluation }: { evaluation: EvaluationResponse }) {
   const { t } = useTranslation();
   const { profile } = useRequiredAuth();
   const lang = profile?.ui_language || 'de';
 
-  const corrections = (submission.llm_corrections as unknown as Correction[] | null) ?? [];
-  const feedback = lang === 'de' ? submission.llm_feedback_de : submission.llm_feedback_en;
+  const corrections = evaluation.korrektheit?.corrections ?? [];
+  const feedback = lang === 'de' ? evaluation.overall_feedback_de : evaluation.overall_feedback_en;
 
   return (
     <div className="space-y-4 rounded-lg border border-border bg-card p-4">
       <h3 className="text-lg font-semibold text-foreground">{t('eval_results')}</h3>
 
       <div className="grid grid-cols-2 gap-3">
-        <ScoreCard label={t('eval_aufgabengerechtheit')} score={submission.score_aufgabengerechtheit ?? ''} />
-        <ScoreCard label={t('eval_korrektheit')} score={submission.score_korrektheit ?? ''} />
-        <ScoreCard label={t('eval_repertoire')} score={submission.score_repertoire ?? ''} />
-        <ScoreCard label={t('eval_kommunikative_gestaltung')} score={submission.score_kommunikative_gestaltung ?? ''} />
+        <ScoreCard label={t('eval_aufgabengerechtheit')} grade={evaluation.aufgabengerechtheit?.grade} />
+        <ScoreCard label={t('eval_korrektheit')} grade={evaluation.korrektheit?.grade} />
+        <ScoreCard label={t('eval_repertoire')} grade={evaluation.repertoire?.grade} />
+        <ScoreCard label={t('eval_kommunikative_gestaltung')} grade={evaluation.kommunikative_gestaltung?.grade} />
       </div>
 
-      {submission.total_points != null && (
-        <div className="text-center text-lg font-bold text-foreground">
-          {t('eval_total')}: {submission.total_points}/48
-        </div>
-      )}
+      <div className="text-center text-lg font-bold text-foreground">
+        {t('eval_total')}: {evaluation.total_points}/{evaluation.max_points}
+      </div>
 
       <Accordion type="multiple" className="w-full">
         {feedback && (
           <AccordionItem value="feedback">
             <AccordionTrigger>{t('eval_detailed_feedback')}</AccordionTrigger>
             <AccordionContent>
-              <p className="whitespace-pre-wrap text-sm text-foreground">{feedback}</p>
+              <div className="space-y-3 text-sm text-foreground">
+                {(['aufgabengerechtheit', 'korrektheit', 'repertoire', 'kommunikative_gestaltung'] as const).map((key) => {
+                  const c = evaluation[key];
+                  if (!c) return null;
+                  const fb = lang === 'de' ? c.feedback_de : c.feedback_en;
+                  return (
+                    <div key={key}>
+                      <p className="font-medium">{t(`eval_${key}` as any)} ({c.grade})</p>
+                      <p className="text-muted-foreground">{fb}</p>
+                    </div>
+                  );
+                })}
+              </div>
             </AccordionContent>
           </AccordionItem>
         )}
@@ -222,7 +263,7 @@ function EvaluationDisplay({ submission }: { submission: WritingSubmission }) {
               <div className="space-y-3">
                 {corrections.map((c, i) => (
                   <div key={i} className="rounded border border-border p-3 text-sm">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
                       <span className="line-through text-destructive">{c.original}</span>
                       <span className="text-muted-foreground">→</span>
                       <span className="font-medium text-emerald-600">{c.corrected}</span>
@@ -237,6 +278,15 @@ function EvaluationDisplay({ submission }: { submission: WritingSubmission }) {
             </AccordionContent>
           </AccordionItem>
         )}
+
+        {evaluation.improved_version && (
+          <AccordionItem value="improved">
+            <AccordionTrigger>{t('eval_improved_version')}</AccordionTrigger>
+            <AccordionContent>
+              <p className="whitespace-pre-wrap text-sm text-foreground">{evaluation.improved_version}</p>
+            </AccordionContent>
+          </AccordionItem>
+        )}
       </Accordion>
     </div>
   );
@@ -247,29 +297,33 @@ function EvaluationDisplay({ submission }: { submission: WritingSubmission }) {
 function WritingInterface({
   prompt,
   existingSubmission,
+  hasApiKey,
   onBack,
   onSubmitted,
 }: {
   prompt: WritingPrompt;
   existingSubmission?: WritingSubmission;
+  hasApiKey: boolean;
   onBack: () => void;
   onSubmitted: (sub: WritingSubmission) => void;
 }) {
   const { t } = useTranslation();
-  const { user, profile } = useRequiredAuth();
+  const { profile } = useRequiredAuth();
   const lang = profile?.ui_language || 'de';
 
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [submission, setSubmission] = useState<WritingSubmission | undefined>(existingSubmission);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [evaluation, setEvaluation] = useState<EvaluationResponse | null>(null);
 
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
   const context = lang === 'de' ? prompt.context_de : prompt.context_en;
-  const starterQuotes = (prompt.starter_quotes as { text: string; source: string }[] | null) ?? [];
+  const starterQuotes = (prompt.starter_quotes as unknown as { text: string; source: string }[] | null) ?? [];
 
   const handleSubmit = async () => {
-    if (!user || wordCount < 10) return;
+    if (!hasApiKey) {
+      toast({ title: t('writing_api_key_needed'), variant: 'destructive' });
+      return;
+    }
     setSubmitting(true);
 
     try {
@@ -280,41 +334,36 @@ function WritingInterface({
           context: prompt.context_de,
           user_text: text,
           prompt_id: prompt.id,
-          target_word_count: prompt.target_word_count,
         },
       });
 
       if (res.error) throw res.error;
-      const data = res.data;
+      const data = res.data as EvaluationResponse;
 
       if (data.error) {
+        // Handle specific error codes from the edge function
+        if (data.code === 'no_api_key') {
+          toast({ title: data.error, variant: 'destructive' });
+          return;
+        }
         toast({ title: data.error, variant: 'destructive' });
         return;
       }
 
-      // Save submission
-      const { data: sub, error: dbErr } = await supabase
+      setEvaluation(data);
+
+      // Refresh submissions list
+      const { data: newSub } = await supabase
         .from('writing_submissions')
-        .insert({
-          user_id: user.id,
-          prompt_id: prompt.id,
-          text_content: text,
-          word_count: wordCount,
-          score_aufgabengerechtheit: data.score_aufgabengerechtheit,
-          score_korrektheit: data.score_korrektheit,
-          score_repertoire: data.score_repertoire,
-          score_kommunikative_gestaltung: data.score_kommunikative_gestaltung,
-          total_points: data.total_points,
-          llm_feedback_de: data.llm_feedback_de,
-          llm_feedback_en: data.llm_feedback_en,
-          llm_corrections: data.llm_corrections,
-        })
-        .select()
+        .select('*')
+        .eq('prompt_id', prompt.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
         .single();
 
-      if (dbErr) throw dbErr;
-      setSubmission(sub as WritingSubmission);
-      onSubmitted(sub as WritingSubmission);
+      if (newSub) {
+        onSubmitted(newSub as WritingSubmission);
+      }
     } catch (err: any) {
       toast({ title: t('common_error'), description: err.message, variant: 'destructive' });
     } finally {
@@ -335,6 +384,8 @@ function WritingInterface({
         {prompt.exam_format === 'telc' && <TelcBadge />}
       </div>
 
+      {!hasApiKey && <ApiKeyBanner />}
+
       {/* Context box */}
       <div className="rounded-lg bg-primary/5 border border-primary/20 p-4">
         <p className="text-sm text-foreground whitespace-pre-wrap">{context}</p>
@@ -354,13 +405,13 @@ function WritingInterface({
       {/* Target info */}
       <div className="flex items-center gap-4 text-sm text-muted-foreground">
         <span>{t('writing_target')}: ~{prompt.target_word_count} {t('writing_word_count')}</span>
+        {hasApiKey && <span>{t('writing_cost_note')}</span>}
       </div>
 
       {/* Textarea */}
-      {!submission && (
+      {!evaluation && (
         <>
           <Textarea
-            ref={textareaRef}
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder={lang === 'de' ? 'Schreibe hier deinen Text...' : 'Write your text here...'}
@@ -371,7 +422,11 @@ function WritingInterface({
             <span className="text-sm text-muted-foreground">
               {t('writing_word_count')}: {wordCount}/{prompt.target_word_count}
             </span>
-            <Button onClick={handleSubmit} disabled={submitting || wordCount < 10}>
+            <Button
+              onClick={handleSubmit}
+              disabled={submitting || wordCount < 10 || !hasApiKey}
+              title={!hasApiKey ? t('writing_api_key_needed') : undefined}
+            >
               {submitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -386,11 +441,11 @@ function WritingInterface({
       )}
 
       {/* Results */}
-      {submission && <EvaluationDisplay submission={submission} />}
+      {evaluation && <EvaluationDisplay evaluation={evaluation} />}
 
-      {submission && (
+      {evaluation && (
         <div className="flex gap-3">
-          <Button variant="outline" onClick={() => { setSubmission(undefined); setText(''); }}>
+          <Button variant="outline" onClick={() => { setEvaluation(null); setText(''); }}>
             {t('exercise_try_again')}
           </Button>
         </div>
@@ -410,6 +465,7 @@ export default function WritingPage() {
   const { t } = useTranslation();
 
   const writingLevel = profile?.writing_level as WritingLevel | null;
+  const hasApiKey = !!profile?.api_key_encrypted;
 
   const selectLevel = async (level: WritingLevel) => {
     if (!user) return;
@@ -434,7 +490,6 @@ export default function WritingPage() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // No level selected → show selector
   if (!writingLevel) {
     return <LevelSelector onSelect={selectLevel} />;
   }
@@ -448,6 +503,7 @@ export default function WritingPage() {
       <WritingInterface
         prompt={selectedPrompt}
         existingSubmission={submissions.get(selectedPrompt.id)}
+        hasApiKey={hasApiKey}
         onBack={() => setSelectedPrompt(null)}
         onSubmitted={(sub) => {
           setSubmissions((prev) => new Map(prev).set(sub.prompt_id, sub));
@@ -460,6 +516,7 @@ export default function WritingPage() {
     <PromptList
       prompts={prompts}
       submissions={submissions}
+      hasApiKey={hasApiKey}
       onSelect={setSelectedPrompt}
     />
   );
