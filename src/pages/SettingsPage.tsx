@@ -14,7 +14,7 @@ export default function SettingsPage() {
   const { profile, refreshProfile } = useRequiredAuth();
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
   const [uiLanguage, setUiLanguage] = useState<string>(profile?.ui_language || 'de');
-  const [writingLevel, setWritingLevel] = useState<string>(profile?.writing_level || 'c1');
+  const [writingLevel, setWritingLevel] = useState<string>(profile?.writing_level || '');
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
