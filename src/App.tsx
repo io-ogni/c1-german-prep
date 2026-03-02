@@ -15,6 +15,7 @@ import ScaffoldPage from "@/pages/ScaffoldPage";
 import VocabularyPage from "@/pages/VocabularyPage";
 import GrammarPage from "@/pages/GrammarPage";
 import VerbTablePage from "@/pages/VerbTablePage";
+import WritingPage from "@/pages/WritingPage";
 import SettingsPage from "@/pages/SettingsPage";
 import NotFound from "@/pages/NotFound";
 
@@ -40,7 +41,7 @@ const App = () => (
               <Route path="/vocabulary" element={<VocabularyPage />} />
               <Route path="/grammar" element={<GrammarPage />} />
               <Route path="/grammar/verbs" element={<VerbTablePage />} />
-              <Route path="/writing" element={<ScaffoldPage titleKey="page_writing" />} />
+              <Route path="/writing" element={<WritingPage />} />
               <Route path="/reading" element={<ScaffoldPage titleKey="page_reading" />} />
               <Route path="/listening" element={<ScaffoldPage titleKey="page_listening" />} />
               <Route path="/exam-prep" element={<ScaffoldPage titleKey="page_exam_prep" />} />
