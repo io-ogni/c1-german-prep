@@ -249,7 +249,7 @@ export type Database = {
           ui_language: string
           updated_at: string
           user_id: string
-          writing_level: string
+          writing_level: string | null
         }
         Insert: {
           api_key_encrypted?: string | null
@@ -261,7 +261,7 @@ export type Database = {
           ui_language?: string
           updated_at?: string
           user_id: string
-          writing_level?: string
+          writing_level?: string | null
         }
         Update: {
           api_key_encrypted?: string | null
@@ -273,7 +273,7 @@ export type Database = {
           ui_language?: string
           updated_at?: string
           user_id?: string
-          writing_level?: string
+          writing_level?: string | null
         }
         Relationships: []
       }
