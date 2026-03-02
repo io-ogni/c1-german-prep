@@ -28,6 +28,11 @@ export const translations = {
     auth_has_account: "Bereits ein Konto?",
     auth_reset_sent: "Falls ein Konto mit dieser E-Mail existiert, haben wir Ihnen einen Link zum Zurücksetzen geschickt.",
     auth_check_email: "Bitte überprüfen Sie Ihre E-Mail für die Bestätigung.",
+    auth_password_hint: "Mindestens 6 Zeichen",
+    auth_passwords_no_match: "Passwörter stimmen nicht überein.",
+    auth_new_password: "Neues Passwort",
+    auth_set_new_password: "Neues Passwort setzen",
+    auth_password_updated: "Passwort wurde aktualisiert. Sie können sich jetzt anmelden.",
 
     // Home
     home_welcome: "Willkommen",
@@ -245,6 +250,11 @@ export const translations = {
     auth_has_account: "Already have an account?",
     auth_reset_sent: "If an account exists with this email, we've sent a reset link.",
     auth_check_email: "Please check your email for confirmation.",
+    auth_password_hint: "At least 6 characters",
+    auth_passwords_no_match: "Passwords don't match.",
+    auth_new_password: "New password",
+    auth_set_new_password: "Set new password",
+    auth_password_updated: "Password updated. You can now log in.",
 
     // Home
     home_welcome: "Welcome",

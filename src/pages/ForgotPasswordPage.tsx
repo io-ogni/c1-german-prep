@@ -19,6 +19,7 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setLoading(true);
     const { error } = await auth!.resetPassword(email);
+    // Note: resetPassword uses redirectTo configured in AuthContext
     setLoading(false);
     if (error) {
       toast.error(error.message);
