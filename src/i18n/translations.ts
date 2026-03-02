@@ -210,6 +210,13 @@ export const translations = {
     page_my_texts: "Meine Texte",
     page_coming_soon: "Demnächst verfügbar",
 
+    // Grammar
+    grammar_verb_table: "Verbtabelle",
+    grammar_filter_all: "Alle",
+    grammar_filter_irregular: "Unregelmäßig",
+    grammar_filter_separable: "Trennbar",
+    grammar_search_verb: "Verb suchen...",
+
     // Common
     common_loading: "Laden...",
     common_error: "Ein Fehler ist aufgetreten.",
@@ -431,6 +438,13 @@ export const translations = {
     page_my_vocabulary: "My Vocabulary",
     page_my_texts: "My Texts",
     page_coming_soon: "Coming soon",
+
+    // Grammar
+    grammar_verb_table: "Verb Table",
+    grammar_filter_all: "All",
+    grammar_filter_irregular: "Irregular only",
+    grammar_filter_separable: "Separable only",
+    grammar_search_verb: "Search verbs...",
 
     // Common
     common_loading: "Loading...",
