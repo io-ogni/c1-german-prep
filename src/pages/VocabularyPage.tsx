@@ -1,0 +1,109 @@
+import { useState } from 'react';
+import { LevelTabs } from '@/components/shared/LevelTabs';
+import { TopicCard } from '@/components/shared/TopicCard';
+import { ExerciseFlow } from '@/components/vocabulary/ExerciseFlow';
+import { useTranslation } from '@/i18n/useTranslation';
+import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const TOPIC_NAMES: Record<string, { de: string; en: string }> = {
+  alltag_gesellschaft: { de: 'Alltag & Gesellschaft', en: 'Everyday Life & Society' },
+  arbeit_karriere: { de: 'Arbeit & Karriere', en: 'Work & Career' },
+  medien_kommunikation: { de: 'Medien & Kommunikation', en: 'Media & Communication' },
+  umwelt_natur: { de: 'Umwelt & Natur', en: 'Environment & Nature' },
+  wissenschaft_technik: { de: 'Wissenschaft & Technik', en: 'Science & Technology' },
+  politik_wirtschaft: { de: 'Politik & Wirtschaft', en: 'Politics & Economy' },
+  kultur_bildung: { de: 'Kultur & Bildung', en: 'Culture & Education' },
+  nomen_verb_verbindungen: { de: 'Nomen-Verb-Verbindungen', en: 'Noun-Verb Combinations' },
+  konnektoren_redemittel: { de: 'Konnektoren & Redemittel', en: 'Connectors & Phrases' },
+};
+
+export default function VocabularyPage() {
+  const [level, setLevel] = useState<'b2' | 'c1'>('b2');
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const { t, lang } = useTranslation();
+  const auth = useAuth();
+
+  const { data: topics, isLoading } = useQuery({
+    queryKey: ['vocabulary-topics', level, auth?.user?.id],
+    queryFn: async () => {
+      const { data: exercises } = await supabase
+        .from('exercises')
+        .select('id, topic, sort_order')
+        .eq('area', 'vocabulary')
+        .eq('level', level);
+
+      if (!exercises?.length) return [];
+
+      const { data: progress } = await supabase
+        .from('exercise_progress')
+        .select('exercise_id, completed')
+        .eq('user_id', auth!.user!.id);
+
+      const completedSet = new Set(
+        (progress ?? []).filter((p) => p.completed).map((p) => p.exercise_id)
+      );
+
+      const topicMap = new Map<string, { total: number; completed: number; minSort: number }>();
+      for (const ex of exercises) {
+        const entry = topicMap.get(ex.topic) ?? { total: 0, completed: 0, minSort: ex.sort_order };
+        entry.total++;
+        if (completedSet.has(ex.id)) entry.completed++;
+        if (ex.sort_order < entry.minSort) entry.minSort = ex.sort_order;
+        topicMap.set(ex.topic, entry);
+      }
+
+      return Array.from(topicMap.entries())
+        .sort((a, b) => a[1].minSort - b[1].minSort)
+        .map(([slug, data]) => ({
+          slug,
+          title: TOPIC_NAMES[slug]?.[lang] ?? slug,
+          total: data.total,
+          completed: data.completed,
+        }));
+    },
+    enabled: !!auth?.user,
+  });
+
+  if (selectedTopic) {
+    return (
+      <ExerciseFlow
+        topic={selectedTopic}
+        level={level}
+        topicTitle={TOPIC_NAMES[selectedTopic]?.[lang] ?? selectedTopic}
+        onBack={() => setSelectedTopic(null)}
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold text-foreground">{t('page_vocabulary')}</h1>
+      <LevelTabs value={level} onValueChange={setLevel} />
+
+      {isLoading ? (
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-28 rounded-lg" />
+          ))}
+        </div>
+      ) : topics?.length ? (
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {topics.map((topic) => (
+            <TopicCard
+              key={topic.slug}
+              title={topic.title}
+              exerciseCount={topic.total}
+              progress={topic.total > 0 ? (topic.completed / topic.total) * 100 : 0}
+              onClick={() => setSelectedTopic(topic.slug)}
+            />
+          ))}
+        </div>
+      ) : (
+        <p className="text-muted-foreground text-sm">{t('page_coming_soon')}</p>
+      )}
+    </div>
+  );
+}
