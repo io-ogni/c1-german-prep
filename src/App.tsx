@@ -3,8 +3,16 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AppLayout } from "@/components/layout/AppLayout";
+import LoginPage from "@/pages/LoginPage";
+import SignupPage from "@/pages/SignupPage";
+import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
+import HomePage from "@/pages/HomePage";
+import ScaffoldPage from "@/pages/ScaffoldPage";
+import SettingsPage from "@/pages/SettingsPage";
+import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -14,11 +22,31 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            {/* Public auth routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+            {/* Protected routes with layout */}
+            <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/vocabulary" element={<ScaffoldPage titleKey="page.vocabulary" />} />
+              <Route path="/grammar" element={<ScaffoldPage titleKey="page.grammar" />} />
+              <Route path="/grammar/verbs" element={<ScaffoldPage titleKey="page.grammar" />} />
+              <Route path="/writing" element={<ScaffoldPage titleKey="page.writing" />} />
+              <Route path="/reading" element={<ScaffoldPage titleKey="page.reading" />} />
+              <Route path="/listening" element={<ScaffoldPage titleKey="page.listening" />} />
+              <Route path="/exam-prep" element={<ScaffoldPage titleKey="page.examPrep" />} />
+              <Route path="/my-vocabulary" element={<ScaffoldPage titleKey="page.myVocabulary" />} />
+              <Route path="/my-texts" element={<ScaffoldPage titleKey="page.myTexts" />} />
+              <Route path="/settings" element={<SettingsPage />} />
+            </Route>
+
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
