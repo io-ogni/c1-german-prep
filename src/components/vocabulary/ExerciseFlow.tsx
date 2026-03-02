@@ -10,29 +10,35 @@ import { DefinitionMatch } from './exercises/DefinitionMatch';
 import { FillIn } from './exercises/FillIn';
 import { SynonymMatch } from './exercises/SynonymMatch';
 import { WordFamily } from './exercises/WordFamily';
+import { GrammarFillIn } from '@/components/grammar/exercises/GrammarFillIn';
+import { Transform } from '@/components/grammar/exercises/Transform';
+import { SentenceBuild } from '@/components/grammar/exercises/SentenceBuild';
+import { MultipleChoice } from '@/components/grammar/exercises/MultipleChoice';
+import { Match } from '@/components/grammar/exercises/Match';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Tables } from '@/integrations/supabase/types';
 
 interface ExerciseFlowProps {
+  area?: string;
   topic: string;
   level: string;
   topicTitle: string;
   onBack: () => void;
 }
 
-export function ExerciseFlow({ topic, level, topicTitle, onBack }: ExerciseFlowProps) {
+export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, onBack }: ExerciseFlowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answered, setAnswered] = useState(false);
   const { t, lang } = useTranslation();
   const auth = useAuth();
 
   const { data: exercises, isLoading } = useQuery({
-    queryKey: ['vocabulary-exercises', topic, level],
+    queryKey: ['exercises', area, topic, level],
     queryFn: async () => {
       const { data } = await supabase
         .from('exercises')
         .select('*')
-        .eq('area', 'vocabulary')
+        .eq('area', area)
         .eq('topic', topic)
         .eq('level', level)
         .order('sort_order');
@@ -111,11 +117,19 @@ export function ExerciseFlow({ topic, level, topicTitle, onBack }: ExerciseFlowP
       case 'definition_match':
         return <DefinitionMatch {...commonProps} />;
       case 'fill_in':
-        return <FillIn {...commonProps} />;
+        return area === 'grammar' ? <GrammarFillIn {...commonProps} /> : <FillIn {...commonProps} />;
       case 'synonym_match':
         return <SynonymMatch {...commonProps} />;
       case 'word_family':
         return <WordFamily {...commonProps} />;
+      case 'transform':
+        return <Transform {...commonProps} />;
+      case 'sentence_build':
+        return <SentenceBuild {...commonProps} />;
+      case 'multiple_choice':
+        return <MultipleChoice {...commonProps} />;
+      case 'match':
+        return <Match {...commonProps} />;
       default:
         return <p className="text-muted-foreground">Unsupported exercise type: {exercise.exercise_type}</p>;
     }
