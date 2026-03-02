@@ -12,6 +12,7 @@ import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import HomePage from "@/pages/HomePage";
 import ScaffoldPage from "@/pages/ScaffoldPage";
+import VocabularyPage from "@/pages/VocabularyPage";
 import SettingsPage from "@/pages/SettingsPage";
 import NotFound from "@/pages/NotFound";
 
@@ -34,7 +35,7 @@ const App = () => (
             {/* Protected routes with layout */}
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
               <Route path="/" element={<HomePage />} />
-              <Route path="/vocabulary" element={<ScaffoldPage titleKey="page_vocabulary" />} />
+              <Route path="/vocabulary" element={<VocabularyPage />} />
               <Route path="/grammar" element={<ScaffoldPage titleKey="page_grammar" />} />
               <Route path="/grammar/verbs" element={<ScaffoldPage titleKey="page_grammar" />} />
               <Route path="/writing" element={<ScaffoldPage titleKey="page_writing" />} />
