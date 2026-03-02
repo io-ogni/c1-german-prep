@@ -12,6 +12,7 @@ import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import HomePage from "@/pages/HomePage";
 import ScaffoldPage from "@/pages/ScaffoldPage";
+import ReadingPage from "@/pages/ReadingPage";
 import VocabularyPage from "@/pages/VocabularyPage";
 import GrammarPage from "@/pages/GrammarPage";
 import VerbTablePage from "@/pages/VerbTablePage";
@@ -42,7 +43,7 @@ const App = () => (
               <Route path="/grammar" element={<GrammarPage />} />
               <Route path="/grammar/verbs" element={<VerbTablePage />} />
               <Route path="/writing" element={<WritingPage />} />
-              <Route path="/reading" element={<ScaffoldPage titleKey="page_reading" />} />
+              <Route path="/reading" element={<ReadingPage />} />
               <Route path="/listening" element={<ScaffoldPage titleKey="page_listening" />} />
               <Route path="/exam-prep" element={<ScaffoldPage titleKey="page_exam_prep" />} />
               <Route path="/my-vocabulary" element={<ScaffoldPage titleKey="page_my_vocabulary" />} />
