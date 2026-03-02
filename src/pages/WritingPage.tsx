@@ -128,11 +128,13 @@ function PromptList({
   submissions,
   hasApiKey,
   onSelect,
+  onChangeLevel,
 }: {
   prompts: WritingPrompt[];
   submissions: Map<string, WritingSubmission>;
   hasApiKey: boolean;
   onSelect: (p: WritingPrompt) => void;
+  onChangeLevel: () => void;
 }) {
   const { t } = useTranslation();
   const { profile } = useRequiredAuth();
@@ -140,7 +142,12 @@ function PromptList({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-foreground">{t('page_writing')}</h1>
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" onClick={onChangeLevel}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="text-2xl font-bold text-foreground">{t('page_writing')}</h1>
+      </div>
       {!hasApiKey && <ApiKeyBanner />}
       <div className="grid gap-3">
         {prompts.map((p) => {
@@ -512,12 +519,19 @@ export default function WritingPage() {
     );
   }
 
+  const handleChangeLevel = async () => {
+    if (!user) return;
+    await supabase.from('profiles').update({ writing_level: null }).eq('user_id', user.id);
+    await refreshProfile();
+  };
+
   return (
     <PromptList
       prompts={prompts}
       submissions={submissions}
       hasApiKey={hasApiKey}
       onSelect={setSelectedPrompt}
+      onChangeLevel={handleChangeLevel}
     />
   );
 }
