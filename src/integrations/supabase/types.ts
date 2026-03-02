@@ -261,7 +261,7 @@ export type Database = {
           ui_language?: string
           updated_at?: string
           user_id: string
-          writing_level: string
+          writing_level?: string
         }
         Update: {
           api_key_encrypted?: string | null
