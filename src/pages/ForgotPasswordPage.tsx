@@ -31,15 +31,15 @@ export default function ForgotPasswordPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-lg">{t('auth.resetPassword')}</CardTitle>
+          <CardTitle className="text-lg">{t('auth_reset_password')}</CardTitle>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             {sent ? (
-              <p className="text-sm text-muted-foreground text-center">{t('auth.resetSent')}</p>
+              <p className="text-sm text-muted-foreground text-center">{t('auth_reset_sent')}</p>
             ) : (
               <div className="space-y-2">
-                <Label htmlFor="email">{t('auth.email')}</Label>
+                <Label htmlFor="email">{t('auth_email')}</Label>
                 <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
               </div>
             )}
@@ -47,10 +47,10 @@ export default function ForgotPasswordPage() {
           <CardFooter className="flex flex-col gap-3">
             {!sent && (
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? t('common.loading') : t('auth.resetPassword')}
+                {loading ? t('common_loading') : t('auth_reset_password')}
               </Button>
             )}
-            <Link to="/login" className="text-sm text-muted-foreground hover:text-primary">{t('auth.login')}</Link>
+            <Link to="/login" className="text-sm text-muted-foreground hover:text-primary">{t('auth_login')}</Link>
           </CardFooter>
         </form>
       </Card>

@@ -13,13 +13,13 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const mainLinks = [
-  { key: 'nav.home' as const, path: '/' },
-  { key: 'nav.vocabulary' as const, path: '/vocabulary' },
-  { key: 'nav.grammar' as const, path: '/grammar' },
-  { key: 'nav.writing' as const, path: '/writing' },
-  { key: 'nav.reading' as const, path: '/reading' },
-  { key: 'nav.listening' as const, path: '/listening' },
-  { key: 'nav.examPrep' as const, path: '/exam-prep' },
+  { key: 'nav_home' as const, path: '/' },
+  { key: 'nav_vocabulary' as const, path: '/vocabulary' },
+  { key: 'nav_grammar' as const, path: '/grammar' },
+  { key: 'nav_writing' as const, path: '/writing' },
+  { key: 'nav_reading' as const, path: '/reading' },
+  { key: 'nav_listening' as const, path: '/listening' },
+  { key: 'nav_exam_prep' as const, path: '/exam-prep' },
 ];
 
 export function Navbar() {
@@ -36,13 +36,11 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
       <div className="container mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        {/* Logo */}
         <Link to="/" className="flex items-center gap-2 font-bold text-lg text-foreground">
           <span className="text-primary">C1</span>
           <span>Werkstatt</span>
         </Link>
 
-        {/* Desktop nav */}
         <div className="hidden items-center gap-1 lg:flex">
           {mainLinks.map((link) => (
             <Link
@@ -60,7 +58,6 @@ export function Navbar() {
           ))}
         </div>
 
-        {/* Right side */}
         <div className="hidden items-center gap-2 lg:flex">
           <Link
             to="/my-vocabulary"
@@ -70,7 +67,7 @@ export function Navbar() {
             )}
           >
             <BookOpen className="h-4 w-4" />
-            {t('nav.myVocabulary')}
+            {t('nav_my_vocabulary')}
           </Link>
           <Link
             to="/my-texts"
@@ -80,7 +77,7 @@ export function Navbar() {
             )}
           >
             <FileText className="h-4 w-4" />
-            {t('nav.myTexts')}
+            {t('nav_my_texts')}
           </Link>
 
           <DropdownMenu>
@@ -92,14 +89,13 @@ export function Navbar() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <Link to="/settings">{t('nav.settings')}</Link>
+                <Link to="/settings">{t('nav_settings')}</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={logout}>{t('nav.logout')}</DropdownMenuItem>
+              <DropdownMenuItem onClick={logout}>{t('nav_logout')}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
-        {/* Mobile hamburger */}
         <button
           className="lg:hidden p-2 text-muted-foreground hover:text-foreground"
           onClick={() => setMobileOpen(!mobileOpen)}
@@ -108,7 +104,6 @@ export function Navbar() {
         </button>
       </div>
 
-      {/* Mobile menu */}
       {mobileOpen && (
         <div className="border-t border-border bg-card px-4 pb-4 pt-2 lg:hidden">
           <div className="flex flex-col gap-1">
@@ -129,16 +124,16 @@ export function Navbar() {
             ))}
             <div className="my-2 border-t border-border" />
             <Link to="/my-vocabulary" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
-              <BookOpen className="h-4 w-4" /> {t('nav.myVocabulary')}
+              <BookOpen className="h-4 w-4" /> {t('nav_my_vocabulary')}
             </Link>
             <Link to="/my-texts" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
-              <FileText className="h-4 w-4" /> {t('nav.myTexts')}
+              <FileText className="h-4 w-4" /> {t('nav_my_texts')}
             </Link>
             <Link to="/settings" onClick={() => setMobileOpen(false)} className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
-              {t('nav.settings')}
+              {t('nav_settings')}
             </Link>
             <button onClick={() => { logout(); setMobileOpen(false); }} className="rounded-md px-3 py-2 text-left text-sm font-medium text-destructive hover:bg-destructive/10">
-              {t('nav.logout')}
+              {t('nav_logout')}
             </button>
           </div>
         </div>

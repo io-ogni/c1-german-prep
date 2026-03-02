@@ -32,15 +32,15 @@ const App = () => (
             {/* Protected routes with layout */}
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
               <Route path="/" element={<HomePage />} />
-              <Route path="/vocabulary" element={<ScaffoldPage titleKey="page.vocabulary" />} />
-              <Route path="/grammar" element={<ScaffoldPage titleKey="page.grammar" />} />
-              <Route path="/grammar/verbs" element={<ScaffoldPage titleKey="page.grammar" />} />
-              <Route path="/writing" element={<ScaffoldPage titleKey="page.writing" />} />
-              <Route path="/reading" element={<ScaffoldPage titleKey="page.reading" />} />
-              <Route path="/listening" element={<ScaffoldPage titleKey="page.listening" />} />
-              <Route path="/exam-prep" element={<ScaffoldPage titleKey="page.examPrep" />} />
-              <Route path="/my-vocabulary" element={<ScaffoldPage titleKey="page.myVocabulary" />} />
-              <Route path="/my-texts" element={<ScaffoldPage titleKey="page.myTexts" />} />
+              <Route path="/vocabulary" element={<ScaffoldPage titleKey="page_vocabulary" />} />
+              <Route path="/grammar" element={<ScaffoldPage titleKey="page_grammar" />} />
+              <Route path="/grammar/verbs" element={<ScaffoldPage titleKey="page_grammar" />} />
+              <Route path="/writing" element={<ScaffoldPage titleKey="page_writing" />} />
+              <Route path="/reading" element={<ScaffoldPage titleKey="page_reading" />} />
+              <Route path="/listening" element={<ScaffoldPage titleKey="page_listening" />} />
+              <Route path="/exam-prep" element={<ScaffoldPage titleKey="page_exam_prep" />} />
+              <Route path="/my-vocabulary" element={<ScaffoldPage titleKey="page_my_vocabulary" />} />
+              <Route path="/my-texts" element={<ScaffoldPage titleKey="page_my_texts" />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
 

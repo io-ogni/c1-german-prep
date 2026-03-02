@@ -4,12 +4,12 @@ import { BookOpen, PenLine, BookOpenCheck, Headphones, GraduationCap, Languages 
 import { Card, CardContent } from '@/components/ui/card';
 
 const areas = [
-  { key: 'nav.vocabulary' as const, path: '/vocabulary', icon: Languages, color: 'text-primary' },
-  { key: 'nav.grammar' as const, path: '/grammar', icon: BookOpen, color: 'text-primary' },
-  { key: 'nav.writing' as const, path: '/writing', icon: PenLine, color: 'text-primary' },
-  { key: 'nav.reading' as const, path: '/reading', icon: BookOpenCheck, color: 'text-primary' },
-  { key: 'nav.listening' as const, path: '/listening', icon: Headphones, color: 'text-primary' },
-  { key: 'nav.examPrep' as const, path: '/exam-prep', icon: GraduationCap, color: 'text-primary' },
+  { key: 'nav_vocabulary' as const, path: '/vocabulary', icon: Languages, color: 'text-primary' },
+  { key: 'nav_grammar' as const, path: '/grammar', icon: BookOpen, color: 'text-primary' },
+  { key: 'nav_writing' as const, path: '/writing', icon: PenLine, color: 'text-primary' },
+  { key: 'nav_reading' as const, path: '/reading', icon: BookOpenCheck, color: 'text-primary' },
+  { key: 'nav_listening' as const, path: '/listening', icon: Headphones, color: 'text-primary' },
+  { key: 'nav_exam_prep' as const, path: '/exam-prep', icon: GraduationCap, color: 'text-primary' },
 ];
 
 export default function HomePage() {
@@ -18,8 +18,8 @@ export default function HomePage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">{t('home.welcome')}</h1>
-        <p className="mt-1 text-muted-foreground">{t('home.subtitle')}</p>
+        <h1 className="text-2xl font-bold text-foreground">{t('home_welcome')}</h1>
+        <p className="mt-1 text-muted-foreground">{t('home_subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">

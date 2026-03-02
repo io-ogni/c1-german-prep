@@ -1,7 +1,8 @@
 import { useTranslation } from '@/i18n/useTranslation';
+import type { TranslationKey } from '@/i18n/translations';
 
 interface ScaffoldPageProps {
-  titleKey: 'page.vocabulary' | 'page.grammar' | 'page.writing' | 'page.reading' | 'page.listening' | 'page.examPrep' | 'page.myVocabulary' | 'page.myTexts';
+  titleKey: TranslationKey;
 }
 
 export default function ScaffoldPage({ titleKey }: ScaffoldPageProps) {
@@ -10,7 +11,7 @@ export default function ScaffoldPage({ titleKey }: ScaffoldPageProps) {
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold text-foreground">{t(titleKey)}</h1>
-      <p className="text-muted-foreground">{t('page.comingSoon')}</p>
+      <p className="text-muted-foreground">{t('page_coming_soon')}</p>
     </div>
   );
 }

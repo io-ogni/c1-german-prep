@@ -33,17 +33,17 @@ export default function SettingsPage() {
       toast.error(error.message);
     } else {
       await refreshProfile();
-      toast.success(t('common.save'));
+      toast.success(t('common_save'));
     }
   };
 
   return (
     <div className="max-w-lg space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">{t('settings.title')}</h1>
+      <h1 className="text-2xl font-bold text-foreground">{t('settings_title')}</h1>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{t('auth.displayName')}</CardTitle>
+          <CardTitle className="text-base">{t('auth_display_name')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
@@ -52,7 +52,7 @@ export default function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{t('settings.language')}</CardTitle>
+          <CardTitle className="text-base">{t('settings_language')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Select value={uiLanguage} onValueChange={setUiLanguage}>
@@ -60,8 +60,8 @@ export default function SettingsPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="de">{t('settings.german')}</SelectItem>
-              <SelectItem value="en">{t('settings.english')}</SelectItem>
+              <SelectItem value="de">{t('settings_german')}</SelectItem>
+              <SelectItem value="en">{t('settings_english')}</SelectItem>
             </SelectContent>
           </Select>
         </CardContent>
@@ -69,7 +69,7 @@ export default function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{t('settings.level')}</CardTitle>
+          <CardTitle className="text-base">{t('settings_writing_level')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Select value={writingLevel} onValueChange={setWritingLevel}>
@@ -77,15 +77,15 @@ export default function SettingsPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="b2">{t('level.b2refresh')}</SelectItem>
-              <SelectItem value="c1">{t('level.c1new')}</SelectItem>
+              <SelectItem value="b2">{t('level_b2_refresh')}</SelectItem>
+              <SelectItem value="c1">{t('level_c1_new')}</SelectItem>
             </SelectContent>
           </Select>
         </CardContent>
       </Card>
 
       <Button onClick={handleSave} disabled={saving}>
-        {saving ? t('common.loading') : t('common.save')}
+        {saving ? t('common_loading') : t('common_save')}
       </Button>
     </div>
   );

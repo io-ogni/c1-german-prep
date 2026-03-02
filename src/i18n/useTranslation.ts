@@ -3,11 +3,10 @@ import { translations, type TranslationKey, type Language } from './translations
 
 export function useTranslation() {
   const auth = useAuth();
-  const lang: Language = auth?.profile?.ui_language ?? 'de';
+  const lang: Language = (auth?.profile?.ui_language as Language) ?? 'de';
 
   function t(key: TranslationKey): string {
-    const entry = translations[key];
-    return entry?.[lang] ?? key;
+    return translations[lang]?.[key] ?? translations.de[key] ?? key;
   }
 
   return { t, lang };

@@ -22,7 +22,7 @@ export function TopicCard({ title, exerciseCount, progress, onClick, className }
       <CardContent className="p-4">
         <h3 className="font-semibold text-sm text-card-foreground mb-1">{title}</h3>
         <p className="text-xs text-muted-foreground mb-3">
-          {exerciseCount} {t('common.exercises')}
+          {exerciseCount} {t('common_exercises')}
         </p>
         <ProgressBar value={progress} />
       </CardContent>
