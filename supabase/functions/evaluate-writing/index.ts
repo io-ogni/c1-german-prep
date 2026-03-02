@@ -5,9 +5,9 @@ import { decrypt } from "../_shared/crypto.ts";
 const GRADE_POINTS: Record<string, number> = { A: 12, B: 8, C: 4, D: 0 };
 
 const MIN_WORDS: Record<string, number> = {
-  micro: 20,
-  paragraph: 80,
-  full_text: 200,
+  micro: 8,
+  paragraph: 40,
+  full_text: 100,
 };
 
 const GERMAN_MARKERS = [
