@@ -17,6 +17,10 @@ import VocabularyPage from "@/pages/VocabularyPage";
 import GrammarPage from "@/pages/GrammarPage";
 import VerbTablePage from "@/pages/VerbTablePage";
 import WritingPage from "@/pages/WritingPage";
+import MyVocabularyPage from "@/pages/MyVocabularyPage";
+import MyTextsPage from "@/pages/MyTextsPage";
+import ExamPrepPage from "@/pages/ExamPrepPage";
+import DailyPracticePage from "@/pages/DailyPracticePage";
 import SettingsPage from "@/pages/SettingsPage";
 import NotFound from "@/pages/NotFound";
 
@@ -45,9 +49,10 @@ const App = () => (
               <Route path="/writing" element={<WritingPage />} />
               <Route path="/reading" element={<ReadingPage />} />
               <Route path="/listening" element={<ScaffoldPage titleKey="page_listening" />} />
-              <Route path="/exam-prep" element={<ScaffoldPage titleKey="page_exam_prep" />} />
-              <Route path="/my-vocabulary" element={<ScaffoldPage titleKey="page_my_vocabulary" />} />
-              <Route path="/my-texts" element={<ScaffoldPage titleKey="page_my_texts" />} />
+              <Route path="/exam-prep" element={<ExamPrepPage />} />
+              <Route path="/my-vocabulary" element={<MyVocabularyPage />} />
+              <Route path="/my-texts" element={<MyTextsPage />} />
+              <Route path="/daily-practice" element={<DailyPracticePage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
 
