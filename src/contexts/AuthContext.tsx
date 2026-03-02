@@ -7,8 +7,10 @@ interface Profile {
   user_id: string;
   display_name: string;
   ui_language: 'de' | 'en';
-  writing_level: 'b2' | 'c1';
-  has_api_key: boolean;
+  writing_level: string | null;
+  api_key_encrypted: string | null;
+  current_streak: number;
+  last_practice_date: string | null;
 }
 
 interface AuthContextType {
