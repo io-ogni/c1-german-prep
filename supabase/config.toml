@@ -1,1 +1,10 @@
 project_id = "ctyblvmermwkcuavzkdr"
+
+[functions.evaluate-writing]
+verify_jwt = false
+
+[functions.set-api-key]
+verify_jwt = false
+
+[functions.test-api-key]
+verify_jwt = false
