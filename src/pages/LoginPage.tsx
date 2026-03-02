@@ -35,28 +35,28 @@ export default function LoginPage() {
           <div className="mb-2 text-2xl font-bold">
             <span className="text-primary">C1</span> Werkstatt
           </div>
-          <CardTitle className="text-lg">{t('auth.login')}</CardTitle>
+          <CardTitle className="text-lg">{t('auth_login')}</CardTitle>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">{t('auth.email')}</Label>
+              <Label htmlFor="email">{t('auth_email')}</Label>
               <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">{t('auth.password')}</Label>
+              <Label htmlFor="password">{t('auth_password')}</Label>
               <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-3">
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? t('common.loading') : t('auth.login')}
+              {loading ? t('common_loading') : t('auth_login')}
             </Button>
             <div className="flex flex-col items-center gap-1 text-sm text-muted-foreground">
-              <Link to="/forgot-password" className="hover:text-primary">{t('auth.forgotPassword')}</Link>
+              <Link to="/forgot-password" className="hover:text-primary">{t('auth_forgot_password')}</Link>
               <span>
-                {t('auth.noAccount')}{' '}
-                <Link to="/signup" className="font-medium text-primary hover:underline">{t('auth.signup')}</Link>
+                {t('auth_no_account')}{' '}
+                <Link to="/signup" className="font-medium text-primary hover:underline">{t('auth_signup')}</Link>
               </span>
             </div>
           </CardFooter>

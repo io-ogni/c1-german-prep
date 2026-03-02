@@ -29,7 +29,7 @@ export function WordPopup({ word, translation, children, onAddToVocabulary }: Wo
           {onAddToVocabulary && (
             <Button variant="outline" size="sm" className="w-full gap-1.5" onClick={onAddToVocabulary}>
               <Plus className="h-3.5 w-3.5" />
-              {t('nav.myVocabulary')}
+              {t('word_add_to_vocabulary')}
             </Button>
           )}
         </div>
