@@ -17,7 +17,8 @@ export function GrammarFillIn({ content, solution, instructions, explanation, an
   const [value, setValue] = useState('');
   const { t } = useTranslation();
 
-  const isCorrect = value.trim().toLowerCase() === solution.correct.trim().toLowerCase();
+  const correctAnswer = solution?.correct ?? '';
+  const isCorrect = value.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
 
   const handleCheck = () => {
     if (!value.trim()) return;
