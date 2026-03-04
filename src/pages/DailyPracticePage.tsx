@@ -11,6 +11,15 @@ import {
   ArrowLeft, CheckCircle, XCircle, Eye, Flame, SkipForward, StopCircle, Loader2,
 } from 'lucide-react';
 import type { Json } from '@/integrations/supabase/types';
+import { DefinitionMatch } from '@/components/vocabulary/exercises/DefinitionMatch';
+import { FillIn } from '@/components/vocabulary/exercises/FillIn';
+import { SynonymMatch } from '@/components/vocabulary/exercises/SynonymMatch';
+import { WordFamily } from '@/components/vocabulary/exercises/WordFamily';
+import { GrammarFillIn } from '@/components/grammar/exercises/GrammarFillIn';
+import { Transform } from '@/components/grammar/exercises/Transform';
+import { SentenceBuild } from '@/components/grammar/exercises/SentenceBuild';
+import { MultipleChoice } from '@/components/grammar/exercises/MultipleChoice';
+import { Match } from '@/components/grammar/exercises/Match';
 
 // ----- Types -----
 interface VocabCard {
@@ -214,18 +223,11 @@ export default function DailyPracticePage() {
     advance();
   };
 
-  const handleExerciseCheck = async () => {
+  const handleExerciseAnswer = async (correct: boolean) => {
     const ex = currentExercise;
     if (!ex || !profile) return;
 
-    // Simple correctness check — compare answer to solution
-    const solution = ex.solution;
-    const correct = JSON.stringify(solution).toLowerCase().includes(exerciseAnswer.toLowerCase()) && exerciseAnswer.length > 0;
-
-    setExerciseFeedback({
-      correct,
-      message: correct ? t('exercise_correct') : t('exercise_incorrect'),
-    });
+    setExerciseFeedback({ correct, message: correct ? t('exercise_correct') : t('exercise_incorrect') });
     setExercisesCompleted(c => c + 1);
     setTotalAnswered(a => a + 1);
     if (correct) setCorrectCount(c => c + 1);
@@ -251,6 +253,44 @@ export default function DailyPracticePage() {
     }
 
     setTimeout(advance, 1500);
+  };
+
+  const renderDailyExercise = (ex: ExerciseItem) => {
+    const content = ex.content as any;
+    const solution = ex.solution as any;
+    const instructions = lang === 'de' ? ex.instructions_de : ex.instructions_en;
+    const explanation = lang === 'de' ? ex.explanation_de : ex.explanation_en;
+    const answered = !!exerciseFeedback;
+
+    const commonProps = {
+      content,
+      solution,
+      instructions,
+      explanation: explanation ?? undefined,
+      answered,
+      onAnswer: (correct: boolean) => handleExerciseAnswer(correct),
+    };
+
+    switch (ex.exercise_type) {
+      case 'definition_match':
+        return <DefinitionMatch {...commonProps} />;
+      case 'fill_in':
+        return ex.area === 'grammar' ? <GrammarFillIn {...commonProps} /> : <FillIn {...commonProps} />;
+      case 'synonym_match':
+        return <SynonymMatch {...commonProps} />;
+      case 'word_family':
+        return <WordFamily {...commonProps} />;
+      case 'transform':
+        return <Transform {...commonProps} />;
+      case 'sentence_build':
+        return <SentenceBuild {...commonProps} />;
+      case 'multiple_choice':
+        return <MultipleChoice {...commonProps} />;
+      case 'match':
+        return <Match {...commonProps} />;
+      default:
+        return <p className="text-muted-foreground">Unsupported: {ex.exercise_type}</p>;
+    }
   };
 
   const endSession = async () => {
@@ -418,41 +458,7 @@ export default function DailyPracticePage() {
       )}
 
       {/* Exercise */}
-      {status === 'exercises' && currentExercise && (
-        <Card>
-          <CardContent className="p-6 space-y-4">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider">
-              {currentExercise.exercise_type.replace(/_/g, ' ')}
-            </p>
-            <h3 className="font-medium text-foreground">
-              {lang === 'de' ? currentExercise.title_de : currentExercise.title_en}
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              {lang === 'de' ? currentExercise.instructions_de : currentExercise.instructions_en}
-            </p>
-            {/* Simple text input for answer */}
-            <input
-              type="text"
-              value={exerciseAnswer}
-              onChange={e => setExerciseAnswer(e.target.value)}
-              disabled={!!exerciseFeedback}
-              placeholder={lang === 'de' ? 'Ihre Antwort...' : 'Your answer...'}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              onKeyDown={e => { if (e.key === 'Enter' && !exerciseFeedback) handleExerciseCheck(); }}
-            />
-            {exerciseFeedback && (
-              <div className={`rounded-md px-3 py-2 text-sm font-medium ${exerciseFeedback.correct ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
-                {exerciseFeedback.message}
-              </div>
-            )}
-            {!exerciseFeedback && (
-              <Button onClick={handleExerciseCheck} disabled={!exerciseAnswer.trim()}>
-                {t('exercise_check')}
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      )}
+      {status === 'exercises' && currentExercise && renderDailyExercise(currentExercise)}
 
       {/* Bottom buttons */}
       <div className="flex justify-between">
