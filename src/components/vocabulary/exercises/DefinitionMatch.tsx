@@ -38,9 +38,9 @@ export function DefinitionMatch({ content, solution, instructions, explanation, 
           : null
       }
     >
-      <p className="text-lg font-semibold text-foreground text-center py-2">{content.word}</p>
+      <p className="text-lg font-semibold text-foreground text-center py-2">{content?.word}</p>
       <div className="grid gap-2">
-        {content.options.map((opt, idx) => (
+        {(content?.options ?? []).map((opt, idx) => (
           <Button
             key={idx}
             variant="outline"
