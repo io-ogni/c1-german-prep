@@ -13,8 +13,8 @@ interface Props {
   onAnswer: (correct: boolean) => void;
 }
 
-function normalize(s: string) {
-  return s.trim().toLowerCase().replace(/[.,;:!?]/g, '').replace(/\s+/g, ' ');
+function normalize(s: string | undefined) {
+  return (s ?? '').trim().toLowerCase().replace(/[.,;:!?]/g, '').replace(/\s+/g, ' ');
 }
 
 export function Transform({ content, solution, instructions, explanation, answered, onAnswer }: Props) {
