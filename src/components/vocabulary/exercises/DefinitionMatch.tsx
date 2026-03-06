@@ -14,7 +14,9 @@ interface Props {
 }
 
 export function DefinitionMatch({ content, solution, instructions, explanation, answered, onAnswer }: Props) {
+  const [selected, setSelected] = useState<number | null>(null);
   const { t } = useTranslation();
+  const isCorrect = selected === solution.correct;
 
   // If pairs format, delegate to PairsMatch
   if (content?.pairs) {
@@ -31,9 +33,6 @@ export function DefinitionMatch({ content, solution, instructions, explanation, 
   }
 
   // Single word + options format
-  const [selected, setSelected] = useState<number | null>(null);
-  const isCorrect = selected === solution.correct;
-
   const handleSelect = (idx: number) => {
     if (answered) return;
     setSelected(idx);
