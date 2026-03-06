@@ -22,11 +22,11 @@ const TOPIC_NAMES: Record<string, { de: string; en: string; telc?: boolean }> = 
   // C1
   nominalisierung: { de: 'Nominalisierung', en: 'Nominalization' },
   konnektoren: { de: 'Konnektoren', en: 'Connectors' },
-  passiversatzformen: { de: 'Passiversatzformen', en: 'Passive Alternatives' },
-  erweitertes_partizip: { de: 'Erweitertes Partizip', en: 'Extended Participle' },
-  n_deklination: { de: 'N-Deklination', en: 'N-Declension' },
-  nomen_verb_verbindungen: { de: 'Nomen-Verb-Verbindungen', en: 'Noun-Verb Combinations' },
-  subjektlose_passivkonstruktionen: { de: 'Subjektlose Passivkonstruktionen', en: 'Subjectless Passive' },
+  passiversatz: { de: 'Passiversatzformen', en: 'Passive Alternatives' },
+  partizip: { de: 'Erweitertes Partizip', en: 'Extended Participle' },
+  'n-deklination': { de: 'N-Deklination', en: 'N-Declension' },
+  'nomen-verb': { de: 'Nomen-Verb-Verbindungen', en: 'Noun-Verb Combinations' },
+  subjektlos: { de: 'Subjektlose Passivkonstruktionen', en: 'Subjectless Passive' },
   sprachbausteine: { de: 'Sprachbausteine (telc)', en: 'Language Building Blocks (telc)', telc: true },
 };
 
