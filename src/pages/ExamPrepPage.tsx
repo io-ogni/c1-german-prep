@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 export default function ExamPrepPage() {
   const { t, lang } = useTranslation();
   const { profile } = useRequiredAuth();
+  const navigate = useNavigate();
   const hasApiKey = !!profile?.api_key_encrypted;
 
   const sections = [
