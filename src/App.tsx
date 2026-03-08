@@ -50,8 +50,10 @@ const App = () => (
               <Route path="/grammar" element={<GrammarPage />} />
               <Route path="/grammar/verbs" element={<VerbTablePage />} />
               <Route path="/writing" element={<WritingPage />} />
+              <Route path="/writing/tips" element={<WritingTipsPage />} />
               <Route path="/reading" element={<ReadingPage />} />
               <Route path="/listening" element={<ListeningPage />} />
+              <Route path="/speaking" element={<SpeakingPage />} />
               <Route path="/exam-prep" element={<ExamPrepPage />} />
               <Route path="/my-vocabulary" element={<MyVocabularyPage />} />
               <Route path="/my-texts" element={<MyTextsPage />} />
