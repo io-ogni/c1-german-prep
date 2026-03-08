@@ -80,7 +80,6 @@ export default function SettingsPage() {
       .from('profiles')
       .update({
         display_name: displayName,
-        writing_level: writingLevel,
       })
       .eq('user_id', profile.user_id);
     setSaving(false);
