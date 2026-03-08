@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Key, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Key, CheckCircle, XCircle, Loader2, ShieldCheck } from 'lucide-react';
 
 export default function SettingsPage() {
   const { t } = useTranslation();
