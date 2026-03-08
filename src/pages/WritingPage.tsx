@@ -94,7 +94,15 @@ function LevelSelector({ onSelect }: { onSelect: (level: WritingLevel) => void }
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">{t('writing_level_select')}</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-foreground">{t('writing_level_select')}</h1>
+        <Link to="/writing/tips">
+          <Button variant="outline" size="sm" className="gap-1.5">
+            <FileText className="h-4 w-4" />
+            Tipps & Redemittel
+          </Button>
+        </Link>
+      </div>
       <div className="grid gap-4 sm:grid-cols-3">
         {levels.map((l) => (
           <Card
