@@ -19,6 +19,10 @@ export function Match({ content, solution, instructions, explanation, answered, 
   const [checked, setChecked] = useState(false);
   const { t } = useTranslation();
 
+  const leftItems = content?.left ?? [];
+  const rightItems = content?.right ?? [];
+  const pairs = solution?.pairs ?? [];
+
   const handleLeftClick = (idx: number) => {
     if (answered) return;
     setSelectedLeft(idx === selectedLeft ? null : idx);
@@ -33,13 +37,13 @@ export function Match({ content, solution, instructions, explanation, answered, 
   };
 
   const handleCheck = () => {
-    if (matches.size !== content.left.length) return;
-    const allCorrect = content.left.every((_, i) => matches.get(i) === solution.pairs[i]);
+    if (matches.size !== leftItems.length) return;
+    const allCorrect = leftItems.every((_, i) => matches.get(i) === pairs[i]);
     setChecked(true);
     onAnswer(allCorrect);
   };
 
-  const allCorrect = checked && content.left.every((_, i) => matches.get(i) === solution.pairs[i]);
+  const allCorrect = checked && leftItems.every((_, i) => matches.get(i) === pairs[i]);
 
   // Which right indices are already matched
   const matchedRight = new Set(matches.values());
