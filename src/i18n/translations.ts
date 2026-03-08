@@ -446,6 +446,8 @@ export const translations = {
     listening_speaker: "Speaker",
     listening_statement: "Statement",
     listening_question: "Question",
+    listening_no_audio: "Audio file not yet available",
+    listening_audio_error: "Could not load audio",
 
     // Daily Practice
     daily_title: "Daily Practice",
