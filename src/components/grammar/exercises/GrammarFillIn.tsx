@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -133,6 +133,19 @@ function MultiSentenceFillIn({
   const [correctCount, setCorrectCount] = useState(0);
   const [eliminated, setEliminated] = useState<Set<number>>(new Set());
   const { t } = useTranslation();
+
+  // Reset all internal state when the exercise changes
+  const sentencesRef = useRef(sentences);
+  useEffect(() => {
+    if (sentencesRef.current !== sentences) {
+      sentencesRef.current = sentences;
+      setSubIndex(0);
+      setSelected(null);
+      setSubAnswered(false);
+      setCorrectCount(0);
+      setEliminated(new Set());
+    }
+  }, [sentences]);
 
   const current = sentences[subIndex];
   const correctAnswer = answers[subIndex] ?? '';
