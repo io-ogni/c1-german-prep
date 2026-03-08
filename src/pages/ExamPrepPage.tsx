@@ -23,6 +23,7 @@ export default function ExamPrepPage() {
       time: '90 min',
       telc: true,
       enabled: true,
+      route: '/reading?exam=telc',
     },
     {
       key: 'sprachbausteine',
@@ -34,6 +35,7 @@ export default function ExamPrepPage() {
       time: lang === 'de' ? 'Teil des Leseverstehens' : 'Part of reading section',
       telc: true,
       enabled: true,
+      route: '/grammar?tab=sprachbausteine',
     },
     {
       key: 'schriftlicher_ausdruck',
@@ -44,8 +46,8 @@ export default function ExamPrepPage() {
         : 'Write one full text with evaluation',
       time: '70 min',
       telc: true,
-      enabled: hasApiKey,
-      disabledReason: lang === 'de' ? 'API-Schlüssel erforderlich' : 'API key required',
+      enabled: true,
+      route: '/writing',
     },
     {
       key: 'hoerverstehen',
