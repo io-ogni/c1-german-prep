@@ -46,7 +46,7 @@ export function ListeningGlobalverstehen({ content, solution, instructions, expl
   const handleRetry = () => {
     setSelections({});
     setChecked(false);
-    setShowTranscript(false);
+    
   };
 
   const score = checked ? speakers.filter(s => selections[s.id] === solution[String(s.id)]).length : 0;
