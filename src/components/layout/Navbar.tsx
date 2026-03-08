@@ -18,6 +18,7 @@ const mainLinks = [
   { key: 'nav_writing' as const, path: '/writing' },
   { key: 'nav_reading' as const, path: '/reading' },
   { key: 'nav_listening' as const, path: '/listening' },
+  { key: 'nav_speaking' as const, path: '/speaking' },
   { key: 'nav_exam_prep' as const, path: '/exam-prep' },
 ];
 

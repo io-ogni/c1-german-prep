@@ -10,6 +10,7 @@ export const translations = {
     nav_reading: "Lesen",
     nav_listening: "Hören",
     nav_exam_prep: "Prüfungsvorbereitung",
+    nav_speaking: "Sprechen",
     nav_my_vocabulary: "Mein Wortschatz",
     nav_my_texts: "Meine Texte",
     nav_settings: "Einstellungen",
