@@ -5,8 +5,8 @@ import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
 
 interface Props {
-  content: { context?: string; sentence?: string; options: string[] };
-  solution: { correct: number };
+  content: any;
+  solution: any;
   instructions: string;
   explanation?: string;
   answered: boolean;
@@ -16,6 +16,37 @@ interface Props {
 const LABELS = ['a', 'b', 'c', 'd'];
 
 export function MultipleChoice({ content, solution, instructions, explanation, answered, onAnswer }: Props) {
+  // Detect multi-question format (qüstions array)
+  const questions: { qüstion?: string; question?: string; correct: string; options: string[] }[] | null =
+    content?.qüstions ?? content?.questions ?? null;
+
+  if (questions && questions.length > 0) {
+    return (
+      <MultiStepMC
+        questions={questions}
+        answers={solution?.answers ?? []}
+        instructions={instructions}
+        explanation={explanation}
+        answered={answered}
+        onAnswer={onAnswer}
+      />
+    );
+  }
+
+  // Single question format
+  return (
+    <SingleMC
+      content={content}
+      solution={solution}
+      instructions={instructions}
+      explanation={explanation}
+      answered={answered}
+      onAnswer={onAnswer}
+    />
+  );
+}
+
+function SingleMC({ content, solution, instructions, explanation, answered, onAnswer }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const { t } = useTranslation();
   const isCorrect = selected === solution.correct;
@@ -46,7 +77,7 @@ export function MultipleChoice({ content, solution, instructions, explanation, a
         </p>
       )}
       <div className="grid gap-2">
-        {(content?.options ?? []).map((opt, idx) => (
+        {(content?.options ?? []).map((opt: string, idx: number) => (
           <Button
             key={idx}
             variant="outline"
@@ -62,6 +93,111 @@ export function MultipleChoice({ content, solution, instructions, explanation, a
           </Button>
         ))}
       </div>
+    </ExerciseCard>
+  );
+}
+
+function MultiStepMC({
+  questions,
+  answers,
+  instructions,
+  explanation,
+  answered: parentAnswered,
+  onAnswer,
+}: {
+  questions: { qüstion?: string; question?: string; correct: string; options: string[] }[];
+  answers: string[];
+  instructions: string;
+  explanation?: string;
+  answered: boolean;
+  onAnswer: (correct: boolean) => void;
+}) {
+  const [subIndex, setSubIndex] = useState(0);
+  const [selected, setSelected] = useState<number | null>(null);
+  const [subAnswered, setSubAnswered] = useState(false);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [eliminated, setEliminated] = useState<Set<number>>(new Set());
+  const { t } = useTranslation();
+
+  const current = questions[subIndex];
+  const questionText = current?.qüstion ?? current?.question ?? '';
+  const correctAnswer = current?.correct ?? answers[subIndex] ?? '';
+  const isLast = subIndex === questions.length - 1;
+
+  const sentenceHtml = questionText.replace(
+    /___/g,
+    '<span class="inline-block border-b-2 border-primary px-2 mx-1 min-w-[4rem]">&nbsp;</span>'
+  );
+
+  const handleSelect = (idx: number) => {
+    if (subAnswered || parentAnswered) return;
+    const opt = current.options[idx];
+    const isCorrect = opt?.toLowerCase() === correctAnswer.toLowerCase();
+    setSelected(idx);
+
+    if (isCorrect) {
+      setSubAnswered(true);
+      const newCount = correctCount + 1;
+      setCorrectCount(newCount);
+      if (isLast) {
+        onAnswer(newCount === questions.length);
+      }
+    } else {
+      setEliminated(prev => new Set(prev).add(idx));
+      setTimeout(() => setSelected(null), 400);
+    }
+  };
+
+  const handleNext = () => {
+    setSubIndex(i => i + 1);
+    setSelected(null);
+    setSubAnswered(false);
+    setEliminated(new Set());
+  };
+
+  const isCorrect = selected !== null && current.options[selected]?.toLowerCase() === correctAnswer.toLowerCase();
+
+  return (
+    <ExerciseCard
+      question={`${instructions} (${subIndex + 1}/${questions.length})`}
+      feedback={
+        subAnswered
+          ? {
+              correct: isCorrect,
+              message: isCorrect
+                ? t('exercise_correct')
+                : `${t('exercise_correct_answer')}: ${correctAnswer}${explanation ? ` — ${explanation}` : ''}`,
+            }
+          : null
+      }
+    >
+      <p
+        className="text-base text-foreground leading-relaxed py-2"
+        dangerouslySetInnerHTML={{ __html: sentenceHtml }}
+      />
+      <div className="grid gap-2 sm:grid-cols-2">
+        {current.options.map((opt, idx) => (
+          <Button
+            key={idx}
+            variant="outline"
+            className={cn(
+              'justify-start text-left h-auto py-3 whitespace-normal',
+              subAnswered && opt.toLowerCase() === correctAnswer.toLowerCase() && 'border-primary bg-primary/10 text-primary',
+              eliminated.has(idx) && 'opacity-40 pointer-events-none border-destructive/50',
+              !subAnswered && selected === idx && opt.toLowerCase() !== correctAnswer.toLowerCase() && 'border-destructive bg-destructive/10 text-destructive'
+            )}
+            onClick={() => handleSelect(idx)}
+            disabled={subAnswered || parentAnswered || eliminated.has(idx)}
+          >
+            <span className="font-semibold mr-2">{LABELS[idx]})</span> {opt}
+          </Button>
+        ))}
+      </div>
+      {subAnswered && !isLast && !parentAnswered && (
+        <div className="flex justify-end pt-2">
+          <Button size="sm" onClick={handleNext}>{t('exercise_next')}</Button>
+        </div>
+      )}
     </ExerciseCard>
   );
 }
