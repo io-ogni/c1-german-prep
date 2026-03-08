@@ -11,43 +11,98 @@ interface Props {
 }
 
 export function DetailverstehenQuestions({ questions, answers, setAnswers, checked }: Props) {
-  const { t } = useTranslation();
-  const statements: { text: string; correct: string }[] = questions.statements || questions || [];
+  const { t, lang: language } = useTranslation();
+  const items: any[] = Array.isArray(questions) ? questions : questions.statements || questions.questions || [];
 
+  // Detect format: R/F/N statements vs multiple-choice with options
+  const isRFN = items.length > 0 && !items[0].options && ['R', 'F', 'N'].includes(items[0]?.correct);
+
+  if (isRFN) {
+    // Original R/F/N format
+    return (
+      <div className="space-y-4">
+        {items.map((stmt, i) => {
+          const key = String(i);
+          const userAnswer = answers[key];
+          const isCorrect = checked && userAnswer === stmt.correct;
+          const isWrong = checked && userAnswer && userAnswer !== stmt.correct;
+
+          return (
+            <div key={i} className={`p-3 rounded-lg border ${isCorrect ? 'border-primary bg-primary/5' : isWrong ? 'border-destructive bg-destructive/5' : 'border-border'}`}>
+              <p className="text-sm text-foreground mb-2">
+                <span className="font-bold mr-1">{i + 1}.</span>
+                {stmt.text}
+              </p>
+              <RadioGroup
+                value={userAnswer || ''}
+                onValueChange={(val) => {
+                  if (!checked) setAnswers({ ...answers, [key]: val });
+                }}
+                className="flex gap-4"
+              >
+                {['R', 'F', 'N'].map(val => (
+                  <div key={val} className="flex items-center gap-1.5">
+                    <RadioGroupItem value={val} id={`${i}-${val}`} disabled={checked} />
+                    <Label htmlFor={`${i}-${val}`} className="text-xs cursor-pointer">
+                      {val === 'R' ? t('reading_richtig') : val === 'F' ? t('reading_falsch') : t('reading_nicht_im_text')}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+              {checked && (
+                <div className="flex items-center gap-1 mt-1">
+                  {isCorrect ? <CheckCircle className="h-3.5 w-3.5 text-primary" /> : <XCircle className="h-3.5 w-3.5 text-destructive" />}
+                  {isWrong && <span className="text-xs text-muted-foreground">→ {stmt.correct === 'R' ? t('reading_richtig') : stmt.correct === 'F' ? t('reading_falsch') : t('reading_nicht_im_text')}</span>}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // Multiple-choice format with options
   return (
     <div className="space-y-4">
-      {statements.map((stmt, i) => {
+      {items.map((q, i) => {
         const key = String(i);
         const userAnswer = answers[key];
-        const isCorrect = checked && userAnswer === stmt.correct;
-        const isWrong = checked && userAnswer && userAnswer !== stmt.correct;
+        const questionText = language === 'de'
+          ? (q.qüstion_de || q.question_de || q.text || '')
+          : (q.qüstion_en || q.question_en || q.text || '');
+        const options: string[] = q.options || [];
+        const correct = q.correct;
+        const isCorrect = checked && userAnswer === correct;
+        const isWrong = checked && userAnswer && userAnswer !== correct;
 
         return (
           <div key={i} className={`p-3 rounded-lg border ${isCorrect ? 'border-primary bg-primary/5' : isWrong ? 'border-destructive bg-destructive/5' : 'border-border'}`}>
             <p className="text-sm text-foreground mb-2">
               <span className="font-bold mr-1">{i + 1}.</span>
-              {stmt.text}
+              {questionText}
             </p>
             <RadioGroup
               value={userAnswer || ''}
               onValueChange={(val) => {
                 if (!checked) setAnswers({ ...answers, [key]: val });
               }}
-              className="flex gap-4"
+              className="space-y-1"
             >
-              {['R', 'F', 'N'].map(val => (
-                <div key={val} className="flex items-center gap-1.5">
-                  <RadioGroupItem value={val} id={`${i}-${val}`} disabled={checked} />
-                  <Label htmlFor={`${i}-${val}`} className="text-xs cursor-pointer">
-                    {val === 'R' ? t('reading_richtig') : val === 'F' ? t('reading_falsch') : t('reading_nicht_im_text')}
-                  </Label>
-                </div>
-              ))}
+              {options.map((opt, optIdx) => {
+                const isThisCorrect = checked && opt === correct;
+                return (
+                  <div key={optIdx} className={`flex items-center gap-2 ${isThisCorrect ? 'text-primary font-medium' : ''}`}>
+                    <RadioGroupItem value={opt} id={`dv-q${i}-opt${optIdx}`} disabled={checked} />
+                    <Label htmlFor={`dv-q${i}-opt${optIdx}`} className="text-xs cursor-pointer">{opt}</Label>
+                  </div>
+                );
+              })}
             </RadioGroup>
             {checked && (
               <div className="flex items-center gap-1 mt-1">
                 {isCorrect ? <CheckCircle className="h-3.5 w-3.5 text-primary" /> : <XCircle className="h-3.5 w-3.5 text-destructive" />}
-                {isWrong && <span className="text-xs text-muted-foreground">→ {stmt.correct === 'R' ? t('reading_richtig') : stmt.correct === 'F' ? t('reading_falsch') : t('reading_nicht_im_text')}</span>}
+                {isWrong && <span className="text-xs text-muted-foreground">→ {correct}</span>}
               </div>
             )}
           </div>
