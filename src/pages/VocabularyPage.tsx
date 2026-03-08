@@ -8,16 +8,15 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const TOPIC_NAMES: Record<string, { de: string; en: string }> = {
-  alltag_gesellschaft: { de: 'Alltag & Gesellschaft', en: 'Everyday Life & Society' },
-  arbeit_karriere: { de: 'Arbeit & Karriere', en: 'Work & Career' },
-  medien_kommunikation: { de: 'Medien & Kommunikation', en: 'Media & Communication' },
-  umwelt_natur: { de: 'Umwelt & Natur', en: 'Environment & Nature' },
-  wissenschaft_technik: { de: 'Wissenschaft & Technik', en: 'Science & Technology' },
-  politik_wirtschaft: { de: 'Politik & Wirtschaft', en: 'Politics & Economy' },
-  kultur_bildung: { de: 'Kultur & Bildung', en: 'Culture & Education' },
-  nomen_verb_verbindungen: { de: 'Nomen-Verb-Verbindungen', en: 'Noun-Verb Combinations' },
-  konnektoren_redemittel: { de: 'Konnektoren & Redemittel', en: 'Connectors & Phrases' },
+const TOPIC_NAMES: Record<string, string> = {
+  alltag: 'Alltag',
+  arbeit: 'Arbeit',
+  medien: 'Medien',
+  umwelt: 'Umwelt',
+  politik: 'Politik',
+  kultur: 'Kultur',
+  'nomen-verb': 'Nomen-Verb-Verbindungen',
+  konnektoren: 'Konnektoren',
 };
 
 export default function VocabularyPage() {
