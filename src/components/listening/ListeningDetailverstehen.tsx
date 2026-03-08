@@ -41,7 +41,7 @@ export function ListeningDetailverstehen({ content, solution, instructions, expl
   const handleRetry = () => {
     setAnswers({});
     setShowResults(false);
-    setShowTranscript(false);
+    
   };
 
   const answeredCount = Object.keys(answers).length;
