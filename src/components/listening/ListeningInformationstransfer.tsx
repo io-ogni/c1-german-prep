@@ -48,7 +48,7 @@ export function ListeningInformationstransfer({ content, solution, instructions,
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [checked, setChecked] = useState(false);
   const [results, setResults] = useState<Record<number, boolean>>({});
-  const [showTranscript, setShowTranscript] = useState(false);
+  
 
   const handleChange = (num: number, value: string) => {
     setAnswers(prev => ({ ...prev, [num]: value }));
