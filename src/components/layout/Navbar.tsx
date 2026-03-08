@@ -13,7 +13,6 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const mainLinks = [
-  { key: 'nav_home' as const, path: '/' },
   { key: 'nav_vocabulary' as const, path: '/vocabulary' },
   { key: 'nav_grammar' as const, path: '/grammar' },
   { key: 'nav_writing' as const, path: '/writing' },
