@@ -19,16 +19,16 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
   const [matches, setMatches] = useState<Map<number, number>>(new Map());
   const [checked, setChecked] = useState(false);
 
-  const leftItems = content.pairs.map((p) => p[0]);
+  const pairsData = content?.pairs ?? [];
+  const leftItems = pairsData.map((p) => p[0]);
   const shuffledRight = useMemo(() => {
-    const right = content.pairs.map((p, i) => ({ text: p[1], originalIdx: i }));
-    // Shuffle
+    const right = pairsData.map((p, i) => ({ text: p[1], originalIdx: i }));
     for (let i = right.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [right[i], right[j]] = [right[j], right[i]];
     }
     return right;
-  }, [content.pairs]);
+  }, [pairsData]);
 
   const handleLeftClick = (idx: number) => {
     if (answered) return;

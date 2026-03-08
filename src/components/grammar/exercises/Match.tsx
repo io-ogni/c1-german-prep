@@ -105,7 +105,7 @@ export function Match({ content, solution, instructions, explanation, answered, 
       {!answered && (
         <Button
           onClick={handleCheck}
-          disabled={matches.size !== content.left.length}
+          disabled={matches.size !== leftItems.length}
           className="self-end"
         >
           {t('exercise_check')}
