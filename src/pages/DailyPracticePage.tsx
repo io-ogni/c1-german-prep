@@ -297,38 +297,42 @@ export default function DailyPracticePage() {
     if (timerRef.current) clearInterval(timerRef.current);
     const elapsed = Math.floor((new Date().getTime() - startTimeRef.current.getTime()) / 1000);
 
-    // Update session
-    if (sessionId) {
-      await supabase.from('daily_sessions').update({
-        actual_seconds: elapsed,
-        exercises_completed: exercisesCompleted,
-        flashcards_reviewed: flashcardsReviewed,
-        correct_count: correctCount,
-        total_answered: totalAnswered,
-        completed_at: new Date().toISOString(),
-      }).eq('id', sessionId);
-    }
-
-    // Update streak
-    if (profile) {
-      const today = new Date().toISOString().slice(0, 10);
-      const lastDate = profile.last_practice_date;
-      let newStreak = 1;
-      if (lastDate) {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = yesterday.toISOString().slice(0, 10);
-        if (lastDate === today) {
-          newStreak = profile.current_streak;
-        } else if (lastDate === yesterdayStr) {
-          newStreak = profile.current_streak + 1;
-        }
+    try {
+      // Update session
+      if (sessionId) {
+        await supabase.from('daily_sessions').update({
+          actual_seconds: elapsed,
+          exercises_completed: exercisesCompleted,
+          flashcards_reviewed: flashcardsReviewed,
+          correct_count: correctCount,
+          total_answered: totalAnswered,
+          completed_at: new Date().toISOString(),
+        }).eq('id', sessionId);
       }
-      await supabase.from('profiles').update({
-        current_streak: newStreak,
-        last_practice_date: today,
-      }).eq('user_id', profile.user_id);
-      await refreshProfile();
+
+      // Update streak
+      if (profile) {
+        const today = new Date().toISOString().slice(0, 10);
+        const lastDate = profile.last_practice_date;
+        let newStreak = 1;
+        if (lastDate) {
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          const yesterdayStr = yesterday.toISOString().slice(0, 10);
+          if (lastDate === today) {
+            newStreak = profile.current_streak;
+          } else if (lastDate === yesterdayStr) {
+            newStreak = profile.current_streak + 1;
+          }
+        }
+        await supabase.from('profiles').update({
+          current_streak: newStreak,
+          last_practice_date: today,
+        }).eq('user_id', profile.user_id);
+        await refreshProfile();
+      }
+    } catch (e) {
+      console.error('Error ending session:', e);
     }
 
     setStatus('completed');
