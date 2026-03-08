@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ArrowLeft, ChevronDown, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ListeningAudioPlayer } from './ListeningAudioPlayer';
 
 interface Props {
   content: any;
