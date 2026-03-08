@@ -130,13 +130,13 @@ export function ListeningGlobalverstehen({ content, solution, instructions, expl
 
       {/* Statements reference */}
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">{t('listening_statement')}n</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">{t('listening_statement')}n</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-1">
+        <CardContent className="space-y-2.5">
           {statements.map(st => (
-            <p key={st.id} className="text-xs text-muted-foreground">
-              <span className="font-medium text-foreground">{st.id})</span> {st.text}
+            <p key={st.id} className="text-sm leading-relaxed text-muted-foreground">
+              <span className="font-semibold text-foreground">{st.id})</span> {st.text}
             </p>
           ))}
         </CardContent>
