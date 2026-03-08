@@ -200,17 +200,30 @@ export function ReadingInterface({ text, onBack }: Props) {
               {/* Self-assessment */}
               <div className="space-y-2">
                 <p className="text-sm font-medium text-foreground">{t('reading_self_assessment')}</p>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map(n => (
-                    <Button
-                      key={n}
-                      variant={selfScore === n ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setSelfScore(n)}
-                    >
-                      {n}
-                    </Button>
-                  ))}
+                <div className="flex items-end gap-1.5">
+                  {[1, 2, 3, 4, 5].map(n => {
+                    const labels: Record<number, { de: string; en: string }> = {
+                      1: { de: 'Kaum', en: 'Barely' },
+                      2: { de: 'Wenig', en: 'Little' },
+                      3: { de: 'Okay', en: 'Okay' },
+                      4: { de: 'Gut', en: 'Well' },
+                      5: { de: 'Super', en: 'Great' },
+                    };
+                    return (
+                      <button
+                        key={n}
+                        onClick={() => setSelfScore(n)}
+                        className={`flex flex-col items-center gap-1 rounded-lg px-3 py-2 text-xs transition-colors border ${
+                          selfScore === n
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-background text-muted-foreground border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <span className="text-base">{'😕😐🙂😊🤩'.split('')[n - 1] ?? ''}</span>
+                        <span className="font-medium">{labels[n]?.[language] ?? n}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
