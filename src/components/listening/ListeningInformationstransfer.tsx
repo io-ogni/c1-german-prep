@@ -122,8 +122,8 @@ export function ListeningInformationstransfer({ content, solution, instructions,
                 checked && isWrong && 'border-destructive/30 bg-destructive/5'
               )}
             >
-              <div className="flex items-start gap-2 text-sm">
-                <span className="font-medium text-foreground shrink-0">{item.number}.</span>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="font-medium text-foreground shrink-0 min-w-[1.5rem] text-right">{item.number}.</span>
                 <div className="flex-1">
                   <span className="text-foreground">{item.sentence_before} </span>
                   <Input
