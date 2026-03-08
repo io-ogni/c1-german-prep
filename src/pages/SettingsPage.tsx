@@ -157,6 +157,11 @@ export default function SettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
+          <div className="flex items-start gap-2 rounded-md border border-border bg-muted/50 p-3 text-xs text-muted-foreground">
+            <ShieldCheck className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
+            <span>Your key is encrypted with AES-256-GCM on the server and never stored in your browser. It's only decrypted momentarily in secure backend functions when needed.</span>
+          </div>
+        <CardContent className="space-y-3">
           {hasKey && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <CheckCircle className="h-4 w-4 text-green-500" />
