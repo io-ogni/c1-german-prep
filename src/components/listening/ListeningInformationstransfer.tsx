@@ -73,7 +73,7 @@ export function ListeningInformationstransfer({ content, solution, instructions,
     setAnswers({});
     setChecked(false);
     setResults({});
-    setShowTranscript(false);
+    
   };
 
   const score = checked ? Object.values(results).filter(Boolean).length : 0;
