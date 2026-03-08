@@ -55,7 +55,7 @@ export function useCustomPhrases(storageKey: string = DEFAULT_STORAGE_KEY) {
         ...prev,
         connectors: [...prev.connectors, { fn, items }],
       };
-      save(next);
+      save(storageKey, next);
       return next;
     });
   }, []);
