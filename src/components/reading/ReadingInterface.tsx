@@ -40,6 +40,13 @@ export function ReadingInterface({ text, onBack }: Props) {
   const [saving, setSaving] = useState(false);
   const timerSecondsRef = useRef(0);
 
+  const handleRetry = () => {
+    setAnswers({});
+    setChecked(false);
+    setScore(null);
+    setSelfScore(null);
+  };
+
   const handleCheck = () => {
     const q = text.questions;
     let correct = 0;
@@ -219,7 +226,7 @@ export function ReadingInterface({ text, onBack }: Props) {
                             : 'bg-background text-muted-foreground border-border hover:border-primary/50'
                         }`}
                       >
-                        <span className="text-base">{'😕😐🙂😊🤩'.split('')[n - 1] ?? ''}</span>
+                        <span className="text-base">{['😟', '😕', '😐', '🙂', '🤩'][n - 1]}</span>
                         <span className="font-medium">{labels[n]?.[language] ?? n}</span>
                       </button>
                     );
@@ -227,9 +234,14 @@ export function ReadingInterface({ text, onBack }: Props) {
                 </div>
               </div>
 
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? t('common_loading') : t('reading_save_progress')}
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={handleRetry}>
+                  {language === 'de' ? 'Nochmal versuchen' : 'Try again'}
+                </Button>
+                <Button onClick={handleSave} disabled={saving}>
+                  {saving ? t('common_loading') : t('reading_save_progress')}
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
