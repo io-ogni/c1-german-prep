@@ -29,6 +29,7 @@ export function FillIn({ content, solution, instructions, explanation, answered,
     /___/g,
     '<span class="inline-block border-b-2 border-primary px-2 mx-1 min-w-[4rem]">&nbsp;</span>'
   );
+  const options = content?.options ?? [];
 
   return (
     <ExerciseCard
@@ -49,7 +50,7 @@ export function FillIn({ content, solution, instructions, explanation, answered,
         dangerouslySetInnerHTML={{ __html: sentenceHtml }}
       />
       <div className="grid gap-2 sm:grid-cols-2">
-        {content.options.map((opt, idx) => (
+        {options.map((opt, idx) => (
           <Button
             key={idx}
             variant="outline"
