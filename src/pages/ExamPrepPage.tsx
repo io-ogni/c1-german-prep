@@ -12,7 +12,17 @@ export default function ExamPrepPage() {
   const navigate = useNavigate();
   const hasApiKey = !!profile?.api_key_encrypted;
 
-  const sections = [
+  const sections: Array<{
+    key: string;
+    icon: any;
+    title: string;
+    description: string;
+    time: string;
+    telc: boolean;
+    enabled: boolean;
+    route?: string;
+    disabledReason?: string;
+  }> = [
     {
       key: 'leseverstehen',
       icon: BookOpen,
