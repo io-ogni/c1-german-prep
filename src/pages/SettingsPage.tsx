@@ -14,7 +14,7 @@ export default function SettingsPage() {
   const { t } = useTranslation();
   const { profile, refreshProfile } = useRequiredAuth();
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
-  const [writingLevel, setWritingLevel] = useState<string>(profile?.writing_level || '');
+  const [saving, setSaving] = useState(false);
   const [saving, setSaving] = useState(false);
 
   // API key state
