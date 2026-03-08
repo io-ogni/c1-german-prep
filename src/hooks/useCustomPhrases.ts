@@ -31,7 +31,7 @@ export function useCustomPhrases(storageKey: string = DEFAULT_STORAGE_KEY) {
           [sectionKey]: [...(prev.phrases[sectionKey] || []), phrase],
         },
       };
-      save(next);
+      save(storageKey, next);
       return next;
     });
   }, []);
