@@ -118,7 +118,7 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
                     const entry = lookupCache[clean.toLowerCase()];
 
                     return (
-                      <Popover key={wIdx} onOpenChange={(open) => { if (open) lookupWord(clean); }}>
+                      <Popover key={wIdx} open={openWord === `${pIdx}-${partIdx}-${wIdx}`} onOpenChange={(open) => { if (open) { lookupWord(clean); setOpenWord(`${pIdx}-${partIdx}-${wIdx}`); } else { setOpenWord(null); } }}>
                         <PopoverTrigger asChild>
                           <span className="cursor-pointer rounded px-0.5 transition-colors hover:bg-accent hover:text-accent-foreground">
                             {word}
