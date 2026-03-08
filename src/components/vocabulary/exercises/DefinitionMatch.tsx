@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -83,14 +83,21 @@ function PairsMatch({ content, solution, instructions, explanation, answered, on
 
   const pairs = content.pairs!;
   const words = pairs.map((p) => p.word);
-  // Shuffle definitions deterministically from solution or just use them in order
-  const solPairs = solution.pairs ?? pairs;
-  const definitions = solPairs.map((p) => p.definition);
 
-  // Build correct mapping: for each word index, find definition index
+  // Shuffle definitions so they don't align with their matching words
+  const shuffledDefs = useMemo(() => {
+    const defs = pairs.map((p, i) => ({ text: p.definition, originalIdx: i }));
+    for (let i = defs.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [defs[i], defs[j]] = [defs[j], defs[i]];
+    }
+    return defs;
+  }, [pairs]);
+
+  // Build correct mapping: for each word index, find its definition in the shuffled array
   const correctMap = new Map<number, number>();
-  pairs.forEach((p, wi) => {
-    const di = definitions.indexOf(p.definition);
+  words.forEach((_, wi) => {
+    const di = shuffledDefs.findIndex((d) => d.originalIdx === wi);
     correctMap.set(wi, di);
   });
 
@@ -153,7 +160,7 @@ function PairsMatch({ content, solution, instructions, explanation, answered, on
           ))}
         </div>
         <div className="space-y-2">
-          {definitions.map((d, i) => (
+          {shuffledDefs.map((d, i) => (
             <Button
               key={i}
               variant="outline"
@@ -166,7 +173,7 @@ function PairsMatch({ content, solution, instructions, explanation, answered, on
               onClick={() => handleRightClick(i)}
               disabled={answered || matchedRight.has(i)}
             >
-              {d}
+              {d.text}
             </Button>
           ))}
         </div>
