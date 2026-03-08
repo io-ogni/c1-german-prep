@@ -8,6 +8,7 @@ import { ProgressBar } from '@/components/shared/ProgressBar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ArrowLeft, ChevronDown, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ListeningAudioPlayer } from './ListeningAudioPlayer';
 
 interface Props {
   content: any;
@@ -91,6 +92,8 @@ export function ListeningInformationstransfer({ content, solution, instructions,
         <h2 className="text-lg font-semibold text-foreground">{t('listening_informationstransfer')}</h2>
         <p className="text-xs text-muted-foreground">{content.topic_title ?? title}</p>
       </div>
+
+      <ListeningAudioPlayer audioFile={content.audio_file} />
 
       <p className="text-sm text-muted-foreground">{instructions}</p>
 

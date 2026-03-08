@@ -7,6 +7,7 @@ import { ProgressBar } from '@/components/shared/ProgressBar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ArrowLeft, ChevronDown, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ListeningAudioPlayer } from './ListeningAudioPlayer';
 
 interface Props {
   content: any;
@@ -157,6 +158,8 @@ export function ListeningDetailverstehen({ content, solution, instructions, expl
         <h2 className="text-lg font-semibold text-foreground">{t('listening_detailverstehen')}</h2>
         <p className="text-xs text-muted-foreground">{instructions}</p>
       </div>
+
+      <ListeningAudioPlayer audioFile={content.audio_file} />
 
       <Card>
         <CardHeader className="pb-2">

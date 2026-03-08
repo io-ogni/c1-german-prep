@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ArrowLeft, ChevronDown, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ListeningAudioPlayer } from './ListeningAudioPlayer';
 
 interface Props {
   content: any;
@@ -64,6 +65,8 @@ export function ListeningGlobalverstehen({ content, solution, instructions, expl
         <h2 className="text-lg font-semibold text-foreground">{t('listening_globalverstehen')}</h2>
         <p className="text-xs text-muted-foreground">{content.topic_title}</p>
       </div>
+
+      <ListeningAudioPlayer audioFile={content.audio_file} />
 
       <p className="text-sm text-muted-foreground">{instructions}</p>
 

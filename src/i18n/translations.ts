@@ -194,6 +194,8 @@ export const translations = {
     listening_speaker: "Sprecher",
     listening_statement: "Aussage",
     listening_question: "Frage",
+    listening_no_audio: "Audiodatei noch nicht verfügbar",
+    listening_audio_error: "Audio konnte nicht geladen werden",
 
     // Daily Practice
     daily_title: "Tagesplan",
@@ -444,6 +446,8 @@ export const translations = {
     listening_speaker: "Speaker",
     listening_statement: "Statement",
     listening_question: "Question",
+    listening_no_audio: "Audio file not yet available",
+    listening_audio_error: "Could not load audio",
 
     // Daily Practice
     daily_title: "Daily Practice",
