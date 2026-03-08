@@ -1,14 +1,15 @@
-import { useState } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useRequiredAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TelcBadge } from '@/components/shared/TelcBadge';
 import { GraduationCap, BookOpen, FileText, Headphones, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function ExamPrepPage() {
   const { t, lang } = useTranslation();
   const { profile } = useRequiredAuth();
+  const navigate = useNavigate();
   const hasApiKey = !!profile?.api_key_encrypted;
 
   const sections = [
@@ -22,6 +23,7 @@ export default function ExamPrepPage() {
       time: '90 min',
       telc: true,
       enabled: true,
+      route: '/reading?exam=telc',
     },
     {
       key: 'sprachbausteine',
@@ -33,6 +35,7 @@ export default function ExamPrepPage() {
       time: lang === 'de' ? 'Teil des Leseverstehens' : 'Part of reading section',
       telc: true,
       enabled: true,
+      route: '/grammar?tab=sprachbausteine',
     },
     {
       key: 'schriftlicher_ausdruck',
@@ -43,8 +46,8 @@ export default function ExamPrepPage() {
         : 'Write one full text with evaluation',
       time: '70 min',
       telc: true,
-      enabled: hasApiKey,
-      disabledReason: lang === 'de' ? 'API-Schlüssel erforderlich' : 'API key required',
+      enabled: true,
+      route: '/writing',
     },
     {
       key: 'hoerverstehen',
@@ -91,8 +94,8 @@ export default function ExamPrepPage() {
                     <Clock className="h-3 w-3" />{section.time}
                   </span>
                 )}
-                {section.enabled ? (
-                  <Button size="sm" variant="outline" disabled>
+                {section.enabled && section.route ? (
+                  <Button size="sm" variant="outline" onClick={() => navigate(section.route!)}>
                     {t('exam_start')}
                   </Button>
                 ) : section.disabledReason ? (
