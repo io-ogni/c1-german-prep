@@ -71,6 +71,7 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
       toast.error(error.message);
     } else {
       toast.success(t('word_added'));
+      setOpenWord(null);
     }
   };
 
