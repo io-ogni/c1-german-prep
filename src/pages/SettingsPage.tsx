@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Key, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Key, CheckCircle, XCircle, Loader2, ShieldCheck } from 'lucide-react';
 
 export default function SettingsPage() {
   const { t } = useTranslation();
@@ -156,6 +156,10 @@ export default function SettingsPage() {
             {t('settings_api_key_note')}
           </CardDescription>
         </CardHeader>
+          <div className="flex items-start gap-2 rounded-md border border-border bg-muted/50 p-3 text-xs text-muted-foreground">
+            <ShieldCheck className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
+            <span>Your key is encrypted with AES-256-GCM on the server and never stored in your browser. It's only decrypted momentarily in secure backend functions when needed.</span>
+          </div>
         <CardContent className="space-y-3">
           {hasKey && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
