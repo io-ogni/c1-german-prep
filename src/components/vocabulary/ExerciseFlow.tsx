@@ -119,7 +119,8 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
       case 'definition_match':
         return <DefinitionMatch {...commonProps} />;
       case 'fill_in':
-        return area === 'grammar' ? <GrammarFillIn {...commonProps} /> : <FillIn {...commonProps} />;
+        // Use GrammarFillIn for multi-sentence format (sentences[]) regardless of area
+        return (content?.sentences || area === 'grammar') ? <GrammarFillIn {...commonProps} /> : <FillIn {...commonProps} />;
       case 'synonym_match':
         return <SynonymMatch {...commonProps} />;
       case 'word_family':
