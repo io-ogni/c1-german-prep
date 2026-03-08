@@ -32,15 +32,17 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
   const { t, lang } = useTranslation();
   const auth = useAuth();
 
+  const dbLevel = level === 'b2' ? 'b2_refresh' : level;
+
   const { data: exercises, isLoading } = useQuery({
-    queryKey: ['exercises', area, topic, level],
+    queryKey: ['exercises', area, topic, dbLevel],
     queryFn: async () => {
       const { data } = await supabase
         .from('exercises')
         .select('*')
         .eq('area', area)
         .eq('topic', topic)
-        .eq('level', level)
+        .eq('level', dbLevel)
         .order('sort_order');
       return (data ?? []) as Tables<'exercises'>[];
     },
