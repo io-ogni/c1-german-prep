@@ -94,8 +94,8 @@ export default function ExamPrepPage() {
                     <Clock className="h-3 w-3" />{section.time}
                   </span>
                 )}
-                {section.enabled ? (
-                  <Button size="sm" variant="outline" disabled>
+                {section.enabled && section.route ? (
+                  <Button size="sm" variant="outline" onClick={() => navigate(section.route!)}>
                     {t('exam_start')}
                   </Button>
                 ) : section.disabledReason ? (
