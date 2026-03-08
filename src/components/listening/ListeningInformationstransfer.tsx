@@ -161,23 +161,6 @@ export function ListeningInformationstransfer({ content, solution, instructions,
         </Card>
       )}
 
-      {checked && content.transcript && (
-        <Collapsible open={showTranscript} onOpenChange={setShowTranscript}>
-          <CollapsibleTrigger asChild>
-            <Button variant="outline" size="sm" className="w-full gap-2">
-              <ChevronDown className={cn('h-4 w-4 transition-transform', showTranscript && 'rotate-180')} />
-              {showTranscript ? t('listening_hide_transcript') : t('listening_show_transcript')}
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <Card className="mt-2">
-              <CardContent className="py-3">
-                <p className="text-xs text-muted-foreground whitespace-pre-line">{content.transcript}</p>
-              </CardContent>
-            </Card>
-          </CollapsibleContent>
-        </Collapsible>
-      )}
 
       <div className="flex justify-end gap-2">
         {!checked ? (

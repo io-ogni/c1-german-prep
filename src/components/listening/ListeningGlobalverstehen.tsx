@@ -154,29 +154,6 @@ export function ListeningGlobalverstehen({ content, solution, instructions, expl
         </Card>
       )}
 
-      {/* Transcript */}
-      {checked && (
-        <Collapsible open={showTranscript} onOpenChange={setShowTranscript}>
-          <CollapsibleTrigger asChild>
-            <Button variant="outline" size="sm" className="w-full gap-2">
-              <ChevronDown className={cn('h-4 w-4 transition-transform', showTranscript && 'rotate-180')} />
-              {showTranscript ? t('listening_hide_transcript') : t('listening_show_transcript')}
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <Card className="mt-2">
-              <CardContent className="py-3 space-y-3">
-                {speakers.map(s => (
-                  <div key={s.id}>
-                    <p className="text-xs font-semibold text-foreground">{t('listening_speaker')} {s.id}:</p>
-                    <p className="text-xs text-muted-foreground">{s.transcript}</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </CollapsibleContent>
-        </Collapsible>
-      )}
 
       {/* Actions */}
       <div className="flex justify-end gap-2">
