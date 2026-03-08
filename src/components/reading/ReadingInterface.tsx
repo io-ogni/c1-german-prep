@@ -53,31 +53,40 @@ export function ReadingInterface({ text, onBack }: Props) {
     let total = 0;
 
     if (text.text_type === 'textrekonstruktion') {
-      const correctMap = q.correct as Record<string, string>;
-      total = Object.keys(correctMap).length;
-      for (const [gap, answer] of Object.entries(correctMap)) {
-        if (answers[gap] === answer) correct++;
+      if (Array.isArray(q)) {
+        // Format B: array of per-gap objects
+        total = q.length;
+        q.forEach((item: any) => {
+          const pos = String(item.position || item.id?.replace('gap', ''));
+          const expectedId = `${pos}-${item.correct}`;
+          if (answers[pos] === expectedId) correct++;
+        });
+      } else {
+        // Format A: { correct: {gap: optionId}, options: [...] }
+        const correctMap = q.correct as Record<string, string>;
+        total = Object.keys(correctMap).length;
+        for (const [gap, answer] of Object.entries(correctMap)) {
+          if (answers[gap] === answer) correct++;
+        }
       }
     } else if (text.text_type === 'detailverstehen') {
-      const statements = q.statements || q;
-      total = Array.isArray(statements) ? statements.length : 0;
-      if (Array.isArray(statements)) {
-        statements.forEach((s: any, i: number) => {
-          if (answers[String(i)] === s.correct) correct++;
-        });
-      }
+      const items: any[] = Array.isArray(q) ? q : q.statements || q.questions || [];
+      total = items.length;
+      items.forEach((item: any, i: number) => {
+        if (answers[String(i)] === item.correct) correct++;
+      });
     } else if (text.text_type === 'selektives_verstehen') {
-      const questions = Array.isArray(q) ? q : q.questions || [];
-      total = questions.length;
-      questions.forEach((question: any, i: number) => {
-        if (answers[String(i)] === question.correct) correct++;
+      const items: any[] = Array.isArray(q) ? q : q.questions || [];
+      total = items.length;
+      items.forEach((item: any, i: number) => {
+        if (answers[String(i)] === item.correct) correct++;
       });
     } else {
       // general MC
-      const questions = Array.isArray(q) ? q : q.questions || [];
-      total = questions.length;
-      questions.forEach((question: any, i: number) => {
-        if (answers[String(i)] === String(question.correct)) correct++;
+      const items: any[] = Array.isArray(q) ? q : q.questions || [];
+      total = items.length;
+      items.forEach((item: any, i: number) => {
+        if (answers[String(i)] === String(item.correct)) correct++;
       });
     }
 
