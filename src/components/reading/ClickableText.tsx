@@ -42,6 +42,7 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
   const [lookupCache, setLookupCache] = useState<Record<string, { word_de: string; article: string | null; translation_en: string } | null>>({});
   const [customTranslation, setCustomTranslation] = useState('');
   const [editingWord, setEditingWord] = useState<string | null>(null);
+  const [openWord, setOpenWord] = useState<string | null>(null);
 
   const lookupWord = async (cleanWord: string) => {
     if (lookupCache[cleanWord.toLowerCase()] !== undefined) return;
@@ -70,6 +71,7 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
       toast.error(error.message);
     } else {
       toast.success(t('word_added'));
+      setOpenWord(null);
     }
   };
 
@@ -116,7 +118,7 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
                     const entry = lookupCache[clean.toLowerCase()];
 
                     return (
-                      <Popover key={wIdx} onOpenChange={(open) => { if (open) lookupWord(clean); }}>
+                      <Popover key={wIdx} open={openWord === `${pIdx}-${partIdx}-${wIdx}`} onOpenChange={(open) => { if (open) { lookupWord(clean); setOpenWord(`${pIdx}-${partIdx}-${wIdx}`); } else { setOpenWord(null); } }}>
                         <PopoverTrigger asChild>
                           <span className="cursor-pointer rounded px-0.5 transition-colors hover:bg-accent hover:text-accent-foreground">
                             {word}
