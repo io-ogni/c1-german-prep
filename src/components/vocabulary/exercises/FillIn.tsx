@@ -25,7 +25,7 @@ export function FillIn({ content, solution, instructions, explanation, answered,
   };
 
   // Highlight the blank
-  const sentenceHtml = content.sentence.replace(
+  const sentenceHtml = (content?.sentence ?? '').replace(
     /___/g,
     '<span class="inline-block border-b-2 border-primary px-2 mx-1 min-w-[4rem]">&nbsp;</span>'
   );
