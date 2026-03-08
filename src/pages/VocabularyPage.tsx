@@ -60,7 +60,7 @@ export default function VocabularyPage() {
         .sort((a, b) => a[1].minSort - b[1].minSort)
         .map(([slug, data]) => ({
           slug,
-          title: TOPIC_NAMES[slug]?.[lang] ?? slug,
+          title: TOPIC_NAMES[slug] ?? slug,
           total: data.total,
           completed: data.completed,
         }));
