@@ -1,17 +1,28 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useRequiredAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { Key, CheckCircle, XCircle, Loader2, ShieldCheck } from 'lucide-react';
+import { Key, CheckCircle, Loader2, ShieldCheck, Trash2 } from 'lucide-react';
 
 export default function SettingsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { profile, refreshProfile } = useRequiredAuth();
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
   const [saving, setSaving] = useState(false);
@@ -21,6 +32,9 @@ export default function SettingsPage() {
   const [savingKey, setSavingKey] = useState(false);
   const [testingKey, setTestingKey] = useState(false);
   const hasKey = !!profile?.api_key_encrypted;
+
+  // Delete account state
+  const [deleting, setDeleting] = useState(false);
 
   const handleSaveKey = async () => {
     if (!apiKey.trim()) return;
@@ -77,9 +91,7 @@ export default function SettingsPage() {
     setSaving(true);
     const { error } = await supabase
       .from('profiles')
-      .update({
-        display_name: displayName,
-      })
+      .update({ display_name: displayName })
       .eq('user_id', profile.user_id);
     setSaving(false);
     if (error) {
@@ -87,6 +99,22 @@ export default function SettingsPage() {
     } else {
       await refreshProfile();
       toast.success(t('common_save'));
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('delete-account');
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      await supabase.auth.signOut();
+      navigate('/login');
+      toast.success('Konto und alle Daten wurden gelöscht.');
+    } catch (err: any) {
+      toast.error(err.message || 'Fehler beim Löschen des Kontos');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -102,7 +130,6 @@ export default function SettingsPage() {
           <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
         </CardContent>
       </Card>
-
 
       <Button onClick={handleSave} disabled={saving}>
         {saving ? t('common_loading') : t('common_save')}
@@ -152,6 +179,46 @@ export default function SettingsPage() {
             <ShieldCheck className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
             <span>Ihr Schlüssel wird mit AES-256-GCM auf dem Server verschlüsselt und nie in Ihrem Browser gespeichert. Er wird nur kurzzeitig in sicheren Backend-Funktionen entschlüsselt.</span>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Delete Account Section */}
+      <Card className="border-destructive/30">
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2 text-destructive">
+            <Trash2 className="h-4 w-4" />
+            Konto löschen
+          </CardTitle>
+          <CardDescription>
+            Ihr Konto und alle zugehörigen Daten (Vokabeln, Texte, Fortschritt) werden unwiderruflich gelöscht.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm" disabled={deleting}>
+                {deleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                Konto endgültig löschen
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Sind Sie sicher?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Diese Aktion kann nicht rückgängig gemacht werden. Ihr Konto und alle Daten — einschließlich Wortschatz, Texte, Übungsfortschritt und Einstellungen — werden dauerhaft gelöscht.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t('common_cancel')}</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteAccount}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Ja, Konto löschen
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </CardContent>
       </Card>
     </div>
