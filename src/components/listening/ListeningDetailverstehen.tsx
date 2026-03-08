@@ -24,38 +24,30 @@ export function ListeningDetailverstehen({ content, solution, instructions, expl
   const questions: any[] = content.questions ?? [];
   const total = questions.length;
 
-  const [currentIdx, setCurrentIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [showResults, setShowResults] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
 
-  const currentQ = questions[currentIdx];
-  const isLast = currentIdx === total - 1;
-
-  const handleSelect = (optionId: string) => {
-    setAnswers(prev => ({ ...prev, [currentQ.number]: optionId }));
+  const handleSelect = (questionNumber: number, optionId: string) => {
+    setAnswers(prev => ({ ...prev, [questionNumber]: optionId }));
   };
 
-  const handleNext = () => {
-    if (isLast) {
-      setShowResults(true);
-      const score = questions.filter(q => answers[q.number] === solution[String(q.number)]).length;
-      onSaveProgress(score, total);
-    } else {
-      setCurrentIdx(i => i + 1);
-    }
+  const handleCheck = () => {
+    setShowResults(true);
+    const score = questions.filter(q => answers[q.number] === solution[String(q.number)]).length;
+    onSaveProgress(score, total);
   };
 
   const handleRetry = () => {
     setAnswers({});
-    setCurrentIdx(0);
     setShowResults(false);
     setShowTranscript(false);
   };
 
-  if (showResults) {
-    const score = questions.filter(q => answers[q.number] === solution[String(q.number)]).length;
+  const answeredCount = Object.keys(answers).length;
+  const score = questions.filter(q => answers[q.number] === solution[String(q.number)]).length;
 
+  if (showResults) {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -147,12 +139,10 @@ export function ListeningDetailverstehen({ content, solution, instructions, expl
           {t('listening_back')}
         </Button>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground tabular-nums">{currentIdx + 1} / {total}</span>
+          <span className="text-sm text-muted-foreground tabular-nums">{answeredCount} / {total}</span>
           <TelcBadge />
         </div>
       </div>
-
-      <ProgressBar value={((currentIdx + 1) / total) * 100} showLabel={false} />
 
       <div>
         <h2 className="text-lg font-semibold text-foreground">{t('listening_detailverstehen')}</h2>
@@ -161,36 +151,40 @@ export function ListeningDetailverstehen({ content, solution, instructions, expl
 
       <ListeningAudioPlayer audioFile={content.audio_file} />
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">
-            {t('listening_question')} {currentQ.number}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <p className="text-sm text-foreground">{currentQ.stem}</p>
-          <div className="space-y-2 pt-2">
-            {currentQ.options.map((opt: any) => (
-              <button
-                key={opt.id}
-                onClick={() => handleSelect(opt.id)}
-                className={cn(
-                  'w-full text-left rounded-md border px-3 py-2.5 text-sm transition-colors',
-                  answers[currentQ.number] === opt.id
-                    ? 'border-primary bg-primary/10 text-foreground'
-                    : 'border-border text-muted-foreground hover:bg-accent/50'
-                )}
-              >
-                <span className="font-medium">{opt.id})</span> {opt.text}
-              </button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-3">
+        {questions.map(q => (
+          <Card key={q.number}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">
+                {t('listening_question')} {q.number}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <p className="text-sm text-foreground">{q.stem}</p>
+              <div className="space-y-2 pt-1">
+                {q.options.map((opt: any) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => handleSelect(q.number, opt.id)}
+                    className={cn(
+                      'w-full text-left rounded-md border px-3 py-2.5 text-sm transition-colors',
+                      answers[q.number] === opt.id
+                        ? 'border-primary bg-primary/10 text-foreground'
+                        : 'border-border text-muted-foreground hover:bg-accent/50'
+                    )}
+                  >
+                    <span className="font-medium">{opt.id})</span> {opt.text}
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       <div className="flex justify-end">
-        <Button onClick={handleNext} disabled={!answers[currentQ.number]}>
-          {isLast ? t('listening_check_answers') : t('exercise_next')}
+        <Button onClick={handleCheck} disabled={answeredCount < total}>
+          {t('listening_check_answers')}
         </Button>
       </div>
     </div>
