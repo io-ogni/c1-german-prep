@@ -29,6 +29,7 @@ export function FillIn({ content, solution, instructions, explanation, answered,
     /___/g,
     '<span class="inline-block border-b-2 border-primary px-2 mx-1 min-w-[4rem]">&nbsp;</span>'
   );
+  const options = content?.options ?? [];
 
   return (
     <ExerciseCard
