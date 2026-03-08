@@ -12,7 +12,17 @@ export default function ExamPrepPage() {
   const navigate = useNavigate();
   const hasApiKey = !!profile?.api_key_encrypted;
 
-  const sections = [
+  const sections: Array<{
+    key: string;
+    icon: any;
+    title: string;
+    description: string;
+    time: string;
+    telc: boolean;
+    enabled: boolean;
+    route?: string;
+    disabledReason?: string;
+  }> = [
     {
       key: 'leseverstehen',
       icon: BookOpen,
@@ -53,11 +63,13 @@ export default function ExamPrepPage() {
       key: 'hoerverstehen',
       icon: Headphones,
       title: t('exam_hoerverstehen'),
-      description: t('exam_coming_soon'),
-      time: '',
+      description: lang === 'de'
+        ? 'Alle 3 Hörteile im telc-Format üben'
+        : 'Practice all 3 listening parts in telc format',
+      time: '40 min',
       telc: true,
-      enabled: false,
-      disabledReason: t('exam_coming_soon'),
+      enabled: true,
+      route: '/listening',
     },
   ];
 
