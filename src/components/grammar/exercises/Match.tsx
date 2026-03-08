@@ -84,7 +84,7 @@ export function Match({ content, solution, instructions, explanation, answered, 
           ))}
         </div>
         <div className="space-y-2">
-          {content.right.map((item, i) => (
+          {rightItems.map((item, i) => (
             <Button
               key={i}
               variant="outline"
