@@ -64,7 +64,7 @@ export function Match({ content, solution, instructions, explanation, answered, 
     >
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          {content.left.map((item, i) => (
+          {leftItems.map((item, i) => (
             <Button
               key={i}
               variant="outline"
