@@ -5,8 +5,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { TelcBadge } from '@/components/shared/TelcBadge';
 import { ProgressBar } from '@/components/shared/ProgressBar';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ArrowLeft, ChevronDown, Check, X } from 'lucide-react';
+
+import { ArrowLeft, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ListeningAudioPlayer } from './ListeningAudioPlayer';
 
@@ -48,7 +48,7 @@ export function ListeningInformationstransfer({ content, solution, instructions,
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [checked, setChecked] = useState(false);
   const [results, setResults] = useState<Record<number, boolean>>({});
-  const [showTranscript, setShowTranscript] = useState(false);
+  
 
   const handleChange = (num: number, value: string) => {
     setAnswers(prev => ({ ...prev, [num]: value }));
@@ -73,7 +73,7 @@ export function ListeningInformationstransfer({ content, solution, instructions,
     setAnswers({});
     setChecked(false);
     setResults({});
-    setShowTranscript(false);
+    
   };
 
   const score = checked ? Object.values(results).filter(Boolean).length : 0;
@@ -161,23 +161,6 @@ export function ListeningInformationstransfer({ content, solution, instructions,
         </Card>
       )}
 
-      {checked && content.transcript && (
-        <Collapsible open={showTranscript} onOpenChange={setShowTranscript}>
-          <CollapsibleTrigger asChild>
-            <Button variant="outline" size="sm" className="w-full gap-2">
-              <ChevronDown className={cn('h-4 w-4 transition-transform', showTranscript && 'rotate-180')} />
-              {showTranscript ? t('listening_hide_transcript') : t('listening_show_transcript')}
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <Card className="mt-2">
-              <CardContent className="py-3">
-                <p className="text-xs text-muted-foreground whitespace-pre-line">{content.transcript}</p>
-              </CardContent>
-            </Card>
-          </CollapsibleContent>
-        </Collapsible>
-      )}
 
       <div className="flex justify-end gap-2">
         {!checked ? (

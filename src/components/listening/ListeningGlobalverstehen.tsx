@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TelcBadge } from '@/components/shared/TelcBadge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ArrowLeft, ChevronDown, Check, X } from 'lucide-react';
+
+import { ArrowLeft, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ListeningAudioPlayer } from './ListeningAudioPlayer';
 
@@ -27,7 +27,7 @@ export function ListeningGlobalverstehen({ content, solution, instructions, expl
 
   const [selections, setSelections] = useState<Record<number, string>>({});
   const [checked, setChecked] = useState(false);
-  const [showTranscript, setShowTranscript] = useState(false);
+  
 
   const usedStatements = new Set(Object.values(selections));
 
@@ -46,7 +46,7 @@ export function ListeningGlobalverstehen({ content, solution, instructions, expl
   const handleRetry = () => {
     setSelections({});
     setChecked(false);
-    setShowTranscript(false);
+    
   };
 
   const score = checked ? speakers.filter(s => selections[s.id] === solution[String(s.id)]).length : 0;
@@ -154,29 +154,6 @@ export function ListeningGlobalverstehen({ content, solution, instructions, expl
         </Card>
       )}
 
-      {/* Transcript */}
-      {checked && (
-        <Collapsible open={showTranscript} onOpenChange={setShowTranscript}>
-          <CollapsibleTrigger asChild>
-            <Button variant="outline" size="sm" className="w-full gap-2">
-              <ChevronDown className={cn('h-4 w-4 transition-transform', showTranscript && 'rotate-180')} />
-              {showTranscript ? t('listening_hide_transcript') : t('listening_show_transcript')}
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <Card className="mt-2">
-              <CardContent className="py-3 space-y-3">
-                {speakers.map(s => (
-                  <div key={s.id}>
-                    <p className="text-xs font-semibold text-foreground">{t('listening_speaker')} {s.id}:</p>
-                    <p className="text-xs text-muted-foreground">{s.transcript}</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </CollapsibleContent>
-        </Collapsible>
-      )}
 
       {/* Actions */}
       <div className="flex justify-end gap-2">
