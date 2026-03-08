@@ -105,22 +105,6 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{t('settings_language')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Select value={uiLanguage} onValueChange={setUiLanguage}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="de">{t('settings_german')}</SelectItem>
-              <SelectItem value="en">{t('settings_english')}</SelectItem>
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>
