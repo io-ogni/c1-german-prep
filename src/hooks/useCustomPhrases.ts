@@ -7,16 +7,16 @@ interface CustomData {
   connectors: Array<{ fn: string; items: string }>;
 }
 
-function load(): CustomData {
+function load(key: string): CustomData {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(key);
     if (raw) return JSON.parse(raw);
   } catch {}
   return { phrases: {}, connectors: [] };
 }
 
-function save(data: CustomData) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+function save(key: string, data: CustomData) {
+  localStorage.setItem(key, JSON.stringify(data));
 }
 
 export function useCustomPhrases() {
