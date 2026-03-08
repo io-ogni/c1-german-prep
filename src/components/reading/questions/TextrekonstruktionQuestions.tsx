@@ -12,9 +12,35 @@ interface Props {
 
 export function TextrekonstruktionQuestions({ questions, answers, setAnswers, checked }: Props) {
   const { lang: language } = useTranslation();
-  const options: { id: string; text: string }[] = questions.options || [];
-  const correct: Record<string, string> = questions.correct || {};
-  const gaps = questions.gaps || Object.keys(correct).length;
+
+  // Normalize two formats:
+  // Format A: { options: [{id, text}], correct: {gapNum: optionId}, gaps }
+  // Format B: [{ id: "gap1", options: [...strings], correct: "...", position }]
+  const isArrayFormat = Array.isArray(questions);
+
+  const options: { id: string; text: string }[] = isArrayFormat
+    ? (questions as any[]).flatMap((q: any, _i: number) =>
+        (q.options || []).map((opt: string) => ({ id: `${q.position || q.id}-${opt}`, text: opt }))
+      )
+    : (questions.options || []);
+
+  const correct: Record<string, string> = isArrayFormat
+    ? (questions as any[]).reduce((acc: Record<string, string>, q: any) => {
+        const pos = String(q.position || q.id?.replace('gap', ''));
+        acc[pos] = `${pos}-${q.correct}`;
+        return acc;
+      }, {})
+    : (questions.correct || {});
+
+  const perGapOptions: Record<string, { id: string; text: string }[]> | null = isArrayFormat
+    ? (questions as any[]).reduce((acc: any, q: any) => {
+        const pos = String(q.position || q.id?.replace('gap', ''));
+        acc[pos] = (q.options || []).map((opt: string) => ({ id: `${pos}-${opt}`, text: opt }));
+        return acc;
+      }, {})
+    : null;
+
+  const gaps = isArrayFormat ? (questions as any[]).length : (questions.gaps || Object.keys(correct).length);
 
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const assignedOptions = new Set(Object.values(answers));
