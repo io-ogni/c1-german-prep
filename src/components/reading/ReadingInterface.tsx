@@ -234,9 +234,14 @@ export function ReadingInterface({ text, onBack }: Props) {
                 </div>
               </div>
 
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? t('common_loading') : t('reading_save_progress')}
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={handleRetry}>
+                  {language === 'de' ? 'Nochmal versuchen' : 'Try again'}
+                </Button>
+                <Button onClick={handleSave} disabled={saving}>
+                  {saving ? t('common_loading') : t('reading_save_progress')}
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
