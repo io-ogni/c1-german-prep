@@ -27,7 +27,7 @@ export function ListeningGlobalverstehen({ content, solution, instructions, expl
 
   const [selections, setSelections] = useState<Record<number, string>>({});
   const [checked, setChecked] = useState(false);
-  const [showTranscript, setShowTranscript] = useState(false);
+  
 
   const usedStatements = new Set(Object.values(selections));
 
