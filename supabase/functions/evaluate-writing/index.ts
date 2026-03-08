@@ -77,6 +77,15 @@ function validateInput(body: Record<string, unknown>): {
     };
   }
 
+  const MAX_WORDS = 700;
+  const totalWordCount = text.trim().split(/\s+/).length;
+  if (totalWordCount > MAX_WORDS) {
+    return {
+      valid: false,
+      error: `Your text exceeds the maximum of ${MAX_WORDS} words (you wrote ~${totalWordCount}). Please shorten it.`,
+    };
+  }
+
   if (!detectGerman(text)) {
     return {
       valid: false,
