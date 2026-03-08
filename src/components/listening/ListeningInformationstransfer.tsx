@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { TelcBadge } from '@/components/shared/TelcBadge';
 import { ProgressBar } from '@/components/shared/ProgressBar';
 
-import { ArrowLeft, ChevronDown, Check, X } from 'lucide-react';
+import { ArrowLeft, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ListeningAudioPlayer } from './ListeningAudioPlayer';
 

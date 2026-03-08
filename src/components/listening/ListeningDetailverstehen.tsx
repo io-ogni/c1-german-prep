@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TelcBadge } from '@/components/shared/TelcBadge';
 import { ProgressBar } from '@/components/shared/ProgressBar';
 
-import { ArrowLeft, ChevronDown, Check, X } from 'lucide-react';
+import { ArrowLeft, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ListeningAudioPlayer } from './ListeningAudioPlayer';
 
