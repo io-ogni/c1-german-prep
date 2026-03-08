@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
