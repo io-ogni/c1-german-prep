@@ -53,11 +53,13 @@ export default function ExamPrepPage() {
       key: 'hoerverstehen',
       icon: Headphones,
       title: t('exam_hoerverstehen'),
-      description: t('exam_coming_soon'),
-      time: '',
+      description: lang === 'de'
+        ? 'Alle 3 Hörteile im telc-Format üben'
+        : 'Practice all 3 listening parts in telc format',
+      time: '40 min',
       telc: true,
-      enabled: false,
-      disabledReason: t('exam_coming_soon'),
+      enabled: true,
+      route: '/listening',
     },
   ];
 
