@@ -73,6 +73,7 @@ export default function DailyPracticePage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const sessionStartedRef = useRef(false);
 
   // Stats
   const [exercisesCompleted, setExercisesCompleted] = useState(0);
