@@ -93,6 +93,8 @@ export function ListeningInformationstransfer({ content, solution, instructions,
         <p className="text-xs text-muted-foreground">{content.topic_title ?? title}</p>
       </div>
 
+      <ListeningAudioPlayer audioFile={content.audio_file} />
+
       <p className="text-sm text-muted-foreground">{instructions}</p>
 
       {checked && (

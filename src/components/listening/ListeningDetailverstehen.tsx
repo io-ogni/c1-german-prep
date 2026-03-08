@@ -159,6 +159,8 @@ export function ListeningDetailverstehen({ content, solution, instructions, expl
         <p className="text-xs text-muted-foreground">{instructions}</p>
       </div>
 
+      <ListeningAudioPlayer audioFile={content.audio_file} />
+
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base">

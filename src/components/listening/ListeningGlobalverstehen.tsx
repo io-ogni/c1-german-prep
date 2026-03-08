@@ -66,6 +66,8 @@ export function ListeningGlobalverstehen({ content, solution, instructions, expl
         <p className="text-xs text-muted-foreground">{content.topic_title}</p>
       </div>
 
+      <ListeningAudioPlayer audioFile={content.audio_file} />
+
       <p className="text-sm text-muted-foreground">{instructions}</p>
 
       {checked && (
