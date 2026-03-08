@@ -14,7 +14,6 @@ export default function SettingsPage() {
   const { t } = useTranslation();
   const { profile, refreshProfile } = useRequiredAuth();
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
-  const [uiLanguage, setUiLanguage] = useState<string>(profile?.ui_language || 'de');
   const [writingLevel, setWritingLevel] = useState<string>(profile?.writing_level || '');
   const [saving, setSaving] = useState(false);
 
@@ -81,7 +80,6 @@ export default function SettingsPage() {
       .from('profiles')
       .update({
         display_name: displayName,
-        ui_language: uiLanguage,
         writing_level: writingLevel,
       })
       .eq('user_id', profile.user_id);
@@ -107,22 +105,6 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{t('settings_language')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Select value={uiLanguage} onValueChange={setUiLanguage}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="de">{t('settings_german')}</SelectItem>
-              <SelectItem value="en">{t('settings_english')}</SelectItem>
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>
