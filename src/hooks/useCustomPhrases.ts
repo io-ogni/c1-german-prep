@@ -19,8 +19,8 @@ function save(key: string, data: CustomData) {
   localStorage.setItem(key, JSON.stringify(data));
 }
 
-export function useCustomPhrases() {
-  const [data, setData] = useState<CustomData>(load);
+export function useCustomPhrases(storageKey: string = DEFAULT_STORAGE_KEY) {
+  const [data, setData] = useState<CustomData>(() => load(storageKey));
 
   const addPhrase = useCallback((sectionKey: string, phrase: string) => {
     setData(prev => {
