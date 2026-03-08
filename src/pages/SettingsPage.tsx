@@ -119,15 +119,11 @@ export default function SettingsPage() {
             {t('settings_api_key_note')}
           </CardDescription>
         </CardHeader>
-          <div className="flex items-start gap-2 rounded-md border border-border bg-muted/50 p-3 text-xs text-muted-foreground">
-            <ShieldCheck className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
-            <span>Your key is encrypted with AES-256-GCM on the server and never stored in your browser. It's only decrypted momentarily in secure backend functions when needed.</span>
-          </div>
         <CardContent className="space-y-3">
           {hasKey && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <CheckCircle className="h-4 w-4 text-green-500" />
-              <span>API key is configured</span>
+              <span>API-Schlüssel ist konfiguriert</span>
             </div>
           )}
           <div className="flex gap-2">
@@ -148,10 +144,14 @@ export default function SettingsPage() {
                 {testingKey ? <Loader2 className="h-4 w-4 animate-spin" /> : t('settings_test_key')}
               </Button>
               <Button variant="destructive" size="sm" onClick={handleRemoveKey} disabled={savingKey}>
-                {t('common_delete') || 'Remove'}
+                {t('common_delete') || 'Entfernen'}
               </Button>
             </div>
           )}
+          <div className="flex items-start gap-2 rounded-md border border-border bg-muted/50 p-3 text-xs text-muted-foreground">
+            <ShieldCheck className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
+            <span>Ihr Schlüssel wird mit AES-256-GCM auf dem Server verschlüsselt und nie in Ihrem Browser gespeichert. Er wird nur kurzzeitig in sicheren Backend-Funktionen entschlüsselt.</span>
+          </div>
         </CardContent>
       </Card>
     </div>
