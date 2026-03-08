@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { TelcBadge } from '@/components/shared/TelcBadge';
 import { ProgressBar } from '@/components/shared/ProgressBar';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
 import { ArrowLeft, ChevronDown, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ListeningAudioPlayer } from './ListeningAudioPlayer';
