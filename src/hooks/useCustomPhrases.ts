@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-const STORAGE_KEY = 'writing-tips-custom';
+const DEFAULT_STORAGE_KEY = 'writing-tips-custom';
 
 interface CustomData {
   phrases: Record<string, string[]>; // sectionKey -> phrases
