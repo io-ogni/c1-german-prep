@@ -1,0 +1,193 @@
+import { useState } from 'react';
+import { useTranslation } from '@/i18n/useTranslation';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { TelcBadge } from '@/components/shared/TelcBadge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ArrowLeft, ChevronDown, Check, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface Props {
+  content: any;
+  solution: Record<string, string>;
+  instructions: string;
+  explanation?: string;
+  title: string;
+  onBack: () => void;
+  onSaveProgress: (score: number, total: number) => void;
+}
+
+export function ListeningGlobalverstehen({ content, solution, instructions, explanation, title, onBack, onSaveProgress }: Props) {
+  const { t } = useTranslation();
+  const speakers: any[] = content.speakers ?? [];
+  const statements: any[] = content.statements ?? [];
+  const total = speakers.length;
+
+  const [selections, setSelections] = useState<Record<number, string>>({});
+  const [checked, setChecked] = useState(false);
+  const [showTranscript, setShowTranscript] = useState(false);
+
+  const usedStatements = new Set(Object.values(selections));
+
+  const handleSelect = (speakerId: number, statementId: string) => {
+    setSelections(prev => ({ ...prev, [speakerId]: statementId }));
+  };
+
+  const allSelected = speakers.every(s => selections[s.id]);
+
+  const handleCheck = () => {
+    setChecked(true);
+    const score = speakers.filter(s => selections[s.id] === solution[String(s.id)]).length;
+    onSaveProgress(score, total);
+  };
+
+  const handleRetry = () => {
+    setSelections({});
+    setChecked(false);
+    setShowTranscript(false);
+  };
+
+  const score = checked ? speakers.filter(s => selections[s.id] === solution[String(s.id)]).length : 0;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="sm" onClick={onBack}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          {t('listening_back')}
+        </Button>
+        <TelcBadge />
+      </div>
+
+      <div>
+        <h2 className="text-lg font-semibold text-foreground">{t('listening_globalverstehen')}</h2>
+        <p className="text-xs text-muted-foreground">{content.topic_title}</p>
+      </div>
+
+      <p className="text-sm text-muted-foreground">{instructions}</p>
+
+      {checked && (
+        <Card className="bg-secondary/50">
+          <CardContent className="py-3 text-center">
+            <p className="font-semibold text-foreground">
+              {t('listening_score')}: {score} / {total} {t('listening_correct')} ({Math.round((score / total) * 100)}%)
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Speaker rows */}
+      <div className="space-y-2">
+        {speakers.map(speaker => {
+          const isCorrect = checked && selections[speaker.id] === solution[String(speaker.id)];
+          const isWrong = checked && selections[speaker.id] !== solution[String(speaker.id)];
+
+          return (
+            <div
+              key={speaker.id}
+              className={cn(
+                'flex items-center gap-3 rounded-md border p-3',
+                checked && isCorrect && 'border-primary/30 bg-primary/5',
+                checked && isWrong && 'border-destructive/30 bg-destructive/5'
+              )}
+            >
+              <span className="text-sm font-medium text-foreground w-24 shrink-0">
+                {t('listening_speaker')} {speaker.id}
+              </span>
+              <div className="flex-1">
+                <Select
+                  value={selections[speaker.id] ?? ''}
+                  onValueChange={(v) => handleSelect(speaker.id, v)}
+                  disabled={checked}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="—" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {statements.map(st => {
+                      const isUsed = usedStatements.has(st.id) && selections[speaker.id] !== st.id;
+                      return (
+                        <SelectItem key={st.id} value={st.id} disabled={isUsed}>
+                          {st.id}) {st.text.slice(0, 60)}…
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+              {checked && isCorrect && <Check className="h-5 w-5 text-primary shrink-0" />}
+              {checked && isWrong && (
+                <div className="flex items-center gap-1 shrink-0">
+                  <X className="h-5 w-5 text-destructive" />
+                  <span className="text-xs text-muted-foreground">→ {solution[String(speaker.id)]}</span>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Statements reference */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">{t('listening_statement')}n</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-1">
+          {statements.map(st => (
+            <p key={st.id} className="text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">{st.id})</span> {st.text}
+            </p>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Explanation */}
+      {checked && explanation && (
+        <Card className="bg-muted/50">
+          <CardContent className="py-3">
+            <p className="text-xs text-muted-foreground">{explanation}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Transcript */}
+      {checked && (
+        <Collapsible open={showTranscript} onOpenChange={setShowTranscript}>
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" size="sm" className="w-full gap-2">
+              <ChevronDown className={cn('h-4 w-4 transition-transform', showTranscript && 'rotate-180')} />
+              {showTranscript ? t('listening_hide_transcript') : t('listening_show_transcript')}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <Card className="mt-2">
+              <CardContent className="py-3 space-y-3">
+                {speakers.map(s => (
+                  <div key={s.id}>
+                    <p className="text-xs font-semibold text-foreground">{t('listening_speaker')} {s.id}:</p>
+                    <p className="text-xs text-muted-foreground">{s.transcript}</p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </CollapsibleContent>
+        </Collapsible>
+      )}
+
+      {/* Actions */}
+      <div className="flex justify-end gap-2">
+        {!checked ? (
+          <Button onClick={handleCheck} disabled={!allSelected}>
+            {t('listening_check_answers')}
+          </Button>
+        ) : (
+          <>
+            <Button variant="outline" onClick={handleRetry}>{t('listening_try_again')}</Button>
+            <Button onClick={onBack}>{t('listening_back')}</Button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
