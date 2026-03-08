@@ -179,6 +179,7 @@ export default function DailyPracticePage() {
       exercise_ids: selectedExercises.map(e => e.id) as unknown as Json,
     }).select('id').single();
 
+    sessionStartedRef.current = true;
     setSessionId(sessionData?.id || null);
     setFlashcards(selectedCards as VocabCard[]);
     setExercises(selectedExercises);
