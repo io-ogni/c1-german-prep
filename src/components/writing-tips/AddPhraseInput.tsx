@@ -36,7 +36,7 @@ export function AddPhraseInput({ placeholder = 'Eigenen Satz hinzufügen…', on
   };
 
   return (
-    <div className="flex gap-2 mt-2">
+    <div className="flex gap-2 mt-2 pl-5">
       <Input
         value={value}
         onChange={e => setValue(e.target.value)}
