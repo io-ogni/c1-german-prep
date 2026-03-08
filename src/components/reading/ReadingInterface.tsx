@@ -40,6 +40,13 @@ export function ReadingInterface({ text, onBack }: Props) {
   const [saving, setSaving] = useState(false);
   const timerSecondsRef = useRef(0);
 
+  const handleRetry = () => {
+    setAnswers({});
+    setChecked(false);
+    setScore(null);
+    setSelfScore(null);
+  };
+
   const handleCheck = () => {
     const q = text.questions;
     let correct = 0;
