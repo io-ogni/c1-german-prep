@@ -131,6 +131,7 @@ function MultiSentenceFillIn({
   const [selected, setSelected] = useState<number | null>(null);
   const [subAnswered, setSubAnswered] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
+  const [eliminated, setEliminated] = useState<Set<number>>(new Set());
   const { t } = useTranslation();
 
   const current = sentences[subIndex];
@@ -144,13 +145,21 @@ function MultiSentenceFillIn({
 
   const handleSelect = (idx: number) => {
     if (subAnswered || parentAnswered) return;
-    setSelected(idx);
-    setSubAnswered(true);
     const isCorrect = current.options?.[idx]?.toLowerCase() === correctAnswer.toLowerCase();
-    const newCount = correctCount + (isCorrect ? 1 : 0);
-    setCorrectCount(newCount);
-    if (isLast) {
-      onAnswer(newCount === sentences.length);
+    setSelected(idx);
+
+    if (isCorrect) {
+      setSubAnswered(true);
+      const newCount = correctCount + 1;
+      setCorrectCount(newCount);
+      if (isLast) {
+        onAnswer(newCount === sentences.length);
+      }
+    } else {
+      // Mark wrong option as eliminated, allow retry
+      setEliminated((prev) => new Set(prev).add(idx));
+      // Brief highlight then clear selection
+      setTimeout(() => setSelected(null), 400);
     }
   };
 
@@ -158,16 +167,16 @@ function MultiSentenceFillIn({
     setSubIndex((i) => i + 1);
     setSelected(null);
     setSubAnswered(false);
+    setEliminated(new Set());
   };
 
-  const showFeedback = subAnswered || parentAnswered;
   const isCorrect = selected !== null && current.options?.[selected]?.toLowerCase() === correctAnswer.toLowerCase();
 
   return (
     <ExerciseCard
       question={`${instructions} (${subIndex + 1}/${sentences.length})`}
       feedback={
-        showFeedback
+        subAnswered
           ? {
               correct: isCorrect,
               message: isCorrect
@@ -189,11 +198,12 @@ function MultiSentenceFillIn({
               variant="outline"
               className={cn(
                 'justify-start text-left h-auto py-3',
-                showFeedback && opt.toLowerCase() === correctAnswer.toLowerCase() && 'border-primary bg-primary/10 text-primary',
-                showFeedback && selected === idx && opt.toLowerCase() !== correctAnswer.toLowerCase() && 'border-destructive bg-destructive/10 text-destructive'
+                subAnswered && opt.toLowerCase() === correctAnswer.toLowerCase() && 'border-primary bg-primary/10 text-primary',
+                eliminated.has(idx) && 'opacity-40 pointer-events-none border-destructive/50',
+                !subAnswered && selected === idx && opt.toLowerCase() !== correctAnswer.toLowerCase() && 'border-destructive bg-destructive/10 text-destructive'
               )}
               onClick={() => handleSelect(idx)}
-              disabled={subAnswered || parentAnswered}
+              disabled={subAnswered || parentAnswered || eliminated.has(idx)}
             >
               {opt}
             </Button>
