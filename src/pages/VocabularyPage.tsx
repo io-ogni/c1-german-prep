@@ -73,7 +73,7 @@ export default function VocabularyPage() {
       <ExerciseFlow
         topic={selectedTopic}
         level={level}
-        topicTitle={TOPIC_NAMES[selectedTopic]?.[lang] ?? selectedTopic}
+        topicTitle={TOPIC_NAMES[selectedTopic] ?? selectedTopic}
         onBack={() => setSelectedTopic(null)}
       />
     );
