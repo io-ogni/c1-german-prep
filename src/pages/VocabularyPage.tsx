@@ -8,16 +8,15 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const TOPIC_NAMES: Record<string, { de: string; en: string }> = {
-  alltag_gesellschaft: { de: 'Alltag & Gesellschaft', en: 'Everyday Life & Society' },
-  arbeit_karriere: { de: 'Arbeit & Karriere', en: 'Work & Career' },
-  medien_kommunikation: { de: 'Medien & Kommunikation', en: 'Media & Communication' },
-  umwelt_natur: { de: 'Umwelt & Natur', en: 'Environment & Nature' },
-  wissenschaft_technik: { de: 'Wissenschaft & Technik', en: 'Science & Technology' },
-  politik_wirtschaft: { de: 'Politik & Wirtschaft', en: 'Politics & Economy' },
-  kultur_bildung: { de: 'Kultur & Bildung', en: 'Culture & Education' },
-  nomen_verb_verbindungen: { de: 'Nomen-Verb-Verbindungen', en: 'Noun-Verb Combinations' },
-  konnektoren_redemittel: { de: 'Konnektoren & Redemittel', en: 'Connectors & Phrases' },
+const TOPIC_NAMES: Record<string, string> = {
+  alltag: 'Alltag',
+  arbeit: 'Arbeit',
+  medien: 'Medien',
+  umwelt: 'Umwelt',
+  politik: 'Politik',
+  kultur: 'Kultur',
+  'nomen-verb': 'Nomen-Verb-Verbindungen',
+  konnektoren: 'Konnektoren',
 };
 
 export default function VocabularyPage() {
@@ -61,7 +60,7 @@ export default function VocabularyPage() {
         .sort((a, b) => a[1].minSort - b[1].minSort)
         .map(([slug, data]) => ({
           slug,
-          title: TOPIC_NAMES[slug]?.[lang] ?? slug,
+          title: TOPIC_NAMES[slug] ?? slug,
           total: data.total,
           completed: data.completed,
         }));
@@ -74,7 +73,7 @@ export default function VocabularyPage() {
       <ExerciseFlow
         topic={selectedTopic}
         level={level}
-        topicTitle={TOPIC_NAMES[selectedTopic]?.[lang] ?? selectedTopic}
+        topicTitle={TOPIC_NAMES[selectedTopic] ?? selectedTopic}
         onBack={() => setSelectedTopic(null)}
       />
     );
