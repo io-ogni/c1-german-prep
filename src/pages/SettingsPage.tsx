@@ -15,7 +15,6 @@ export default function SettingsPage() {
   const { profile, refreshProfile } = useRequiredAuth();
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
   const [saving, setSaving] = useState(false);
-  const [saving, setSaving] = useState(false);
 
   // API key state
   const [apiKey, setApiKey] = useState('');
