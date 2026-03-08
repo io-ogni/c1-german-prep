@@ -58,27 +58,6 @@ export function Navbar() {
         </div>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <Link
-            to="/my-vocabulary"
-            className={cn(
-              'flex items-center gap-1 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors',
-              isActive('/my-vocabulary') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <BookOpen className="h-4 w-4" />
-            {t('nav_my_vocabulary')}
-          </Link>
-          <Link
-            to="/my-texts"
-            className={cn(
-              'flex items-center gap-1 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors',
-              isActive('/my-texts') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <FileText className="h-4 w-4" />
-            {t('nav_my_texts')}
-          </Link>
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="gap-1 text-sm">
@@ -87,6 +66,18 @@ export function Navbar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link to="/my-vocabulary" className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  {t('nav_my_vocabulary')}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/my-texts" className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  {t('nav_my_texts')}
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/settings">{t('nav_settings')}</Link>
               </DropdownMenuItem>
