@@ -26,7 +26,7 @@ export function ListeningDetailverstehen({ content, solution, instructions, expl
 
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [showResults, setShowResults] = useState(false);
-  const [showTranscript, setShowTranscript] = useState(false);
+  
 
   const handleSelect = (questionNumber: number, optionId: string) => {
     setAnswers(prev => ({ ...prev, [questionNumber]: optionId }));
