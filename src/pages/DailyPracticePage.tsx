@@ -114,7 +114,7 @@ export default function DailyPracticePage() {
 
   // ----- Session generation -----
   const generateSession = useCallback(async () => {
-    if (!profile) return;
+    if (!profile || sessionStartedRef.current) return;
 
     const [vocabRes, progressRes, exercisesRes] = await Promise.all([
       supabase.from('personal_vocabulary').select('id, word_de, translation_en, translation_custom, example_sentence, box_number, review_count').eq('user_id', profile.user_id).lte('next_review_at', new Date().toISOString()).order('next_review_at').limit(50),
