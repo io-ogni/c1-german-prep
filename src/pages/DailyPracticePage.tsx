@@ -416,8 +416,11 @@ export default function DailyPracticePage() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <Button variant="ghost" size="sm" onClick={() => {
-          if (confirm(lang === 'de' ? 'Sitzung abbrechen? Dein Fortschritt wird gespeichert.' : 'End session? Your progress will be saved.')) endSession();
+        <Button variant="ghost" size="sm" onClick={async () => {
+          if (confirm(lang === 'de' ? 'Sitzung abbrechen? Dein Fortschritt wird gespeichert.' : 'End session? Your progress will be saved.')) {
+            await endSession();
+            navigate('/');
+          }
         }}>
           <ArrowLeft className="h-4 w-4 mr-1" />{lang === 'de' ? 'Startseite' : 'Home'}
         </Button>
