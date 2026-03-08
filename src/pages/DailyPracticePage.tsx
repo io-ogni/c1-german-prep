@@ -277,7 +277,10 @@ export default function DailyPracticePage() {
       case 'definition_match':
         return <DefinitionMatch {...commonProps} />;
       case 'fill_in':
-        return ex.area === 'grammar' ? <GrammarFillIn {...commonProps} /> : <FillIn {...commonProps} />;
+        // Both grammar and vocabulary fill_in can use sentences[] format
+        return (content?.sentences || content?.sentence) 
+          ? (content?.sentences ? <GrammarFillIn {...commonProps} /> : <FillIn {...commonProps} />)
+          : <GrammarFillIn {...commonProps} />;
       case 'synonym_match':
         return <SynonymMatch {...commonProps} />;
       case 'word_family':

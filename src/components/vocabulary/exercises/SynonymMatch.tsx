@@ -5,12 +5,23 @@ import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
 
 interface Props {
-  content: { pairs: [string, string][] };
+  content: { pairs: any[] };
   solution: { correct: number[][] };
   instructions: string;
   explanation?: string;
   answered: boolean;
   onAnswer: (correct: boolean) => void;
+}
+
+/** Normalize pairs from either [{word, synonym}] objects or [string, string] tuples */
+function normalizePairs(raw: any[]): [string, string][] {
+  if (!raw || raw.length === 0) return [];
+  const first = raw[0];
+  if (Array.isArray(first)) return raw as [string, string][];
+  if (first && typeof first === 'object' && ('word' in first)) {
+    return raw.map((p: any) => [p.word, p.synonym ?? p.definition ?? '']);
+  }
+  return [];
 }
 
 export function SynonymMatch({ content, solution, instructions, explanation, answered, onAnswer }: Props) {
@@ -19,7 +30,7 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
   const [matches, setMatches] = useState<Map<number, number>>(new Map());
   const [checked, setChecked] = useState(false);
 
-  const pairsData = content?.pairs ?? [];
+  const pairsData = useMemo(() => normalizePairs(content?.pairs ?? []), [content?.pairs]);
   const leftItems = pairsData.map((p) => p[0]);
   const shuffledRight = useMemo(() => {
     const right = pairsData.map((p, i) => ({ text: p[1], originalIdx: i }));
@@ -45,7 +56,6 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
 
   const handleCheck = () => {
     setChecked(true);
-    // Check if all matches are correct (left idx should map to the right item whose originalIdx matches)
     let allCorrect = true;
     for (let i = 0; i < leftItems.length; i++) {
       const rightIdx = matches.get(i);
@@ -65,6 +75,10 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
   };
 
   const matchedRightIndices = new Set(matches.values());
+
+  if (pairsData.length === 0) {
+    return <ExerciseCard question={instructions} feedback={null}><p className="text-muted-foreground">No data available.</p></ExerciseCard>;
+  }
 
   return (
     <ExerciseCard question={instructions} feedback={null}>
@@ -120,10 +134,9 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
         <div
           className={cn(
             'rounded-md px-3 py-2 text-sm font-medium',
-            matches.size === leftItems.length &&
-              Array.from(matches.entries()).every(
-                ([l, r]) => shuffledRight[r].originalIdx === l
-              )
+            Array.from(matches.entries()).every(
+              ([l, r]) => shuffledRight[r].originalIdx === l
+            )
               ? 'bg-primary/10 text-primary'
               : 'bg-destructive/10 text-destructive'
           )}
