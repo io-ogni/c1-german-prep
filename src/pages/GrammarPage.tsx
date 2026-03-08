@@ -13,11 +13,15 @@ import { useNavigate } from 'react-router-dom';
 
 const TOPIC_NAMES: Record<string, { de: string; en: string; telc?: boolean }> = {
   // B2
+  adjektiv: { de: 'Adjektivdeklination', en: 'Adjective Declension' },
   adjektivdeklination: { de: 'Adjektivdeklination', en: 'Adjective Declension' },
   praepositionen: { de: 'Präpositionen', en: 'Prepositions' },
+  konjunktiv: { de: 'Konjunktiv II', en: 'Subjunctive II' },
   konjunktiv_ii: { de: 'Konjunktiv II', en: 'Subjunctive II' },
+  relativ: { de: 'Relativsätze', en: 'Relative Clauses' },
   relativsaetze: { de: 'Relativsätze', en: 'Relative Clauses' },
   passiv: { de: 'Passiv', en: 'Passive Voice' },
+  verben: { de: 'Verben mit Präpositionen', en: 'Verbs with Prepositions' },
   verben_mit_praepositionen: { de: 'Verben mit Präpositionen', en: 'Verbs with Prepositions' },
   // C1
   nominalisierung: { de: 'Nominalisierung', en: 'Nominalization' },
