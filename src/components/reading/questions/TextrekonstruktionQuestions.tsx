@@ -64,6 +64,56 @@ export function TextrekonstruktionQuestions({ questions, answers, setAnswers, ch
     setSelectedOption(null);
   };
 
+  if (perGapOptions) {
+    // Format B: each gap has its own multiple-choice options
+    return (
+      <div className="space-y-4">
+        <p className="text-sm font-medium text-foreground">
+          {language === 'de'
+            ? 'Wählen Sie für jede Lücke den passenden Satz aus.'
+            : 'Choose the correct sentence for each gap.'}
+        </p>
+
+        <div className="space-y-4">
+          {Array.from({ length: gaps }, (_, i) => String(i + 1)).map(gapNum => {
+            const gapOpts = perGapOptions[gapNum] || [];
+            const assigned = answers[gapNum];
+            const isCorrect = checked && assigned === correct[gapNum];
+            const isWrong = checked && assigned && assigned !== correct[gapNum];
+
+            return (
+              <div key={gapNum} className="space-y-2">
+                <p className="text-xs font-bold text-foreground">[{gapNum}]</p>
+                {gapOpts.map(opt => {
+                  const isSelected = assigned === opt.id;
+                  const optCorrect = checked && opt.id === correct[gapNum];
+                  const optWrong = checked && isSelected && opt.id !== correct[gapNum];
+                  return (
+                    <Button
+                      key={opt.id}
+                      variant={isSelected ? 'default' : 'outline'}
+                      className={`w-full justify-start text-left h-auto py-2 text-xs whitespace-normal ${
+                        optCorrect ? 'border-primary bg-primary/10 text-primary' : ''
+                      } ${optWrong ? 'border-destructive bg-destructive/10 text-destructive' : ''}`}
+                      onClick={() => {
+                        if (checked) return;
+                        setAnswers({ ...answers, [gapNum]: isSelected ? '' : opt.id });
+                      }}
+                      disabled={checked}
+                    >
+                      <span className="line-clamp-3">{opt.text}</span>
+                    </Button>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // Format A: shared pool of options, click-to-assign
   return (
     <div className="space-y-4">
       <p className="text-sm font-medium text-foreground">
