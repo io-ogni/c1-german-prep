@@ -220,14 +220,42 @@ export default function MyVocabularyPage() {
         </TabsContent>
 
         <TabsContent value="all" className="mt-4 space-y-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder={t('vocab_search')}
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={t('vocab_search')}
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            {allWords.length > 0 && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm" className="gap-1 shrink-0">
+                    <Trash2 className="h-4 w-4" />
+                    {lang === 'de' ? 'Alle löschen' : 'Delete All'}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{lang === 'de' ? 'Alle Wörter löschen?' : 'Delete all words?'}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {lang === 'de'
+                        ? `${allWords.length} Wörter werden unwiderruflich gelöscht.`
+                        : `${allWords.length} words will be permanently deleted.`}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{lang === 'de' ? 'Abbrechen' : 'Cancel'}</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteAll} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                      {lang === 'de' ? 'Alle löschen' : 'Delete All'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
           {filteredWords.length === 0 ? (
             <p className="text-sm text-muted-foreground py-4 text-center">
@@ -242,9 +270,19 @@ export default function MyVocabularyPage() {
                       <p className="text-sm font-medium text-foreground">{w.word_de}</p>
                       <p className="text-xs text-muted-foreground">{w.translation_en}{w.translation_custom ? ` · ${w.translation_custom}` : ''}</p>
                     </div>
-                    <div className="text-right text-xs text-muted-foreground">
-                      <p>{t('vocab_box')} {w.box_number}/5</p>
-                      <p>{w.source_type}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right text-xs text-muted-foreground">
+                        <p>{t('vocab_box')} {w.box_number}/5</p>
+                        <p>{w.source_type}</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        onClick={() => handleDeleteWord(w.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
