@@ -41,14 +41,16 @@ export default function GrammarPage() {
   const auth = useAuth();
   const navigate = useNavigate();
 
+  const dbLevel = level === 'b2' ? 'b2_refresh' : level;
+
   const { data: topics, isLoading } = useQuery({
-    queryKey: ['grammar-topics', level, auth?.user?.id],
+    queryKey: ['grammar-topics', dbLevel, auth?.user?.id],
     queryFn: async () => {
       const { data: exercises } = await supabase
         .from('exercises')
         .select('id, topic, sort_order')
         .eq('area', 'grammar')
-        .eq('level', level);
+        .eq('level', dbLevel);
 
       if (!exercises?.length) return [];
 

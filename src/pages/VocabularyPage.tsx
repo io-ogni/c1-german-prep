@@ -26,14 +26,16 @@ export default function VocabularyPage() {
   const { t, lang } = useTranslation();
   const auth = useAuth();
 
+  const dbLevel = level === 'b2' ? 'b2_refresh' : level;
+
   const { data: topics, isLoading } = useQuery({
-    queryKey: ['vocabulary-topics', level, auth?.user?.id],
+    queryKey: ['vocabulary-topics', dbLevel, auth?.user?.id],
     queryFn: async () => {
       const { data: exercises } = await supabase
         .from('exercises')
         .select('id, topic, sort_order')
         .eq('area', 'vocabulary')
-        .eq('level', level);
+        .eq('level', dbLevel);
 
       if (!exercises?.length) return [];
 
