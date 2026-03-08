@@ -50,7 +50,7 @@ export function FillIn({ content, solution, instructions, explanation, answered,
         dangerouslySetInnerHTML={{ __html: sentenceHtml }}
       />
       <div className="grid gap-2 sm:grid-cols-2">
-        {content.options.map((opt, idx) => (
+        {options.map((opt, idx) => (
           <Button
             key={idx}
             variant="outline"
