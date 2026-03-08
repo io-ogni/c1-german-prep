@@ -1,26 +1,26 @@
 import { useState, useCallback } from 'react';
 
-const STORAGE_KEY = 'writing-tips-custom';
+const DEFAULT_STORAGE_KEY = 'writing-tips-custom';
 
 interface CustomData {
   phrases: Record<string, string[]>; // sectionKey -> phrases
   connectors: Array<{ fn: string; items: string }>;
 }
 
-function load(): CustomData {
+function load(key: string): CustomData {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(key);
     if (raw) return JSON.parse(raw);
   } catch {}
   return { phrases: {}, connectors: [] };
 }
 
-function save(data: CustomData) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+function save(key: string, data: CustomData) {
+  localStorage.setItem(key, JSON.stringify(data));
 }
 
-export function useCustomPhrases() {
-  const [data, setData] = useState<CustomData>(load);
+export function useCustomPhrases(storageKey: string = DEFAULT_STORAGE_KEY) {
+  const [data, setData] = useState<CustomData>(() => load(storageKey));
 
   const addPhrase = useCallback((sectionKey: string, phrase: string) => {
     setData(prev => {
@@ -31,7 +31,7 @@ export function useCustomPhrases() {
           [sectionKey]: [...(prev.phrases[sectionKey] || []), phrase],
         },
       };
-      save(next);
+      save(storageKey, next);
       return next;
     });
   }, []);
@@ -44,7 +44,7 @@ export function useCustomPhrases() {
         ...prev,
         phrases: { ...prev.phrases, [sectionKey]: arr },
       };
-      save(next);
+      save(storageKey, next);
       return next;
     });
   }, []);
@@ -55,7 +55,7 @@ export function useCustomPhrases() {
         ...prev,
         connectors: [...prev.connectors, { fn, items }],
       };
-      save(next);
+      save(storageKey, next);
       return next;
     });
   }, []);
@@ -65,7 +65,7 @@ export function useCustomPhrases() {
       const arr = [...prev.connectors];
       arr.splice(index, 1);
       const next = { ...prev, connectors: arr };
-      save(next);
+      save(storageKey, next);
       return next;
     });
   }, []);
