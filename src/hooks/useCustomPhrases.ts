@@ -44,7 +44,7 @@ export function useCustomPhrases(storageKey: string = DEFAULT_STORAGE_KEY) {
         ...prev,
         phrases: { ...prev.phrases, [sectionKey]: arr },
       };
-      save(next);
+      save(storageKey, next);
       return next;
     });
   }, []);
