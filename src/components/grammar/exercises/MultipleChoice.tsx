@@ -40,13 +40,13 @@ export function MultipleChoice({ content, solution, instructions, explanation, a
           : null
       }
     >
-      {(content.context || content.sentence) && (
+      {(content?.context || content?.sentence) && (
         <p className="text-sm text-foreground leading-relaxed bg-muted rounded-md p-3">
           {content.context ?? content.sentence}
         </p>
       )}
       <div className="grid gap-2">
-        {content.options.map((opt, idx) => (
+        {(content?.options ?? []).map((opt, idx) => (
           <Button
             key={idx}
             variant="outline"
