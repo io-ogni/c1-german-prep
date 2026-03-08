@@ -97,8 +97,8 @@ function LevelSelector({ onSelect }: { onSelect: (level: WritingLevel) => void }
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">{t('writing_level_select')}</h1>
         <Link to="/writing/tips">
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <FileText className="h-4 w-4" />
+          <Button variant="default" size="default" className="gap-2 font-semibold shadow-md">
+            <FileText className="h-5 w-5" />
             Tipps & Redemittel
           </Button>
         </Link>
