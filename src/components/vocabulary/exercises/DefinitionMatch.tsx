@@ -160,7 +160,7 @@ function PairsMatch({ content, solution, instructions, explanation, answered, on
           ))}
         </div>
         <div className="space-y-2">
-          {definitions.map((d, i) => (
+          {shuffledDefs.map((d, i) => (
             <Button
               key={i}
               variant="outline"
@@ -173,7 +173,7 @@ function PairsMatch({ content, solution, instructions, explanation, answered, on
               onClick={() => handleRightClick(i)}
               disabled={answered || matchedRight.has(i)}
             >
-              {d}
+              {d.text}
             </Button>
           ))}
         </div>
