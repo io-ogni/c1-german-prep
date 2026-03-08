@@ -1,10 +1,10 @@
-import { useState } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useRequiredAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TelcBadge } from '@/components/shared/TelcBadge';
 import { GraduationCap, BookOpen, FileText, Headphones, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function ExamPrepPage() {
   const { t, lang } = useTranslation();
