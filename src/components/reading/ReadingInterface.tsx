@@ -226,7 +226,7 @@ export function ReadingInterface({ text, onBack }: Props) {
                             : 'bg-background text-muted-foreground border-border hover:border-primary/50'
                         }`}
                       >
-                        <span className="text-base">{'😕😐🙂😊🤩'.split('')[n - 1] ?? ''}</span>
+                        <span className="text-base">{['😟', '😕', '😐', '🙂', '🤩'][n - 1]}</span>
                         <span className="font-medium">{labels[n]?.[language] ?? n}</span>
                       </button>
                     );
