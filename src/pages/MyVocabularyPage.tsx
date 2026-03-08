@@ -104,6 +104,27 @@ export default function MyVocabularyPage() {
     }
   };
 
+  const handleDeleteWord = async (id: string) => {
+    const { error } = await supabase.from('personal_vocabulary').delete().eq('id', id);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(lang === 'de' ? 'Wort gelöscht' : 'Word deleted');
+      fetchData();
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    if (!profile) return;
+    const { error } = await supabase.from('personal_vocabulary').delete().eq('user_id', profile.user_id);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(lang === 'de' ? 'Alle Wörter gelöscht' : 'All words deleted');
+      fetchData();
+    }
+  };
+
   const filteredWords = searchQuery
     ? allWords.filter(w =>
         w.word_de.toLowerCase().includes(searchQuery.toLowerCase()) ||
