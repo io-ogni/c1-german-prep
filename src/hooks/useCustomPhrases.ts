@@ -1,0 +1,81 @@
+import { useState, useCallback } from 'react';
+
+const STORAGE_KEY = 'writing-tips-custom';
+
+interface CustomData {
+  phrases: Record<string, string[]>; // sectionKey -> phrases
+  connectors: Array<{ fn: string; items: string }>;
+}
+
+function load(): CustomData {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { phrases: {}, connectors: [] };
+}
+
+function save(data: CustomData) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+export function useCustomPhrases() {
+  const [data, setData] = useState<CustomData>(load);
+
+  const addPhrase = useCallback((sectionKey: string, phrase: string) => {
+    setData(prev => {
+      const next = {
+        ...prev,
+        phrases: {
+          ...prev.phrases,
+          [sectionKey]: [...(prev.phrases[sectionKey] || []), phrase],
+        },
+      };
+      save(next);
+      return next;
+    });
+  }, []);
+
+  const removePhrase = useCallback((sectionKey: string, index: number) => {
+    setData(prev => {
+      const arr = [...(prev.phrases[sectionKey] || [])];
+      arr.splice(index, 1);
+      const next = {
+        ...prev,
+        phrases: { ...prev.phrases, [sectionKey]: arr },
+      };
+      save(next);
+      return next;
+    });
+  }, []);
+
+  const addConnector = useCallback((fn: string, items: string) => {
+    setData(prev => {
+      const next = {
+        ...prev,
+        connectors: [...prev.connectors, { fn, items }],
+      };
+      save(next);
+      return next;
+    });
+  }, []);
+
+  const removeConnector = useCallback((index: number) => {
+    setData(prev => {
+      const arr = [...prev.connectors];
+      arr.splice(index, 1);
+      const next = { ...prev, connectors: arr };
+      save(next);
+      return next;
+    });
+  }, []);
+
+  return {
+    customPhrases: data.phrases,
+    customConnectors: data.connectors,
+    addPhrase,
+    removePhrase,
+    addConnector,
+    removeConnector,
+  };
+}
