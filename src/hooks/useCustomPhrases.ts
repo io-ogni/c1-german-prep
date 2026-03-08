@@ -65,7 +65,7 @@ export function useCustomPhrases(storageKey: string = DEFAULT_STORAGE_KEY) {
       const arr = [...prev.connectors];
       arr.splice(index, 1);
       const next = { ...prev, connectors: arr };
-      save(next);
+      save(storageKey, next);
       return next;
     });
   }, []);
