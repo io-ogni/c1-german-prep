@@ -134,6 +134,19 @@ function MultiSentenceFillIn({
   const [eliminated, setEliminated] = useState<Set<number>>(new Set());
   const { t } = useTranslation();
 
+  // Reset all internal state when the exercise changes
+  const sentencesRef = useRef(sentences);
+  useEffect(() => {
+    if (sentencesRef.current !== sentences) {
+      sentencesRef.current = sentences;
+      setSubIndex(0);
+      setSelected(null);
+      setSubAnswered(false);
+      setCorrectCount(0);
+      setEliminated(new Set());
+    }
+  }, [sentences]);
+
   const current = sentences[subIndex];
   const correctAnswer = answers[subIndex] ?? '';
   const isLast = subIndex === sentences.length - 1;
