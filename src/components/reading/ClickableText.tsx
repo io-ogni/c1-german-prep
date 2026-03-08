@@ -42,6 +42,7 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
   const [lookupCache, setLookupCache] = useState<Record<string, { word_de: string; article: string | null; translation_en: string } | null>>({});
   const [customTranslation, setCustomTranslation] = useState('');
   const [editingWord, setEditingWord] = useState<string | null>(null);
+  const [openWord, setOpenWord] = useState<string | null>(null);
 
   const lookupWord = async (cleanWord: string) => {
     if (lookupCache[cleanWord.toLowerCase()] !== undefined) return;
