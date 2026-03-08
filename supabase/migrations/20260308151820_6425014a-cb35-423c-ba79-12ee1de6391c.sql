@@ -1,0 +1,1 @@
+UPDATE exercises SET content = content || '{"audio_file": "SET1_Teil2.mp3"}'::jsonb WHERE id = 'a13b5613-c133-422e-b5fd-b440be39e583';
