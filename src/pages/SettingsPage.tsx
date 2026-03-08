@@ -105,23 +105,6 @@ export default function SettingsPage() {
       </Card>
 
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{t('settings_writing_level')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Select value={writingLevel} onValueChange={setWritingLevel}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="b2">{t('level_b2_refresh')}</SelectItem>
-              <SelectItem value="c1">{t('level_c1_new')}</SelectItem>
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
-
       <Button onClick={handleSave} disabled={saving}>
         {saving ? t('common_loading') : t('common_save')}
       </Button>
