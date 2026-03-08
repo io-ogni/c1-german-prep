@@ -73,8 +73,8 @@ export function Match({ content, solution, instructions, explanation, answered, 
                 'w-full justify-start text-left h-auto py-2 whitespace-normal text-xs',
                 selectedLeft === i && 'ring-2 ring-primary',
                 matches.has(i) && 'bg-muted',
-                answered && matches.get(i) === solution.pairs[i] && 'border-primary bg-primary/10',
-                answered && matches.get(i) !== solution.pairs[i] && 'border-destructive bg-destructive/10'
+                answered && matches.get(i) === pairs[i] && 'border-primary bg-primary/10',
+                answered && matches.get(i) !== pairs[i] && 'border-destructive bg-destructive/10'
               )}
               onClick={() => handleLeftClick(i)}
               disabled={answered}
