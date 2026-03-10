@@ -171,8 +171,10 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
                             variant="outline"
                             size="sm"
                             className="w-full gap-1 text-xs h-7"
+                            disabled={!entry?.translation_en && !customTranslation}
                             onClick={() => {
-                              const translation = entry?.translation_en || customTranslation || clean;
+                              const translation = entry?.translation_en || customTranslation;
+                              if (!translation) return;
                               const wordWithArticle = entry?.article ? `${entry.article} ${entry.word_de}` : clean;
                               addToVocabulary(wordWithArticle, translation, getSentence(content, pIdx));
                             }}
