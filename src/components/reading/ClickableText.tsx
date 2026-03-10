@@ -222,7 +222,7 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
       {hasSelection && (
         <div
           ref={popupRef}
-          className="sticky bottom-4 mt-4 mx-auto max-w-md rounded-lg border bg-popover p-3 shadow-lg space-y-2"
+          className="sticky bottom-4 mt-4 mx-auto max-w-md rounded-xl border-2 border-primary/30 bg-primary/5 p-4 shadow-xl shadow-primary/10 space-y-2 backdrop-blur-sm"
         >
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
