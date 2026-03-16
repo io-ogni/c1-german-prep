@@ -18,7 +18,67 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { Key, CheckCircle, Loader2, ShieldCheck, Trash2 } from 'lucide-react';
+import { Key, CheckCircle, Loader2, ShieldCheck, Trash2, Lock } from 'lucide-react';
+
+function ChangePasswordCard() {
+  const [currentPw, setCurrentPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const handleChangePassword = async () => {
+    if (newPw !== confirmPw) {
+      toast.error('Passwörter stimmen nicht überein.');
+      return;
+    }
+    if (newPw.length < 8) {
+      toast.error('Mindestens 8 Zeichen.');
+      return;
+    }
+    setSaving(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPw });
+      if (error) throw error;
+      toast.success('Passwort geändert.');
+      setCurrentPw('');
+      setNewPw('');
+      setConfirmPw('');
+    } catch (err: any) {
+      toast.error(err.message || 'Fehler beim Ändern des Passworts');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <Lock className="h-4 w-4" />
+          Passwort ändern
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <Input
+          type="password"
+          placeholder="Neues Passwort"
+          value={newPw}
+          onChange={(e) => setNewPw(e.target.value)}
+        />
+        <Input
+          type="password"
+          placeholder="Neues Passwort bestätigen"
+          value={confirmPw}
+          onChange={(e) => setConfirmPw(e.target.value)}
+        />
+        <Button onClick={handleChangePassword} disabled={saving || !newPw || !confirmPw} size="sm">
+          {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+          Passwort ändern
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function SettingsPage() {
   const { t } = useTranslation();
@@ -134,6 +194,9 @@ export default function SettingsPage() {
       <Button onClick={handleSave} disabled={saving}>
         {saving ? t('common_loading') : t('common_save')}
       </Button>
+
+      {/* Change Password */}
+      <ChangePasswordCard />
 
       {/* API Key Section */}
       <Card>
