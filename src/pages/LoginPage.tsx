@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { toast } from 'sonner';
 import { BookOpen, PenTool, Headphones, GraduationCap } from 'lucide-react';
 
+const HCAPTCHA_SITE_KEY = import.meta.env.VITE_HCAPTCHA_SITE_KEY;
+
 export default function LoginPage() {
   const auth = useAuth();
   const { t } = useTranslation();
@@ -16,12 +19,20 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<HCaptcha>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (HCAPTCHA_SITE_KEY && !captchaToken) {
+      toast.error('Bitte CAPTCHA bestätigen');
+      return;
+    }
     setLoading(true);
-    const { error } = await auth!.login(email, password);
+    const { error } = await auth!.login(email, password, captchaToken || undefined);
     setLoading(false);
+    captchaRef.current?.resetCaptcha();
+    setCaptchaToken(null);
     if (error) {
       toast.error(error.message);
     } else {
@@ -83,6 +94,16 @@ export default function LoginPage() {
                 <Label htmlFor="password">{t('auth_password')}</Label>
                 <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
               </div>
+              {HCAPTCHA_SITE_KEY && (
+                <div className="flex justify-center">
+                  <HCaptcha
+                    sitekey={HCAPTCHA_SITE_KEY}
+                    onVerify={setCaptchaToken}
+                    onExpire={() => setCaptchaToken(null)}
+                    ref={captchaRef}
+                  />
+                </div>
+              )}
             </CardContent>
             <CardFooter className="flex flex-col gap-3">
               <Button type="submit" className="w-full" disabled={loading}>
