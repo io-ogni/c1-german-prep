@@ -28,13 +28,15 @@ export default function ForgotPasswordPage() {
       try {
         const res = await captchaRef.current.execute({ async: true });
         token = res.response;
-      } catch {
+        console.log('hCaptcha token obtained:', token?.substring(0, 20) + '...');
+      } catch (err) {
+        console.error('hCaptcha execute failed:', err);
         toast.error('CAPTCHA fehlgeschlagen, bitte erneut versuchen');
         setLoading(false);
         return;
       }
     }
-
+    console.log('Calling resetPassword with captchaToken:', !!token);
     const { error } = await auth!.resetPassword(email, token);
     setLoading(false);
     captchaRef.current?.resetCaptcha();
