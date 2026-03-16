@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,20 +17,28 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaReady, setCaptchaReady] = useState(false);
+  const captchaTokenRef = useRef<string | null>(null);
   const captchaRef = useRef<HCaptcha>(null);
+
+  const onVerify = useCallback((token: string) => {
+    captchaTokenRef.current = token;
+    setCaptchaReady(true);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (HCAPTCHA_SITE_KEY && !captchaToken) {
+    if (HCAPTCHA_SITE_KEY && !captchaTokenRef.current) {
       toast.error('Bitte CAPTCHA bestätigen');
       return;
     }
     setLoading(true);
-    const { error } = await auth!.resetPassword(email, captchaToken || undefined);
+    const token = captchaTokenRef.current || undefined;
+    captchaTokenRef.current = null;
+    setCaptchaReady(false);
+    const { error } = await auth!.resetPassword(email, token);
     setLoading(false);
     captchaRef.current?.resetCaptcha();
-    setCaptchaToken(null);
     if (error) {
       toast.error(error.message);
     } else {
@@ -58,8 +66,8 @@ export default function ForgotPasswordPage() {
               <div className="flex justify-center">
                 <HCaptcha
                   sitekey={HCAPTCHA_SITE_KEY}
-                  onVerify={setCaptchaToken}
-                  onExpire={() => setCaptchaToken(null)}
+                  onVerify={onVerify}
+                  onExpire={() => { captchaTokenRef.current = null; setCaptchaReady(false); }}
                   ref={captchaRef}
                 />
               </div>

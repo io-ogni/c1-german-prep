@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,20 +19,25 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaTokenRef = useRef<string | null>(null);
   const captchaRef = useRef<HCaptcha>(null);
+
+  const onVerify = useCallback((token: string) => {
+    captchaTokenRef.current = token;
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (HCAPTCHA_SITE_KEY && !captchaToken) {
+    if (HCAPTCHA_SITE_KEY && !captchaTokenRef.current) {
       toast.error('Bitte CAPTCHA bestätigen');
       return;
     }
     setLoading(true);
-    const { error } = await auth!.login(email, password, captchaToken || undefined);
+    const token = captchaTokenRef.current || undefined;
+    captchaTokenRef.current = null;
+    const { error } = await auth!.login(email, password, token);
     setLoading(false);
     captchaRef.current?.resetCaptcha();
-    setCaptchaToken(null);
     if (error) {
       toast.error(error.message);
     } else {
@@ -98,8 +103,8 @@ export default function LoginPage() {
                 <div className="flex justify-center">
                   <HCaptcha
                     sitekey={HCAPTCHA_SITE_KEY}
-                    onVerify={setCaptchaToken}
-                    onExpire={() => setCaptchaToken(null)}
+                    onVerify={onVerify}
+                    onExpire={() => { captchaTokenRef.current = null; }}
                     ref={captchaRef}
                   />
                 </div>
