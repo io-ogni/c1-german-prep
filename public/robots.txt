@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://c1-deutsch.ioana-ognibeni.eu/sitemap.xml
