@@ -16,7 +16,6 @@ interface Props {
 export function DefinitionMatch({ content, solution, instructions, explanation, answered, onAnswer }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const { t } = useTranslation();
-  const isCorrect = selected === solution.correct;
 
   // If pairs format, delegate to PairsMatch
   if (content?.pairs) {
@@ -32,11 +31,24 @@ export function DefinitionMatch({ content, solution, instructions, explanation, 
     );
   }
 
+  // Shuffle options, tracking which shuffled index is correct
+  const shuffled = useMemo(() => {
+    const opts = (content?.options ?? []).map((text, origIdx) => ({ text, origIdx }));
+    for (let i = opts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [opts[i], opts[j]] = [opts[j], opts[i]];
+    }
+    const correctIdx = opts.findIndex((o) => o.origIdx === solution.correct);
+    return { options: opts, correctIdx };
+  }, [content?.options, solution.correct]);
+
+  const isCorrect = selected === shuffled.correctIdx;
+
   // Single word + options format
   const handleSelect = (idx: number) => {
     if (answered) return;
     setSelected(idx);
-    onAnswer(idx === solution.correct);
+    onAnswer(idx === shuffled.correctIdx);
   };
 
   return (
@@ -55,19 +67,19 @@ export function DefinitionMatch({ content, solution, instructions, explanation, 
     >
       <p className="text-lg font-semibold text-foreground text-center py-2">{content?.word}</p>
       <div className="grid gap-2">
-        {(content?.options ?? []).map((opt, idx) => (
+        {shuffled.options.map((opt, idx) => (
           <Button
             key={idx}
             variant="outline"
             className={cn(
               'justify-start text-left h-auto py-3 whitespace-normal',
-              answered && idx === solution.correct && 'border-primary bg-primary/10 text-primary',
-              answered && selected === idx && idx !== solution.correct && 'border-destructive bg-destructive/10 text-destructive'
+              answered && idx === shuffled.correctIdx && 'border-primary bg-primary/10 text-primary',
+              answered && selected === idx && idx !== shuffled.correctIdx && 'border-destructive bg-destructive/10 text-destructive'
             )}
             onClick={() => handleSelect(idx)}
             disabled={answered}
           >
-            {opt}
+            {opt.text}
           </Button>
         ))}
       </div>

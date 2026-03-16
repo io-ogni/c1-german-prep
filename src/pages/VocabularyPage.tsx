@@ -9,14 +9,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const TOPIC_NAMES: Record<string, string> = {
-  alltag: 'Alltag',
-  arbeit: 'Arbeit',
-  medien: 'Medien',
-  umwelt: 'Umwelt',
-  politik: 'Politik',
-  kultur: 'Kultur',
-  'nomen-verb': 'Nomen-Verb-Verbindungen',
-  konnektoren: 'Konnektoren',
+  alltag_gesellschaft: 'Alltag & Gesellschaft',
+  arbeit_karriere: 'Arbeit & Karriere',
+  medien_kommunikation: 'Medien & Kommunikation',
+  umwelt_natur: 'Umwelt & Natur',
+  politik_wirtschaft: 'Politik & Wirtschaft',
+  kultur_bildung: 'Kultur & Bildung',
+  wissenschaft_technik: 'Wissenschaft & Technik',
+  nomen_verb_verbindungen: 'Nomen-Verb-Verbindungen',
+  konnektoren_redemittel: 'Konnektoren & Redemittel',
 };
 
 export default function VocabularyPage() {

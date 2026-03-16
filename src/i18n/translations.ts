@@ -90,6 +90,9 @@ export const translations = {
     writing_not_started: "Noch nicht begonnen",
     writing_submitted: "Eingereicht",
     writing_save_to_texts: "In Meine Texte speichern",
+    writing_copy_prompt: "Prompt kopieren — in ChatGPT etc. einfügen",
+    writing_copied: "Prompt in die Zwischenablage kopiert!",
+    writing_no_api_alternative: "Kein API-Schlüssel? Kein Problem — schreiben Sie Ihren Text und kopieren Sie den Bewertungs-Prompt für ChatGPT oder ein anderes LLM.",
 
     // Writing evaluation
     eval_results: "Bewertungsergebnisse",

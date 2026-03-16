@@ -22,7 +22,7 @@
     --secondary-foreground: 215 25% 15%;
 
     --muted: 215 20% 95%;
-    --muted-foreground: 215 16% 35%;
+    --muted-foreground: 215 16% 27%;
 
     --accent: 215 20% 93%;
     --accent-foreground: 215 25% 15%;
@@ -66,7 +66,7 @@
     --secondary-foreground: 210 20% 95%;
 
     --muted: 215 20% 18%;
-    --muted-foreground: 215 16% 65%;
+    --muted-foreground: 215 16% 75%;
 
     --accent: 215 20% 18%;
     --accent-foreground: 210 20% 95%;
@@ -99,6 +99,12 @@
 
   html {
     font-size: 17px;
+  }
+
+  @media (min-width: 640px) {
+    html {
+      font-size: 19px;
+    }
   }
 
   body {

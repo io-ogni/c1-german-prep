@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -30,8 +30,25 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
   const [matches, setMatches] = useState<Map<number, number>>(new Map());
   const [checked, setChecked] = useState(false);
 
+  // Reset state when exercise changes
+  useEffect(() => {
+    setSelectedLeft(null);
+    setMatches(new Map());
+    setChecked(false);
+  }, [content]);
+
   const pairsData = useMemo(() => normalizePairs(content?.pairs ?? []), [content?.pairs]);
-  const leftItems = pairsData.map((p) => p[0]);
+
+  // Shuffle both sides independently
+  const shuffledLeft = useMemo(() => {
+    const left = pairsData.map((p, i) => ({ text: p[0], originalIdx: i }));
+    for (let i = left.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [left[i], left[j]] = [left[j], left[i]];
+    }
+    return left;
+  }, [pairsData]);
+
   const shuffledRight = useMemo(() => {
     const right = pairsData.map((p, i) => ({ text: p[1], originalIdx: i }));
     for (let i = right.length - 1; i > 0; i--) {
@@ -57,9 +74,9 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
   const handleCheck = () => {
     setChecked(true);
     let allCorrect = true;
-    for (let i = 0; i < leftItems.length; i++) {
+    for (let i = 0; i < shuffledLeft.length; i++) {
       const rightIdx = matches.get(i);
-      if (rightIdx === undefined || shuffledRight[rightIdx].originalIdx !== i) {
+      if (rightIdx === undefined || shuffledRight[rightIdx].originalIdx !== shuffledLeft[i].originalIdx) {
         allCorrect = false;
         break;
       }
@@ -71,7 +88,7 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
     if (!checked) return null;
     const rightIdx = matches.get(leftIdx);
     if (rightIdx === undefined) return false;
-    return shuffledRight[rightIdx].originalIdx === leftIdx;
+    return shuffledRight[rightIdx].originalIdx === shuffledLeft[leftIdx].originalIdx;
   };
 
   const matchedRightIndices = new Set(matches.values());
@@ -84,20 +101,20 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
     <ExerciseCard question={instructions} feedback={null}>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          {leftItems.map((item, idx) => (
+          {shuffledLeft.map((item, idx) => (
             <Button
               key={idx}
               variant="outline"
               className={cn(
                 'w-full justify-start h-auto py-3 text-left whitespace-normal',
                 selectedLeft === idx && 'ring-2 ring-primary',
-                checked && isMatchCorrect(idx) === true && 'border-primary bg-primary/10',
+                checked && isMatchCorrect(idx) === true && 'border-green-500 bg-green-100 dark:bg-green-900/30',
                 checked && isMatchCorrect(idx) === false && 'border-destructive bg-destructive/10'
               )}
               onClick={() => handleLeftClick(idx)}
               disabled={answered}
             >
-              {item}
+              {item.text}
               {matches.has(idx) && (
                 <span className="ml-auto text-xs text-muted-foreground">
                   → {shuffledRight[matches.get(idx)!].text}
@@ -124,7 +141,7 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
         </div>
       </div>
 
-      {!answered && matches.size === leftItems.length && !checked && (
+      {!answered && matches.size === shuffledLeft.length && !checked && (
         <Button onClick={handleCheck} className="w-full mt-2">
           {t('exercise_check')}
         </Button>
@@ -135,9 +152,9 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
           className={cn(
             'rounded-md px-3 py-2 text-sm font-medium',
             Array.from(matches.entries()).every(
-              ([l, r]) => shuffledRight[r].originalIdx === l
+              ([l, r]) => shuffledRight[r].originalIdx === shuffledLeft[l].originalIdx
             )
-              ? 'bg-primary/10 text-primary'
+              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
               : 'bg-destructive/10 text-destructive'
           )}
         >

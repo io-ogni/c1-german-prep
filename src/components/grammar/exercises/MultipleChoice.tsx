@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -49,12 +49,23 @@ export function MultipleChoice({ content, solution, instructions, explanation, a
 function SingleMC({ content, solution, instructions, explanation, answered, onAnswer }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const { t } = useTranslation();
-  const isCorrect = selected === solution.correct;
+
+  const shuffled = useMemo(() => {
+    const opts = (content?.options ?? []).map((text: string, origIdx: number) => ({ text, origIdx }));
+    for (let i = opts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [opts[i], opts[j]] = [opts[j], opts[i]];
+    }
+    const correctIdx = opts.findIndex((o: { origIdx: number }) => o.origIdx === solution.correct);
+    return { options: opts, correctIdx };
+  }, [content?.options, solution.correct]);
+
+  const isCorrect = selected === shuffled.correctIdx;
 
   const handleSelect = (idx: number) => {
     if (answered) return;
     setSelected(idx);
-    onAnswer(idx === solution.correct);
+    onAnswer(idx === shuffled.correctIdx);
   };
 
   return (
@@ -77,19 +88,19 @@ function SingleMC({ content, solution, instructions, explanation, answered, onAn
         </p>
       )}
       <div className="grid gap-2">
-        {(content?.options ?? []).map((opt: string, idx: number) => (
+        {shuffled.options.map((opt: { text: string; origIdx: number }, idx: number) => (
           <Button
             key={idx}
             variant="outline"
             className={cn(
               'justify-start text-left h-auto py-3 whitespace-normal',
-              answered && idx === solution.correct && 'border-primary bg-primary/10 text-primary',
-              answered && selected === idx && idx !== solution.correct && 'border-destructive bg-destructive/10 text-destructive'
+              answered && idx === shuffled.correctIdx && 'border-primary bg-primary/10 text-primary',
+              answered && selected === idx && idx !== shuffled.correctIdx && 'border-destructive bg-destructive/10 text-destructive'
             )}
             onClick={() => handleSelect(idx)}
             disabled={answered}
           >
-            <span className="font-semibold mr-2">{LABELS[idx]})</span> {opt}
+            <span className="font-semibold mr-2">{LABELS[idx]})</span> {opt.text}
           </Button>
         ))}
       </div>

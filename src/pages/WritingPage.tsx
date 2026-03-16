@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { TelcBadge } from '@/components/shared/TelcBadge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, Loader2, PenLine, FileText, GraduationCap, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, PenLine, FileText, GraduationCap, AlertCircle, Copy, CheckCheck } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
 import type { Tables } from '@/integrations/supabase/types';
@@ -47,6 +47,56 @@ interface EvaluationResponse {
   code?: string;
 }
 
+// ─── Build clipboard prompt ──────────────────────────
+
+function buildCopyPrompt(prompt: WritingPrompt, userText: string): string {
+  return `Du bist ein erfahrener Prüfer für die telc Deutsch C1 Prüfung. Bewerte den folgenden Text nach den offiziellen telc-Kriterien.
+
+AUFGABENSTELLUNG:
+Thema: ${prompt.title_de}
+Kontext: ${prompt.context_de}
+Textsorte: ${prompt.text_type}
+Ziel-Wortanzahl: ~${prompt.target_word_count} Wörter
+
+BEWERTUNGSKRITERIEN (jeweils A / B / C / D):
+
+1. AUFGABENGERECHTHEIT (Erfüllung der Aufgabenstellung)
+   A = Thema vollständig behandelt, klarer roter Faden, kritische Auseinandersetzung
+   B = Anforderungen weitgehend erfüllt
+   C = Anforderungen nur teilweise erfüllt
+   D = Anforderungen nicht erfüllt
+
+2. KORREKTHEIT (Grammatik, Rechtschreibung, Zeichensetzung)
+   A = Sehr wenige / keine Fehler
+   B = Fehler nur bei komplexen Strukturen
+   C = Mehrere Fehler auch bei einfachen Strukturen
+   D = Zahlreiche Fehler, Text teilweise unverständlich
+
+3. REPERTOIRE (Wortschatz und Satzbau)
+   A = Breiter Wortschatz, komplexe Satzformen
+   B = Gelegentlich einfacher Wortschatz
+   C = Häufig einfacher Wortschatz, Wiederholungen
+   D = Fast nur einfache Strukturen
+
+4. KOMMUNIKATIVE GESTALTUNG (Textaufbau und Konnektoren)
+   A = Gut strukturiert, passende Verknüpfungen
+   B = Weitgehend gut strukturiert
+   C = Strukturbrüche, wenig Konnektoren
+   D = Unklare Struktur
+
+MEIN TEXT:
+---
+${userText}
+---
+
+Bitte gib mir:
+1. Eine Note (A/B/C/D) für jedes der 4 Kriterien mit kurzer Begründung
+2. Gesamtpunktzahl (A=12, B=8, C=4, D=0 pro Kriterium, max. 48)
+3. Die wichtigsten Fehler mit Korrektur und Erklärung (Original → Korrektur, Kategorie: Morphologie/Syntax/Orthographie/Lexik/Stil)
+4. Eine verbesserte Version meines Textes
+5. 2-3 konkrete Tipps, was ich beim nächsten Mal besser machen kann`;
+}
+
 // ─── API Key Banner ───────────────────────────────────
 
 function ApiKeyBanner() {
@@ -54,11 +104,13 @@ function ApiKeyBanner() {
   return (
     <Alert className="border-amber-300 bg-amber-50 dark:bg-amber-950/30">
       <AlertCircle className="h-4 w-4 text-amber-600" />
-      <AlertDescription className="flex items-center justify-between">
-        <span className="text-sm">{t('writing_api_key_needed')}</span>
-        <Link to="/settings">
-          <Button variant="outline" size="sm">{t('nav_settings')}</Button>
-        </Link>
+      <AlertDescription className="space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-sm">{t('writing_no_api_alternative')}</span>
+          <Link to="/settings">
+            <Button variant="outline" size="sm">{t('nav_settings')}</Button>
+          </Link>
+        </div>
       </AlertDescription>
     </Alert>
   );
@@ -329,6 +381,7 @@ function WritingInterface({
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [evaluation, setEvaluation] = useState<EvaluationResponse | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
   const context = lang === 'de' ? prompt.context_de : prompt.context_en;
@@ -437,20 +490,39 @@ function WritingInterface({
             <span className="text-sm text-muted-foreground">
               {t('writing_word_count')}: {wordCount}/{prompt.target_word_count}
             </span>
-            <Button
-              onClick={handleSubmit}
-              disabled={submitting || wordCount < 10 || !hasApiKey}
-              title={!hasApiKey ? t('writing_api_key_needed') : undefined}
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t('writing_evaluating')}
-                </>
-              ) : (
-                t('writing_submit')
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  navigator.clipboard.writeText(buildCopyPrompt(prompt, text));
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                  toast({ title: t('writing_copied') });
+                }}
+                disabled={wordCount < 10}
+              >
+                {copied ? (
+                  <><CheckCheck className="mr-2 h-4 w-4" />{t('writing_copied')}</>
+                ) : (
+                  <><Copy className="mr-2 h-4 w-4" />{t('writing_copy_prompt')}</>
+                )}
+              </Button>
+              {hasApiKey && (
+                <Button
+                  onClick={handleSubmit}
+                  disabled={submitting || wordCount < 10}
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {t('writing_evaluating')}
+                    </>
+                  ) : (
+                    t('writing_submit')
+                  )}
+                </Button>
               )}
-            </Button>
+            </div>
           </div>
         </>
       )}
