@@ -222,6 +222,16 @@ export default function HomePage() {
           ))}
         </div>
       )}
+
+      {/* Footer */}
+      <div className="pt-4 border-t border-border text-center text-xs text-muted-foreground space-y-1">
+        <p>
+          Built by <a href="https://ioana-ognibeni.eu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Ioana Ognibeni</a> with{' '}
+          <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Claude</a> &{' '}
+          <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Lovable</a>
+        </p>
+        <p>CC BY-NC 4.0 — free to use, not for commercial purposes</p>
+      </div>
     </div>
   );
 }
