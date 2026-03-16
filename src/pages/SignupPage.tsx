@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,12 +20,7 @@ export default function SignupPage() {
   const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const captchaTokenRef = useRef<string | null>(null);
   const captchaRef = useRef<HCaptcha>(null);
-
-  const onVerify = useCallback((token: string) => {
-    captchaTokenRef.current = token;
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,13 +28,20 @@ export default function SignupPage() {
       toast.error(t('auth_passwords_no_match'));
       return;
     }
-    if (HCAPTCHA_SITE_KEY && !captchaTokenRef.current) {
-      toast.error('Bitte CAPTCHA bestätigen');
-      return;
-    }
     setLoading(true);
-    const token = captchaTokenRef.current || undefined;
-    captchaTokenRef.current = null;
+
+    let token: string | undefined;
+    if (HCAPTCHA_SITE_KEY && captchaRef.current) {
+      try {
+        const res = await captchaRef.current.execute({ async: true });
+        token = res.response;
+      } catch {
+        toast.error('CAPTCHA fehlgeschlagen, bitte erneut versuchen');
+        setLoading(false);
+        return;
+      }
+    }
+
     const { error } = await auth!.signup(email, password, displayName, token);
     setLoading(false);
     captchaRef.current?.resetCaptcha();
@@ -93,14 +95,11 @@ export default function SignupPage() {
               <Input id="confirm-password" type="password" required minLength={6} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
             </div>
             {HCAPTCHA_SITE_KEY && (
-              <div className="flex justify-center">
-                <HCaptcha
-                  sitekey={HCAPTCHA_SITE_KEY}
-                  onVerify={onVerify}
-                  onExpire={() => { captchaTokenRef.current = null; }}
-                  ref={captchaRef}
-                />
-              </div>
+              <HCaptcha
+                sitekey={HCAPTCHA_SITE_KEY}
+                size="invisible"
+                ref={captchaRef}
+              />
             )}
           </CardContent>
           <CardFooter className="flex flex-col gap-3">

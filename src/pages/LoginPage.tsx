@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,22 +19,24 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const captchaTokenRef = useRef<string | null>(null);
   const captchaRef = useRef<HCaptcha>(null);
-
-  const onVerify = useCallback((token: string) => {
-    captchaTokenRef.current = token;
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (HCAPTCHA_SITE_KEY && !captchaTokenRef.current) {
-      toast.error('Bitte CAPTCHA bestätigen');
-      return;
-    }
     setLoading(true);
-    const token = captchaTokenRef.current || undefined;
-    captchaTokenRef.current = null;
+
+    let token: string | undefined;
+    if (HCAPTCHA_SITE_KEY && captchaRef.current) {
+      try {
+        const res = await captchaRef.current.execute({ async: true });
+        token = res.response;
+      } catch {
+        toast.error('CAPTCHA fehlgeschlagen, bitte erneut versuchen');
+        setLoading(false);
+        return;
+      }
+    }
+
     const { error } = await auth!.login(email, password, token);
     setLoading(false);
     captchaRef.current?.resetCaptcha();
@@ -100,14 +102,11 @@ export default function LoginPage() {
                 <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
               </div>
               {HCAPTCHA_SITE_KEY && (
-                <div className="flex justify-center">
-                  <HCaptcha
-                    sitekey={HCAPTCHA_SITE_KEY}
-                    onVerify={onVerify}
-                    onExpire={() => { captchaTokenRef.current = null; }}
-                    ref={captchaRef}
-                  />
-                </div>
+                <HCaptcha
+                  sitekey={HCAPTCHA_SITE_KEY}
+                  size="invisible"
+                  ref={captchaRef}
+                />
               )}
             </CardContent>
             <CardFooter className="flex flex-col gap-3">
