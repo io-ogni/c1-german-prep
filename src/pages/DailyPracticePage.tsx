@@ -124,7 +124,13 @@ export default function DailyPracticePage() {
 
     const dueCards = vocabRes.data || [];
     const progressMap = new Map((progressRes.data || []).map(p => [p.exercise_id, p]));
-    const allExercises = exercisesRes.data || [];
+    const allExercises = (exercisesRes.data || []).filter(e => {
+      const c = e.content as Record<string, unknown> | null;
+      if (!c) return false;
+      // match exercises need pairs or left/right arrays
+      if (e.exercise_type === 'match') return Array.isArray(c.pairs) && c.pairs.length > 0 || Array.isArray(c.left) && (c.left as unknown[]).length > 0;
+      return true;
+    });
 
     // Flashcards — cap at 30% of time
     const maxFlashcardTime = minutes * 0.3;
@@ -409,7 +415,22 @@ export default function DailyPracticePage() {
           <Button variant="outline" onClick={() => navigate('/')}>
             {lang === 'de' ? 'Startseite' : 'Home'}
           </Button>
-          <Button onClick={() => navigate(`/daily-practice?minutes=${minutes}`)}>
+          <Button onClick={() => {
+            sessionStartedRef.current = false;
+            setStatus('loading');
+            setExercises([]);
+            setFlashcards([]);
+            setCurrentIndex(0);
+            setCorrectCount(0);
+            setTotalAnswered(0);
+            setExercisesCompleted(0);
+            setFlashcardsReviewed(0);
+            setSessionId(null);
+            setSecondsLeft(minutes * 60);
+            setExerciseAnswer('');
+            setExerciseFeedback(null);
+            generateSession();
+          }}>
             {lang === 'de' ? 'Weiter üben' : 'Practice More'}
           </Button>
         </div>
