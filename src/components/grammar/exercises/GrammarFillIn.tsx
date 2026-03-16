@@ -147,7 +147,7 @@ function MultiSentenceFillIn({
     }
   }, [sentences]);
 
-  const current = sentences[subIndex];
+  const current = sentences[subIndex] ?? { text: '', options: [] };
   const correctAnswer = answers[subIndex] ?? '';
   const isLast = subIndex === sentences.length - 1;
 

@@ -130,7 +130,7 @@ function MultiStepMC({
   const [eliminated, setEliminated] = useState<Set<number>>(new Set());
   const { t } = useTranslation();
 
-  const current = questions[subIndex];
+  const current = questions[subIndex] ?? { question: '', options: [], correct: '' };
   const questionText = current?.qüstion ?? current?.question ?? '';
   const correctAnswer = current?.correct ?? answers[subIndex] ?? '';
   const isLast = subIndex === questions.length - 1;
