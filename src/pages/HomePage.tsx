@@ -105,7 +105,7 @@ export default function HomePage() {
     { key: 'nav_grammar' as const, path: '/grammar', icon: BookOpen, data: data?.grammar },
     { key: 'nav_writing' as const, path: '/writing', icon: PenLine, data: data?.writing },
     { key: 'nav_reading' as const, path: '/reading', icon: BookOpenCheck, data: data?.reading },
-    { key: 'nav_listening' as const, path: '/listening', icon: Headphones, data: data?.listening, comingSoon: true },
+    { key: 'nav_listening' as const, path: '/listening', icon: Headphones, data: data?.listening },
     { key: 'nav_exam_prep' as const, path: '/exam-prep', icon: GraduationCap, data: data?.examPrep },
   ];
 
