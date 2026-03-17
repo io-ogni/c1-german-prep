@@ -92,6 +92,22 @@
   }
 }
 
+@layer utilities {
+  .animate-slide-out-right {
+    animation: slideOutRight 0.35s ease-in forwards;
+  }
+  .animate-slide-out-left {
+    animation: slideOutLeft 0.35s ease-in forwards;
+  }
+}
+
+@keyframes slideOutRight {
+  to { transform: translateX(120%) rotate(8deg); opacity: 0; }
+}
+@keyframes slideOutLeft {
+  to { transform: translateX(-120%) rotate(-8deg); opacity: 0; }
+}
+
 @layer base {
   * {
     @apply border-border;
