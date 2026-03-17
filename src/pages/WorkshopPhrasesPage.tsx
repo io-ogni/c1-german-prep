@@ -116,13 +116,6 @@ export default function WorkshopPhrasesPage() {
     });
   };
 
-  const speak = (text: string) => {
-    const clean = text.replace(/[„"]/g, '');
-    const utterance = new SpeechSynthesisUtterance(clean);
-    utterance.lang = 'de-DE';
-    utterance.rate = 0.85;
-    speechSynthesis.speak(utterance);
-  };
 
   return (
     <div className="space-y-5">
