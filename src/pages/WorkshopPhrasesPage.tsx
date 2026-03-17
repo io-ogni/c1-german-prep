@@ -133,8 +133,8 @@ export default function WorkshopPhrasesPage() {
           Zurück
         </Button>
         <div>
-          <h1 className="text-xl font-bold text-foreground">Workshop Facilitation Boot Camp</h1>
-          <p className="text-sm text-muted-foreground">50 Power Phrases · Klicke auf eine Zeile, um sie zu markieren</p>
+          <h1 className="text-2xl font-bold text-foreground">Workshop Facilitation Boot Camp</h1>
+          <p className="text-sm text-muted-foreground">50 Power Phrases (Informal/Dutzen) · Klicke auf eine Zeile, um sie zu markieren</p>
         </div>
       </div>
 
