@@ -18,6 +18,7 @@ interface Props {
   checked?: boolean;
   correctMap?: Record<string, string>;
   onGapClick?: (gapNumber: string) => void;
+  onSelectOption?: (gapNum: string, optionId: string) => void;
 }
 
 function stripPunctuation(word: string): string {
