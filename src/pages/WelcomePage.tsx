@@ -183,14 +183,14 @@ export default function WelcomePage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.5 }}
-            className="mt-6 relative rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 p-8 overflow-hidden"
+            className="mt-6 relative rounded-2xl border-2 border-dashed border-pink-500/40 bg-gradient-to-br from-pink-500/10 via-fuchsia-500/10 to-magenta-500/5 p-8 overflow-hidden"
           >
             <div className="flex items-start gap-5">
-              <div className="inline-flex p-3 rounded-xl bg-foreground text-background shrink-0">
+              <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-pink-500 to-fuchsia-600 text-white shrink-0">
                 <Code className="h-6 w-6" />
               </div>
               <div>
-                <div className="inline-block px-2.5 py-0.5 rounded-md bg-foreground text-background text-xs font-mono font-bold tracking-wider uppercase mb-3">
+                <div className="inline-block px-2.5 py-0.5 rounded-md bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-xs font-mono font-bold tracking-wider uppercase mb-3">
                   Software flavour
                 </div>
                 <h3 className="text-xl font-bold mb-2">IT vocabulary to express complex thoughts</h3>
