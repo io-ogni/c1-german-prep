@@ -20,6 +20,7 @@ import VerbTablePage from "@/pages/VerbTablePage";
 import WritingPage from "@/pages/WritingPage";
 import WritingTipsPage from "@/pages/WritingTipsPage";
 import SpeakingPage from "@/pages/SpeakingPage";
+import WorkshopPhrasesPage from "@/pages/WorkshopPhrasesPage";
 import MyVocabularyPage from "@/pages/MyVocabularyPage";
 import MyTextsPage from "@/pages/MyTextsPage";
 import ExamPrepPage from "@/pages/ExamPrepPage";
