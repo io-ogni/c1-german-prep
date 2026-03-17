@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Sparkles, BookOpen, PenTool, Headphones, MessageCircle, ArrowRight, Zap, Target } from 'lucide-react';
+import { Sparkles, BookOpen, PenTool, Headphones, MessageCircle, ArrowRight, Zap, Target, Code } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const floatingEmojis = ['🇩🇪', '📚', '✍️', '🎧', '💬', '🎯', '⚡', '🏆'];
@@ -176,6 +176,29 @@ export default function WelcomePage() {
               </motion.div>
             ))}
           </div>
+
+          {/* Software flavour card — distinct style */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5 }}
+            className="mt-6 relative rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 p-8 overflow-hidden"
+          >
+            <div className="flex items-start gap-5">
+              <div className="inline-flex p-3 rounded-xl bg-foreground text-background shrink-0">
+                <Code className="h-6 w-6" />
+              </div>
+              <div>
+                <div className="inline-block px-2.5 py-0.5 rounded-md bg-foreground text-background text-xs font-mono font-bold tracking-wider uppercase mb-3">
+                  Software flavour
+                </div>
+                <h3 className="text-xl font-bold mb-2">IT vocabulary to express complex thoughts</h3>
+                <p className="text-muted-foreground">From standup updates to architecture discussions — finally say what you actually mean.</p>
+              </div>
+            </div>
+            <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full bg-primary/10 blur-2xl" />
+          </motion.div>
         </div>
       </section>
 
