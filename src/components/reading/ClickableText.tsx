@@ -275,6 +275,8 @@ export function ClickableText({ content, textId, textType, gapAnswers, gapOption
                         isCorrect={isCorrect}
                         isWrong={isWrong}
                         onRemove={() => onGapClick?.(gapNum)}
+                        availableOptions={availableOptions}
+                        onSelectOption={(optId) => onSelectOption?.(gapNum, optId)}
                       />
                     );
                   }
