@@ -34,6 +34,7 @@ export default function LoginPage() {
     { icon: PenTool, label: 'Schreiben', desc: 'Aufsätze mit KI-Feedback verbessern' },
     { icon: Headphones, label: 'Hörverstehen', desc: 'Hörübungen im Prüfungsformat' },
     { icon: GraduationCap, label: 'Grammatik & Wortschatz', desc: 'Gezielte Übungen für C1' },
+    { icon: Monitor, label: 'Deutsch für ITler', desc: 'Fachvokabular & Szenarien aus der IT-Welt' },
   ];
 
   return (
