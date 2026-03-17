@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Sparkles, BookOpen, PenTool, Headphones, MessageCircle, ArrowRight, Zap, Target, Code } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import logo from '@/assets/logo.png';
 
 const floatingEmojis = ['🇩🇪', '📚', '✍️', '🎧', '💬', '🎯', '⚡', '🏆'];
 
