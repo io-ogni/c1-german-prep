@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Search, Volume2 } from 'lucide-react';
+import { ArrowLeft, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
@@ -116,13 +116,6 @@ export default function WorkshopPhrasesPage() {
     });
   };
 
-  const speak = (text: string) => {
-    const clean = text.replace(/[„"]/g, '');
-    const utterance = new SpeechSynthesisUtterance(clean);
-    utterance.lang = 'de-DE';
-    utterance.rate = 0.85;
-    speechSynthesis.speak(utterance);
-  };
 
   return (
     <div className="space-y-5">
@@ -212,25 +205,15 @@ export default function WorkshopPhrasesPage() {
                   : 'bg-card border border-l-4 border-border hover:bg-accent/50'
               )}
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={cn('inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold', colors.bg, colors.text)}>
-                      {p.phase}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">{p.category}</span>
-                  </div>
-                  <p className="font-semibold text-base text-foreground">{p.german}</p>
-                  <p className="text-sm text-muted-foreground">{p.english}</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={cn('inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold', colors.bg, colors.text)}>
+                    {p.phase}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">{p.category}</span>
                 </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); speak(p.example); }}
-                  className="mt-1 shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
-                >
-                  <Volume2 className="h-3.5 w-3.5" />
-                </button>
-              </div>
-              <p className="mt-2 text-sm italic text-foreground/80 leading-relaxed bg-muted/50 rounded px-2 py-1.5">{p.example}</p>
+                <p className="font-semibold text-base text-foreground">{p.german}</p>
+                <p className="text-sm text-muted-foreground">{p.english}</p>
+              <p className="mt-2 text-base italic text-foreground font-medium leading-relaxed bg-muted/50 rounded px-2 py-1.5">{p.example}</p>
             </div>
           );
         })}
@@ -248,7 +231,6 @@ export default function WorkshopPhrasesPage() {
                 <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground">Deutsch</th>
                 <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground">Englisch</th>
                 <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground">C1-Beispielsatz</th>
-                <th className="px-3 py-2.5 w-10"></th>
               </tr>
             </thead>
             <tbody>
@@ -280,16 +262,8 @@ export default function WorkshopPhrasesPage() {
                     <td className="px-3 py-2.5 text-xs text-muted-foreground">{p.category}</td>
                     <td className="px-3 py-3 font-semibold text-base text-foreground">{p.german}</td>
                     <td className="px-3 py-3 text-sm text-muted-foreground">{p.english}</td>
-                    <td className="px-3 py-3 text-sm italic text-foreground/80 max-w-md leading-relaxed">
-                      <span className="bg-muted/50 rounded px-2 py-1 inline-block">{p.example}</span>
-                    </td>
-                    <td className="px-2 py-2.5">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); speak(p.example); }}
-                        className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-                      >
-                        <Volume2 className="h-3.5 w-3.5" />
-                      </button>
+                    <td className="px-3 py-3 text-base italic text-foreground font-medium max-w-lg leading-relaxed">
+                      <span className="bg-muted/50 rounded px-2 py-1.5 inline-block">{p.example}</span>
                     </td>
                   </tr>
                 );
