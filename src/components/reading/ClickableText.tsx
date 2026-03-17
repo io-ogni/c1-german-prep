@@ -18,6 +18,7 @@ interface Props {
   checked?: boolean;
   correctMap?: Record<string, string>;
   onGapClick?: (gapNumber: string) => void;
+  onSelectOption?: (gapNum: string, optionId: string) => void;
 }
 
 function stripPunctuation(word: string): string {
@@ -43,6 +44,8 @@ function InlineDropGap({
   isCorrect,
   isWrong,
   onRemove,
+  availableOptions,
+  onSelectOption,
 }: {
   gapNum: string;
   assignedText: string | null;
@@ -50,8 +53,24 @@ function InlineDropGap({
   isCorrect: boolean;
   isWrong: boolean;
   onRemove: () => void;
+  availableOptions?: { id: string; text: string }[];
+  onSelectOption?: (optionId: string) => void;
 }) {
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const { setNodeRef, isOver } = useDroppable({ id: `gap-${gapNum}` });
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!showDropdown) return;
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showDropdown]);
 
   if (assignedText) {
     return (
@@ -73,21 +92,47 @@ function InlineDropGap({
   }
 
   return (
-    <span
-      ref={setNodeRef}
-      className={cn(
-        'inline-block min-w-[6rem] mx-0.5 px-2 py-0.5 rounded border-2 border-dashed text-sm font-medium transition-colors',
-        isOver
-          ? 'border-primary bg-primary/10 text-primary'
-          : 'border-muted-foreground/30 text-muted-foreground'
+    <span ref={dropdownRef} className="relative inline-block">
+      <span
+        ref={setNodeRef}
+        className={cn(
+          'inline-block min-w-[6rem] mx-0.5 px-2 py-0.5 rounded border-2 border-dashed text-sm font-medium transition-colors cursor-pointer',
+          isOver
+            ? 'border-primary bg-primary/10 text-primary'
+            : showDropdown
+              ? 'border-primary bg-primary/5 text-primary'
+              : 'border-muted-foreground/30 text-muted-foreground hover:border-primary/50'
+        )}
+        onClick={() => {
+          if (!checked && availableOptions && availableOptions.length > 0) {
+            setShowDropdown(!showDropdown);
+          }
+        }}
+      >
+        ____{gapNum}____
+      </span>
+      {showDropdown && availableOptions && availableOptions.length > 0 && (
+        <div className="absolute left-0 top-full mt-1 z-50 w-72 max-h-48 overflow-y-auto rounded-lg border border-border bg-popover shadow-lg">
+          {availableOptions.map(opt => (
+            <button
+              key={opt.id}
+              className="w-full text-left px-3 py-2 text-xs text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors border-b border-border/50 last:border-b-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelectOption?.(opt.id);
+                setShowDropdown(false);
+              }}
+            >
+              {opt.text}
+            </button>
+          ))}
+        </div>
       )}
-    >
-      ____{gapNum}____
     </span>
   );
 }
 
-export function ClickableText({ content, textId, textType, gapAnswers, gapOptions, checked = false, correctMap, onGapClick }: Props) {
+export function ClickableText({ content, textId, textType, gapAnswers, gapOptions, checked = false, correctMap, onGapClick, onSelectOption }: Props) {
   const { t } = useTranslation();
   const { profile } = useRequiredAuth();
   const [lookupCache, setLookupCache] = useState<Record<string, { word_de: string; article: string | null; translation_en: string } | null>>({});
@@ -198,6 +243,9 @@ export function ClickableText({ content, textId, textType, gapAnswers, gapOption
     return opt?.text ?? null;
   };
 
+  const assignedSet = new Set(Object.values(gapAnswers ?? {}));
+  const availableOptions = gapOptions?.filter(o => !assignedSet.has(o.id)) ?? [];
+
   const paragraphs = content.split('\n\n');
 
   return (
@@ -227,6 +275,8 @@ export function ClickableText({ content, textId, textType, gapAnswers, gapOption
                         isCorrect={isCorrect}
                         isWrong={isWrong}
                         onRemove={() => onGapClick?.(gapNum)}
+                        availableOptions={availableOptions}
+                        onSelectOption={(optId) => onSelectOption?.(gapNum, optId)}
                       />
                     );
                   }
