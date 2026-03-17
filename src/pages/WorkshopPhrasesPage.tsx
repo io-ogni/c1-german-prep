@@ -231,7 +231,6 @@ export default function WorkshopPhrasesPage() {
                 <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground">Deutsch</th>
                 <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground">Englisch</th>
                 <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground">C1-Beispielsatz</th>
-                <th className="px-3 py-2.5 w-10"></th>
               </tr>
             </thead>
             <tbody>
