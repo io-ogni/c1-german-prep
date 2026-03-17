@@ -1,7 +1,8 @@
 import { useTranslation } from '@/i18n/useTranslation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Check, Trash2 } from 'lucide-react';
+import { Check, Trash2, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
