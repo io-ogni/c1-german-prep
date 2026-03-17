@@ -96,7 +96,7 @@ export default function WelcomePage() {
             className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto mb-10 leading-relaxed"
           >
             Interactive exercises, AI-powered feedback, and real exam formats — 
-            everything you need to crush the telc C1, but also be prepared for the next Refinement meeting.
+            everything you need from today, to telc C1, to the next Refinement meeting.
           </motion.p>
 
           <motion.div
