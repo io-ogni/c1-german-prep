@@ -220,8 +220,8 @@ export default function WorkshopPhrasesPage() {
                     </span>
                     <span className="text-[10px] text-muted-foreground">{p.category}</span>
                   </div>
-                  <p className="font-semibold text-sm text-foreground">{p.german}</p>
-                  <p className="text-xs text-muted-foreground">{p.english}</p>
+                  <p className="font-semibold text-base text-foreground">{p.german}</p>
+                  <p className="text-sm text-muted-foreground">{p.english}</p>
                 </div>
                 <button
                   onClick={(e) => { e.stopPropagation(); speak(p.example); }}
