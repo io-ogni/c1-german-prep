@@ -132,7 +132,7 @@ function InlineDropGap({
   );
 }
 
-export function ClickableText({ content, textId, textType, gapAnswers, gapOptions, checked = false, correctMap, onGapClick }: Props) {
+export function ClickableText({ content, textId, textType, gapAnswers, gapOptions, checked = false, correctMap, onGapClick, onSelectOption }: Props) {
   const { t } = useTranslation();
   const { profile } = useRequiredAuth();
   const [lookupCache, setLookupCache] = useState<Record<string, { word_de: string; article: string | null; translation_en: string } | null>>({});
