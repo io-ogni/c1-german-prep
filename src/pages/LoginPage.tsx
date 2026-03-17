@@ -46,7 +46,7 @@ export default function LoginPage() {
             <span className="text-primary">C1</span> Werkstatt
           </h1>
           <div className="flex items-center gap-2 mb-6">
-            <span className="text-2xl">🧅</span>
+            <span className="text-2xl">👹</span>
             <span className="text-sm font-semibold text-muted-foreground italic tracking-wide">+ IT much?</span>
           </div>
           <p className="text-lg text-muted-foreground mb-8">
