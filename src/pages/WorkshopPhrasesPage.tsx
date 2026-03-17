@@ -205,24 +205,14 @@ export default function WorkshopPhrasesPage() {
                   : 'bg-card border border-l-4 border-border hover:bg-accent/50'
               )}
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={cn('inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold', colors.bg, colors.text)}>
-                      {p.phase}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">{p.category}</span>
-                  </div>
-                  <p className="font-semibold text-base text-foreground">{p.german}</p>
-                  <p className="text-sm text-muted-foreground">{p.english}</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={cn('inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold', colors.bg, colors.text)}>
+                    {p.phase}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">{p.category}</span>
                 </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); speak(p.example); }}
-                  className="mt-1 shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
-                >
-                  <Volume2 className="h-3.5 w-3.5" />
-                </button>
-              </div>
+                <p className="font-semibold text-base text-foreground">{p.german}</p>
+                <p className="text-sm text-muted-foreground">{p.english}</p>
               <p className="mt-2 text-base italic text-foreground font-medium leading-relaxed bg-muted/50 rounded px-2 py-1.5">{p.example}</p>
             </div>
           );
