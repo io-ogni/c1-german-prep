@@ -42,9 +42,13 @@ export default function LoginPage() {
       {/* Left side – info */}
       <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-12 xl:px-20 bg-primary/[0.04]">
         <div className="max-w-md">
-          <h1 className="text-4xl font-bold text-foreground mb-2">
+          <h1 className="text-4xl font-bold text-foreground mb-1">
             <span className="text-primary">C1</span> Werkstatt
           </h1>
+          <div className="flex items-center gap-2 mb-6">
+            <span className="text-2xl">🧅</span>
+            <span className="text-sm font-semibold text-muted-foreground italic tracking-wide">+ IT much?</span>
+          </div>
           <p className="text-lg text-muted-foreground mb-8">
             Dein interaktives Lernportal für die telc Deutsch C1 Prüfung – mit Übungen, KI-Feedback und Fortschrittskontrolle.
           </p>
