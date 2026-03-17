@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import logo from '@/assets/logo.png';
 
 const mainLinks = [
   { key: 'nav_vocabulary' as const, path: '/vocabulary' },
@@ -36,9 +37,8 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
       <div className="container mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2 font-bold text-lg text-foreground">
-          <span className="text-primary">C1</span>
-          <span>Werkstatt</span>
+        <Link to="/" className="flex items-center">
+          <img src={logo} alt="C1 Werkstatt" className="h-8" />
         </Link>
 
         <div className="hidden items-center gap-1 lg:flex">
