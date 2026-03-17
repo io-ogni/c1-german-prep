@@ -7,12 +7,23 @@ import { Card, CardContent } from '@/components/ui/card';
 import { TelcBadge } from '@/components/shared/TelcBadge';
 import { Timer } from '@/components/shared/Timer';
 import { toast } from 'sonner';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, GripVertical } from 'lucide-react';
 import { ClickableText } from './ClickableText';
 import { TextrekonstruktionQuestions } from './questions/TextrekonstruktionQuestions';
 import { DetailverstehenQuestions } from './questions/DetailverstehenQuestions';
 import { SelektivesVerstehenQuestions } from './questions/SelektivesVerstehenQuestions';
 import { GeneralQuestions } from './questions/GeneralQuestions';
+import {
+  DndContext,
+  DragOverlay,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragStartEvent,
+  type DragEndEvent,
+} from '@dnd-kit/core';
 
 interface ReadingText {
   id: string;
@@ -38,7 +49,68 @@ export function ReadingInterface({ text, onBack }: Props) {
   const [score, setScore] = useState<{ correct: number; total: number } | null>(null);
   const [selfScore, setSelfScore] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const timerSecondsRef = useRef(0);
+
+  const isTextrekonstruktion = text.text_type === 'textrekonstruktion';
+  const isArrayFormat = isTextrekonstruktion && Array.isArray(text.questions);
+
+  // Build options and correct map for Format A
+  const options: { id: string; text: string }[] = isTextrekonstruktion
+    ? isArrayFormat
+      ? (text.questions as any[]).flatMap((q: any) =>
+          (q.options || []).map((opt: string) => ({ id: `${q.position || q.id}-${opt}`, text: opt }))
+        )
+      : (text.questions.options || [])
+    : [];
+
+  const correctMap: Record<string, string> = isTextrekonstruktion
+    ? isArrayFormat
+      ? (text.questions as any[]).reduce((acc: Record<string, string>, q: any) => {
+          const pos = String(q.position || q.id?.replace('gap', ''));
+          acc[pos] = `${pos}-${q.correct}`;
+          return acc;
+        }, {})
+      : (text.questions.correct || {})
+    : {};
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } })
+  );
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(String(event.active.id));
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveId(null);
+    if (checked) return;
+    const { active, over } = event;
+    if (!over) return;
+
+    const optionId = String(active.id);
+    const overId = String(over.id);
+
+    if (overId.startsWith('gap-')) {
+      const gapNum = overId.replace('gap-', '');
+      const newAnswers = { ...answers };
+      for (const [gap, val] of Object.entries(newAnswers)) {
+        if (val === optionId) delete newAnswers[gap];
+      }
+      newAnswers[gapNum] = optionId;
+      setAnswers(newAnswers);
+    }
+  };
+
+  const handleRemoveFromGap = (gapNum: string) => {
+    if (checked) return;
+    const newAnswers = { ...answers };
+    delete newAnswers[gapNum];
+    setAnswers(newAnswers);
+  };
+
+  const activeOption = activeId ? options.find(o => o.id === activeId) : null;
 
   const handleRetry = () => {
     setAnswers({});
@@ -54,7 +126,6 @@ export function ReadingInterface({ text, onBack }: Props) {
 
     if (text.text_type === 'textrekonstruktion') {
       if (Array.isArray(q)) {
-        // Format B: array of per-gap objects
         total = q.length;
         q.forEach((item: any) => {
           const pos = String(item.position || item.id?.replace('gap', ''));
@@ -62,7 +133,6 @@ export function ReadingInterface({ text, onBack }: Props) {
           if (answers[pos] === expectedId) correct++;
         });
       } else {
-        // Format A: { correct: {gap: optionId}, options: [...] }
         const correctMap = q.correct as Record<string, string>;
         total = Object.keys(correctMap).length;
         for (const [gap, answer] of Object.entries(correctMap)) {
@@ -82,7 +152,6 @@ export function ReadingInterface({ text, onBack }: Props) {
         if (answers[String(i)] === item.correct) correct++;
       });
     } else {
-      // general MC
       const items: any[] = Array.isArray(q) ? q : q.questions || [];
       total = items.length;
       items.forEach((item: any, i: number) => {
@@ -124,8 +193,9 @@ export function ReadingInterface({ text, onBack }: Props) {
   };
 
   const title = language === 'de' ? text.title_de : text.title_en;
+  const assignedOptions = new Set(Object.values(answers));
 
-  return (
+  const renderContent = () => (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
@@ -151,18 +221,19 @@ export function ReadingInterface({ text, onBack }: Props) {
             content={text.text_content}
             textId={text.id}
             textType={text.text_type}
-            gapAnswers={text.text_type === 'textrekonstruktion' ? answers : undefined}
-            onGapClick={text.text_type === 'textrekonstruktion' ? (gap) => {
-              // handled by TextrekonstruktionQuestions
-            } : undefined}
+            gapAnswers={isTextrekonstruktion ? answers : undefined}
+            gapOptions={isTextrekonstruktion ? options : undefined}
+            checked={checked}
+            correctMap={isTextrekonstruktion ? correctMap : undefined}
+            onGapClick={isTextrekonstruktion ? handleRemoveFromGap : undefined}
           />
         </CardContent>
       </Card>
 
-      {/* Questions */}
+      {/* Questions / Options */}
       <Card>
         <CardContent className="p-6 space-y-4">
-          {text.text_type === 'textrekonstruktion' && (
+          {isTextrekonstruktion && (
             <TextrekonstruktionQuestions
               questions={text.questions}
               answers={answers}
@@ -213,7 +284,6 @@ export function ReadingInterface({ text, onBack }: Props) {
                 </div>
               )}
 
-              {/* Self-assessment */}
               <div className="space-y-2">
                 <p className="text-sm font-medium text-foreground">{t('reading_self_assessment')}</p>
                 <div className="flex items-end gap-1.5">
@@ -257,4 +327,28 @@ export function ReadingInterface({ text, onBack }: Props) {
       </Card>
     </div>
   );
+
+  // Wrap with DndContext for textrekonstruktion Format A (drag-and-drop)
+  if (isTextrekonstruktion && !isArrayFormat) {
+    return (
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        {renderContent()}
+        <DragOverlay>
+          {activeOption ? (
+            <div className="flex items-center gap-2 rounded-md border border-primary bg-background px-3 py-2 text-xs shadow-lg max-w-md">
+              <GripVertical className="h-3.5 w-3.5 text-primary shrink-0" />
+              <span className="line-clamp-2">{activeOption.text}</span>
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
+    );
+  }
+
+  return renderContent();
 }
