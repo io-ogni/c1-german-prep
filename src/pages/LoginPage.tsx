@@ -40,11 +40,15 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen bg-background">
       {/* Left side – info */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-12 xl:px-20 bg-primary/[0.04]">
+      <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-12 xl:px-20 bg-primary/[0.04] relative overflow-hidden">
+        {/* Stamp overlay */}
+        <div className="absolute top-12 right-10 rotate-[18deg] select-none pointer-events-none">
+          <div className="border-[3px] border-destructive/70 rounded-md px-4 py-1.5 text-destructive/70 font-black text-xl tracking-widest uppercase"
+               style={{ fontFamily: 'Impact, Haettenschweiler, Arial Narrow Bold, sans-serif' }}>
+            + IT much?
+          </div>
+        </div>
         <div className="max-w-md">
-          <h1 className="text-4xl font-bold text-foreground mb-2">
-            <span className="text-primary">C1</span> Werkstatt
-          </h1>
           <p className="text-lg text-muted-foreground mb-8">
             Dein interaktives Lernportal für die telc Deutsch C1 Prüfung – mit Übungen, KI-Feedback und Fortschrittskontrolle.
           </p>
