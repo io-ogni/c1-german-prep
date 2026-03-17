@@ -226,6 +226,16 @@ export function ReadingInterface({ text, onBack }: Props) {
             checked={checked}
             correctMap={isTextrekonstruktion ? correctMap : undefined}
             onGapClick={isTextrekonstruktion ? handleRemoveFromGap : undefined}
+            onSelectOption={isTextrekonstruktion ? (gapNum, optionId) => {
+              if (checked) return;
+              const newAnswers = { ...answers };
+              // Remove this option from any other gap
+              for (const [gap, val] of Object.entries(newAnswers)) {
+                if (val === optionId) delete newAnswers[gap];
+              }
+              newAnswers[gapNum] = optionId;
+              setAnswers(newAnswers);
+            } : undefined}
           />
         </CardContent>
       </Card>
