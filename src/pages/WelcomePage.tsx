@@ -211,17 +211,16 @@ export default function WelcomePage() {
             viewport={{ once: true }}
           >
             <p className="text-2xl md:text-3xl font-semibold leading-relaxed mb-8">
-              "I moved to Berlin, panicked about the C1 exam, 
-              <span className="text-primary"> and then found this.</span> 
-              {' '}It actually made studying feel like less of a chore."
+              "This time, I don't want just to pass the exam,
+              <span className="text-primary"> I want to be freaking free in my everyday work in IT</span>."
             </p>
             <div className="flex items-center justify-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-violet-500 flex items-center justify-center text-white font-bold text-sm">
-                S
+                I
               </div>
               <div className="text-left">
-                <p className="font-semibold text-sm">Sarah, 28</p>
-                <p className="text-xs text-muted-foreground">Software engineer from London → Berlin</p>
+                <p className="font-semibold text-sm">Ioana, Product Manager</p>
+                <p className="text-xs text-muted-foreground">Was bored of all language tools and made this app instead</p>
               </div>
             </div>
           </motion.div>
