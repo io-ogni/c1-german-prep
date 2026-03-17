@@ -22,6 +22,7 @@ import WritingPage from "@/pages/WritingPage";
 import WritingTipsPage from "@/pages/WritingTipsPage";
 import SpeakingPage from "@/pages/SpeakingPage";
 import WorkshopPhrasesPage from "@/pages/WorkshopPhrasesPage";
+import TechIdiomsPage from "@/pages/TechIdiomsPage";
 import MyVocabularyPage from "@/pages/MyVocabularyPage";
 import MyTextsPage from "@/pages/MyTextsPage";
 import ExamPrepPage from "@/pages/ExamPrepPage";
