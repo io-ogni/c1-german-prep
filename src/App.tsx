@@ -22,6 +22,7 @@ import WritingPage from "@/pages/WritingPage";
 import WritingTipsPage from "@/pages/WritingTipsPage";
 import SpeakingPage from "@/pages/SpeakingPage";
 import WorkshopPhrasesPage from "@/pages/WorkshopPhrasesPage";
+import TechIdiomsPage from "@/pages/TechIdiomsPage";
 import MyVocabularyPage from "@/pages/MyVocabularyPage";
 import MyTextsPage from "@/pages/MyTextsPage";
 import ExamPrepPage from "@/pages/ExamPrepPage";
@@ -59,6 +60,7 @@ const App = () => (
               <Route path="/listening" element={<ListeningPage />} />
               <Route path="/speaking" element={<SpeakingPage />} />
               <Route path="/speaking/workshop" element={<WorkshopPhrasesPage />} />
+              <Route path="/speaking/idioms" element={<TechIdiomsPage />} />
               <Route path="/exam-prep" element={<ExamPrepPage />} />
               <Route path="/my-vocabulary" element={<MyVocabularyPage />} />
               <Route path="/my-texts" element={<MyTextsPage />} />
