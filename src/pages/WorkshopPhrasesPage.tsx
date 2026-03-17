@@ -213,7 +213,7 @@ export default function WorkshopPhrasesPage() {
                 </div>
                 <p className="font-semibold text-base text-foreground">{p.german}</p>
                 <p className="text-sm text-muted-foreground">{p.english}</p>
-              <p className="mt-2 text-base italic text-foreground font-medium leading-relaxed bg-muted/50 rounded px-2 py-1.5">{p.example}</p>
+              <p className="mt-2 text-base text-foreground font-medium leading-relaxed bg-muted/50 rounded px-2 py-1.5">{p.example}</p>
             </div>
           );
         })}
