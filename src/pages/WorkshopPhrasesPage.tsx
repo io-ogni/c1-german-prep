@@ -278,9 +278,11 @@ export default function WorkshopPhrasesPage() {
                       </span>
                     </td>
                     <td className="px-3 py-2.5 text-xs text-muted-foreground">{p.category}</td>
-                    <td className="px-3 py-2.5 font-semibold text-foreground">{p.german}</td>
-                    <td className="px-3 py-2.5 text-muted-foreground">{p.english}</td>
-                    <td className="px-3 py-2.5 text-xs italic text-muted-foreground max-w-xs leading-relaxed">{p.example}</td>
+                    <td className="px-3 py-3 font-semibold text-base text-foreground">{p.german}</td>
+                    <td className="px-3 py-3 text-sm text-muted-foreground">{p.english}</td>
+                    <td className="px-3 py-3 text-sm italic text-foreground/80 max-w-md leading-relaxed">
+                      <span className="bg-muted/50 rounded px-2 py-1 inline-block">{p.example}</span>
+                    </td>
                     <td className="px-2 py-2.5">
                       <button
                         onClick={(e) => { e.stopPropagation(); speak(p.example); }}
