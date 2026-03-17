@@ -7,12 +7,16 @@ import { Input } from '@/components/ui/input';
 import { Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useDroppable } from '@dnd-kit/core';
 
 interface Props {
   content: string;
   textId: string;
   textType: string;
   gapAnswers?: Record<string, string>;
+  gapOptions?: { id: string; text: string }[];
+  checked?: boolean;
+  correctMap?: Record<string, string>;
   onGapClick?: (gapNumber: string) => void;
 }
 
@@ -32,19 +36,68 @@ function getSentenceAtPosition(text: string, charPos: number): string {
 
 type WordKey = `${number}-${number}-${number}`;
 
-export function ClickableText({ content, textId, textType, gapAnswers, onGapClick }: Props) {
+function InlineDropGap({
+  gapNum,
+  assignedText,
+  checked,
+  isCorrect,
+  isWrong,
+  onRemove,
+}: {
+  gapNum: string;
+  assignedText: string | null;
+  checked: boolean;
+  isCorrect: boolean;
+  isWrong: boolean;
+  onRemove: () => void;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id: `gap-${gapNum}` });
+
+  if (assignedText) {
+    return (
+      <span
+        ref={setNodeRef}
+        className={cn(
+          'inline rounded px-1.5 py-0.5 mx-0.5 font-medium text-sm cursor-pointer transition-colors',
+          isCorrect && 'bg-primary/15 text-primary',
+          isWrong && 'bg-destructive/15 text-destructive line-through',
+          !checked && 'bg-primary/10 text-primary hover:bg-primary/20',
+          isOver && !checked && 'ring-2 ring-primary'
+        )}
+        onClick={() => { if (!checked) onRemove(); }}
+      >
+        {assignedText}
+        {!checked && <span className="ml-1 text-xs opacity-60">✕</span>}
+      </span>
+    );
+  }
+
+  return (
+    <span
+      ref={setNodeRef}
+      className={cn(
+        'inline-block min-w-[6rem] mx-0.5 px-2 py-0.5 rounded border-2 border-dashed text-sm font-medium transition-colors',
+        isOver
+          ? 'border-primary bg-primary/10 text-primary'
+          : 'border-muted-foreground/30 text-muted-foreground'
+      )}
+    >
+      ____{gapNum}____
+    </span>
+  );
+}
+
+export function ClickableText({ content, textId, textType, gapAnswers, gapOptions, checked = false, correctMap, onGapClick }: Props) {
   const { t } = useTranslation();
   const { profile } = useRequiredAuth();
   const [lookupCache, setLookupCache] = useState<Record<string, { word_de: string; article: string | null; translation_en: string } | null>>({});
 
-  // Selection state: ordered list of selected word keys
   const [selectedWords, setSelectedWords] = useState<WordKey[]>([]);
   const [selectedTexts, setSelectedTexts] = useState<string[]>([]);
   const [customTranslation, setCustomTranslation] = useState('');
   const popupRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // The combined expression from selected words
   const combinedExpression = selectedTexts.join(' ');
   const firstSelectedClean = selectedTexts.length === 1 ? stripPunctuation(selectedTexts[0]) : null;
   const dictEntry = firstSelectedClean ? lookupCache[firstSelectedClean.toLowerCase()] : null;
@@ -67,7 +120,6 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
     setCustomTranslation('');
   }, []);
 
-  // ESC to dismiss
   useEffect(() => {
     if (selectedWords.length === 0) return;
     const handler = (e: KeyboardEvent) => {
@@ -77,7 +129,6 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
     return () => document.removeEventListener('keydown', handler);
   }, [selectedWords.length, clearSelection]);
 
-  // Click outside to dismiss
   useEffect(() => {
     if (selectedWords.length === 0) return;
     const handler = (e: MouseEvent) => {
@@ -93,7 +144,6 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
   }, [selectedWords.length, clearSelection]);
 
   const handleWordClick = (key: WordKey, cleanWord: string) => {
-    // Toggle: if already selected, remove it
     const idx = selectedWords.indexOf(key);
     if (idx >= 0) {
       setSelectedWords(prev => prev.filter(k => k !== key));
@@ -101,13 +151,9 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
       setCustomTranslation('');
       return;
     }
-
-    // Add to selection
     setSelectedWords(prev => [...prev, key]);
     setSelectedTexts(prev => [...prev, cleanWord]);
     setCustomTranslation('');
-
-    // Lookup single words in dictionary
     lookupWord(cleanWord);
   };
 
@@ -115,18 +161,12 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
     if (!profile) return;
     const expression = combinedExpression;
     if (!expression) return;
-
-    // For single words with dict entry, use dict translation; otherwise require custom
     const translation = hasDictTranslation ? dictEntry!.translation_en : customTranslation;
     if (!translation) return;
-
     const wordDisplay = (hasDictTranslation && dictEntry?.article)
       ? `${dictEntry.article} ${dictEntry.word_de}`
       : expression;
-
-    // Approximate sentence from first selected word position
     const sentence = getSentenceAtPosition(content, content.indexOf(stripPunctuation(selectedTexts[0])));
-
     const { error } = await supabase.from('personal_vocabulary').insert({
       user_id: profile.user_id,
       word_de: wordDisplay,
@@ -150,7 +190,14 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
   const needsTranslation = selectedTexts.length > 1 || !hasDictTranslation;
   const canAdd = hasSelection && (hasDictTranslation || customTranslation.trim().length > 0);
 
-  // Split content into paragraphs, then words, preserving gaps
+  const isTextrekonstruktion = textType === 'textrekonstruktion';
+
+  const resolveGapText = (optionId: string): string | null => {
+    if (!gapOptions) return optionId;
+    const opt = gapOptions.find(o => o.id === optionId);
+    return opt?.text ?? null;
+  };
+
   const paragraphs = content.split('\n\n');
 
   return (
@@ -165,18 +212,36 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
                 const gapMatch = part.match(/\[___(\d+)___\]/);
                 if (gapMatch) {
                   const gapNum = gapMatch[1];
-                  const assigned = gapAnswers?.[gapNum];
+                  const assignedId = gapAnswers?.[gapNum];
+                  const assignedText = assignedId ? resolveGapText(assignedId) : null;
+                  const isCorrect = checked && !!assignedId && correctMap?.[gapNum] === assignedId;
+                  const isWrong = checked && !!assignedId && correctMap?.[gapNum] !== assignedId;
+
+                  if (isTextrekonstruktion) {
+                    return (
+                      <InlineDropGap
+                        key={partIdx}
+                        gapNum={gapNum}
+                        assignedText={assignedText}
+                        checked={checked}
+                        isCorrect={isCorrect}
+                        isWrong={isWrong}
+                        onRemove={() => onGapClick?.(gapNum)}
+                      />
+                    );
+                  }
+
                   return (
                     <span
                       key={partIdx}
                       className={`inline-block min-w-[3rem] mx-1 px-2 py-0.5 rounded border-2 border-dashed text-sm font-medium cursor-pointer transition-colors ${
-                        assigned
+                        assignedId
                           ? 'border-primary bg-primary/10 text-primary'
                           : 'border-muted-foreground/30 text-muted-foreground'
                       }`}
                       onClick={() => onGapClick?.(gapNum)}
                     >
-                      {assigned ? `[${assigned}]` : `___${gapNum}___`}
+                      {assignedId ? `[${assignedId}]` : `___${gapNum}___`}
                     </span>
                   );
                 }
@@ -240,12 +305,10 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
             </Button>
           </div>
 
-          {/* Show dict translation if available for single word */}
           {hasDictTranslation && (
             <p className="text-xs text-muted-foreground">EN: {dictEntry!.translation_en}</p>
           )}
 
-          {/* Translation input — required when no dict entry or multi-word */}
           {needsTranslation && (
             <div className="space-y-1">
               <Input
