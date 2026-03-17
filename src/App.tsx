@@ -25,6 +25,7 @@ import MyTextsPage from "@/pages/MyTextsPage";
 import ExamPrepPage from "@/pages/ExamPrepPage";
 import DailyPracticePage from "@/pages/DailyPracticePage";
 import SettingsPage from "@/pages/SettingsPage";
+import FlashcardsPage from "@/pages/FlashcardsPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -59,6 +60,7 @@ const App = () => (
               <Route path="/my-texts" element={<MyTextsPage />} />
               <Route path="/daily-practice" element={<DailyPracticePage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/flashcards" element={<FlashcardsPage />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
