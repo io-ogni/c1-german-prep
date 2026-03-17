@@ -262,16 +262,8 @@ export default function WorkshopPhrasesPage() {
                     <td className="px-3 py-2.5 text-xs text-muted-foreground">{p.category}</td>
                     <td className="px-3 py-3 font-semibold text-base text-foreground">{p.german}</td>
                     <td className="px-3 py-3 text-sm text-muted-foreground">{p.english}</td>
-                    <td className="px-3 py-3 text-sm italic text-foreground/80 max-w-md leading-relaxed">
-                      <span className="bg-muted/50 rounded px-2 py-1 inline-block">{p.example}</span>
-                    </td>
-                    <td className="px-2 py-2.5">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); speak(p.example); }}
-                        className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-                      >
-                        <Volume2 className="h-3.5 w-3.5" />
-                      </button>
+                    <td className="px-3 py-3 text-base italic text-foreground font-medium max-w-lg leading-relaxed">
+                      <span className="bg-muted/50 rounded px-2 py-1.5 inline-block">{p.example}</span>
                     </td>
                   </tr>
                 );
