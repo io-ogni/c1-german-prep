@@ -366,6 +366,24 @@ export default function SpeakingPage() {
           </Accordion>
         </CardContent>
       </Card>
+
+      {/* Module links */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Link to="/speaking/workshop" className="flex items-center justify-between rounded-lg border border-border bg-card p-4 hover:bg-accent/50 transition-colors group">
+          <div>
+            <p className="font-semibold text-foreground">Workshop Facilitation</p>
+            <p className="text-xs text-muted-foreground">50 Power Phrases für Workshops</p>
+          </div>
+          <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+        </Link>
+        <Link to="/speaking/idioms" className="flex items-center justify-between rounded-lg border border-border bg-card p-4 hover:bg-accent/50 transition-colors group">
+          <div>
+            <p className="font-semibold text-foreground">Tech-Redewendungen</p>
+            <p className="text-xs text-muted-foreground">72 Redewendungen mit Illustrationen</p>
+          </div>
+          <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+        </Link>
+      </div>
     </div>
   );
 }
