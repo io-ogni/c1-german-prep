@@ -243,6 +243,9 @@ export function ClickableText({ content, textId, textType, gapAnswers, gapOption
     return opt?.text ?? null;
   };
 
+  const assignedSet = new Set(Object.values(gapAnswers ?? {}));
+  const availableOptions = gapOptions?.filter(o => !assignedSet.has(o.id)) ?? [];
+
   const paragraphs = content.split('\n\n');
 
   return (
