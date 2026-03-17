@@ -82,10 +82,10 @@ export default function WelcomePage() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.1] mb-6"
           >
-            Deutsch lernen?
+            Deutsch C1 —
             <br />
             <span className="bg-gradient-to-r from-primary via-blue-400 to-violet-500 bg-clip-text text-transparent">
-              Aber make it fun.
+              Einmal mit Profis arbeiten.
             </span>
           </motion.h1>
 
@@ -96,7 +96,7 @@ export default function WelcomePage() {
             className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto mb-10 leading-relaxed"
           >
             Interactive exercises, AI-powered feedback, and real exam formats — 
-            everything you need to crush the telc C1, without the boring textbook vibes.
+            everything you need to crush the telc C1, but also be prepared for the next Refinement meeting.
           </motion.p>
 
           <motion.div
