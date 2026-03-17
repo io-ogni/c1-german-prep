@@ -230,7 +230,7 @@ export default function WorkshopPhrasesPage() {
                   <Volume2 className="h-3.5 w-3.5" />
                 </button>
               </div>
-              <p className="mt-2 text-xs italic text-muted-foreground leading-relaxed">{p.example}</p>
+              <p className="mt-2 text-sm italic text-foreground/80 leading-relaxed bg-muted/50 rounded px-2 py-1.5">{p.example}</p>
             </div>
           );
         })}
