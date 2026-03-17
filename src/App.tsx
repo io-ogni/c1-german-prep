@@ -20,6 +20,7 @@ import VerbTablePage from "@/pages/VerbTablePage";
 import WritingPage from "@/pages/WritingPage";
 import WritingTipsPage from "@/pages/WritingTipsPage";
 import SpeakingPage from "@/pages/SpeakingPage";
+import WorkshopPhrasesPage from "@/pages/WorkshopPhrasesPage";
 import MyVocabularyPage from "@/pages/MyVocabularyPage";
 import MyTextsPage from "@/pages/MyTextsPage";
 import ExamPrepPage from "@/pages/ExamPrepPage";
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="/reading" element={<ReadingPage />} />
               <Route path="/listening" element={<ListeningPage />} />
               <Route path="/speaking" element={<SpeakingPage />} />
+              <Route path="/speaking/workshop" element={<WorkshopPhrasesPage />} />
               <Route path="/exam-prep" element={<ExamPrepPage />} />
               <Route path="/my-vocabulary" element={<MyVocabularyPage />} />
               <Route path="/my-texts" element={<MyTextsPage />} />
