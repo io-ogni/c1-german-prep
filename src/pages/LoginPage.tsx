@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { BookOpen, PenTool, Headphones, GraduationCap } from 'lucide-react';
+import { BookOpen, PenTool, Headphones, GraduationCap, Monitor } from 'lucide-react';
 
 export default function LoginPage() {
   const auth = useAuth();
