@@ -17,6 +17,7 @@ import ReadingPage from "@/pages/ReadingPage";
 import ListeningPage from "@/pages/ListeningPage";
 import VocabularyPage from "@/pages/VocabularyPage";
 import GrammarPage from "@/pages/GrammarPage";
+import GrammarSubPage from "@/pages/GrammarSubPage";
 import VerbTablePage from "@/pages/VerbTablePage";
 import WritingPage from "@/pages/WritingPage";
 import WritingTipsPage from "@/pages/WritingTipsPage";
