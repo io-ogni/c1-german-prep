@@ -97,12 +97,6 @@ export default function GrammarPage() {
     );
   }
 
-  const grammarSubPages = [
-    { label: 'Präpositionen', path: '/grammar/prepositions' },
-    { label: 'Konjunktiv', path: '/grammar/konjunktiv' },
-    { label: 'Passiv', path: '/grammar/passiv' },
-  ];
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -111,20 +105,6 @@ export default function GrammarPage() {
           <BookOpen className="mr-2 h-4 w-4" />
           {t('grammar_verb_table')}
         </Button>
-      </div>
-
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        {grammarSubPages.map((item) => (
-          <Button
-            key={item.path}
-            variant="outline"
-            size="sm"
-            className="shrink-0"
-            onClick={() => navigate(item.path)}
-          >
-            {item.label}
-          </Button>
-        ))}
       </div>
 
       <LevelTabs value={level} onValueChange={setLevel} />
