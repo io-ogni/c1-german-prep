@@ -47,7 +47,7 @@ export default function C1ExpressionsPage() {
         </Button>
         <div>
           <h1 className="text-2xl font-bold text-foreground">C1/C2 Ausdrücke für Aufsätze & Debatten</h1>
-          <p className="text-sm text-muted-foreground">72 gehobene Ausdrücke mit Illustrationen · Klicke auf eine Karte für Details</p>
+          
         </div>
       </div>
 
