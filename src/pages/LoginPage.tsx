@@ -80,8 +80,8 @@ export default function LoginPage() {
             className="mt-12 flex gap-4"
           >
             {[
-              { num: '4', label: 'Skills' },
-              { num: '100+', label: 'Exercises' },
+              { num: '7', label: 'Bereiche' },
+              { num: '500+', label: 'Übungen' },
               { num: 'AI', label: 'Feedback' },
             ].map((s) => (
               <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3">
@@ -101,7 +101,7 @@ export default function LoginPage() {
             <Code className="h-5 w-5 shrink-0" />
             <div>
               <p className="font-bold text-sm">Deutsch für IT-ler</p>
-              <p className="text-xs text-white/70">250+ Phrasen für Meetings, Refinements & Krisen</p>
+              <p className="text-xs text-white/70">265+ Phrasen für Meetings, Refinements & Krisen</p>
             </div>
           </motion.div>
         </div>
