@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n/useTranslation';
 import { ProgressBar } from '@/components/shared/ProgressBar';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, RotateCcw } from 'lucide-react';
 import { DefinitionMatch } from './exercises/DefinitionMatch';
 import { FillIn } from './exercises/FillIn';
 import { SynonymMatch } from './exercises/SynonymMatch';
@@ -30,13 +30,15 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
   const queryClient = useQueryClient();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answered, setAnswered] = useState(false);
+  const [restartMode, setRestartMode] = useState(false);
   const cleanupRef = useRef<(() => void) | null>(null);
   const { t, lang } = useTranslation();
   const auth = useAuth();
 
   const dbLevel = level === 'b2' ? 'b2_refresh' : level;
 
-  const { data: exercises, isLoading } = useQuery({
+  // Fetch all exercises for this topic
+  const { data: allExercises, isLoading: loadingExercises } = useQuery({
     queryKey: ['exercises', area, topic, dbLevel],
     queryFn: async () => {
       const { data } = await supabase
@@ -50,6 +52,53 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
     },
   });
 
+  // Fetch user's progress for these exercises
+  const { data: progressMap, isLoading: loadingProgress } = useQuery({
+    queryKey: ['exercise-progress', area, topic, dbLevel, auth?.user?.id],
+    queryFn: async () => {
+      if (!auth?.user || !allExercises?.length) return {};
+      const ids = allExercises.map(e => e.id);
+      const { data } = await supabase
+        .from('exercise_progress')
+        .select('exercise_id, completed')
+        .eq('user_id', auth.user.id)
+        .in('exercise_id', ids);
+      const map: Record<string, boolean> = {};
+      for (const row of data ?? []) {
+        map[row.exercise_id] = row.completed;
+      }
+      return map;
+    },
+    enabled: !!allExercises?.length && !!auth?.user,
+  });
+
+  // Build the exercise queue: failed first → unattempted → skip completed
+  // In restart mode, show all exercises in original order
+  const exercises = useMemo(() => {
+    if (!allExercises?.length) return [];
+    if (restartMode || !progressMap || Object.keys(progressMap).length === 0) return allExercises;
+
+    const failed: Tables<'exercises'>[] = [];
+    const unattempted: Tables<'exercises'>[] = [];
+    let allDone = true;
+
+    for (const ex of allExercises) {
+      const status = progressMap[ex.id];
+      if (status === true) continue; // completed — skip
+      allDone = false;
+      if (status === false) {
+        failed.push(ex); // attempted but wrong
+      } else {
+        unattempted.push(ex); // never tried
+      }
+    }
+
+    if (allDone) return []; // all completed — show completion screen
+    return [...failed, ...unattempted];
+  }, [allExercises, progressMap, restartMode]);
+
+  const isLoading = loadingExercises || loadingProgress;
+
   const handleAnswer = async (correct: boolean, exerciseId: string) => {
     setAnswered(true);
     if (!auth?.user) return;
@@ -60,11 +109,12 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
         exercise_id: exerciseId,
         completed: correct,
         last_attempt_at: new Date().toISOString(),
-        attempts: 1, // will be incremented by trigger or we handle it
+        attempts: 1,
       },
       { onConflict: 'user_id,exercise_id' as any }
     );
-    // Invalidate topic lists so progress updates when navigating back
+    // Invalidate progress so it's fresh next time
+    queryClient.invalidateQueries({ queryKey: ['exercise-progress', area, topic, dbLevel, auth.user.id] });
     queryClient.invalidateQueries({ queryKey: ['grammar-topics'] });
     queryClient.invalidateQueries({ queryKey: ['vocabulary-topics'] });
   };
@@ -74,8 +124,13 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
     setCurrentIndex((i) => i + 1);
   }, []);
 
+  const handleRestart = () => {
+    setRestartMode(true);
+    setCurrentIndex(0);
+    setAnswered(false);
+  };
+
   // Enter key advances to next exercise when answered
-  // Delay listener attachment so the same Enter keypress that triggered "check" doesn't immediately advance
   useEffect(() => {
     if (!answered) return;
     const timeout = setTimeout(() => {
@@ -83,7 +138,6 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
         if (e.key === 'Enter') handleNext();
       };
       window.addEventListener('keydown', onKey);
-      // Store cleanup ref
       cleanupRef.current = () => window.removeEventListener('keydown', onKey);
     }, 50);
     return () => {
@@ -96,7 +150,7 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
     return <Skeleton className="h-64 w-full rounded-lg" />;
   }
 
-  if (!exercises?.length) {
+  if (!allExercises?.length) {
     return (
       <div className="space-y-4">
         <Button variant="ghost" size="sm" onClick={onBack}>
@@ -108,21 +162,34 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
     );
   }
 
-  const exercise = exercises[currentIndex];
-  const isComplete = currentIndex >= exercises.length;
+  // All exercises completed (not in restart mode)
+  const allCompleted = exercises.length === 0 && !restartMode;
+  const flowComplete = currentIndex >= exercises.length && exercises.length > 0;
 
-  if (isComplete) {
+  if (allCompleted || flowComplete) {
+    const totalCount = allExercises.length;
+    const completedCount = allCompleted
+      ? totalCount
+      : Object.values(progressMap ?? {}).filter(Boolean).length;
+
     return (
       <div className="space-y-4 text-center py-12">
         <h2 className="text-xl font-bold text-foreground">🎉 {topicTitle}</h2>
         <p className="text-muted-foreground">
-          {exercises.length} {t('exercise_of')} {exercises.length} {t('exercise_progress')}
+          {completedCount} {t('exercise_of')} {totalCount} {t('exercise_progress')}
         </p>
-        <Button onClick={onBack}>{t('exercise_back_to_topics')}</Button>
+        <div className="flex gap-3 justify-center">
+          <Button variant="outline" onClick={onBack}>{t('exercise_back_to_topics')}</Button>
+          <Button onClick={handleRestart}>
+            <RotateCcw className="mr-2 h-4 w-4" />
+            {lang === 'de' ? 'Nochmal üben' : 'Practice again'}
+          </Button>
+        </div>
       </div>
     );
   }
 
+  const exercise = exercises[currentIndex];
   const content = exercise.content as any;
   const solution = exercise.solution as any;
   const instructions = lang === 'de' ? exercise.instructions_de : exercise.instructions_en;
@@ -142,7 +209,6 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
       case 'definition_match':
         return <DefinitionMatch {...commonProps} />;
       case 'fill_in':
-        // Use GrammarFillIn for multi-sentence format (sentences[]) regardless of area
         return (content?.sentences || area === 'grammar') ? <GrammarFillIn {...commonProps} /> : <FillIn {...commonProps} />;
       case 'synonym_match':
         return <SynonymMatch {...commonProps} />;

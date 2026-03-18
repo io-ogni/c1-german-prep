@@ -1,4 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="6" fill="#3B82F6"/>
+  <defs>
+    <clipPath id="r">
+      <rect width="32" height="32" rx="6"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#r)">
+    <rect width="32" height="32" fill="#3B82F6"/>
+    <polygon points="0,0 32,0 32,32" fill="#D946EF"/>
+  </g>
   <text x="16" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="800" font-size="18" fill="white">C1</text>
 </svg>

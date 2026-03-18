@@ -46,63 +46,67 @@ export default function HomePage() {
   async function loadProgress() {
     setLoading(true);
     try {
+      // Step 1: Get all exercise IDs grouped by area
+      const { data: allExercises } = await supabase
+        .from('exercises')
+        .select('id, area, exam_format');
+
+      const exercisesByArea: Record<string, string[]> = {};
+      const examIds: string[] = [];
+      for (const ex of allExercises ?? []) {
+        const a = ex.area ?? 'unknown';
+        (exercisesByArea[a] ??= []).push(ex.id);
+        if (ex.exam_format) examIds.push(ex.id);
+      }
+
+      const vocabIds = exercisesByArea['vocabulary'] ?? [];
+      const grammarIds = [...(exercisesByArea['grammar'] ?? []), ...(exercisesByArea['sprachbausteine'] ?? [])];
+      const itIds = exercisesByArea['berufssprache_it'] ?? [];
+      const listeningIds = exercisesByArea['listening'] ?? [];
+
+      // Step 2: Get all completed exercise IDs for this user in one query
+      const { data: completedRows } = await supabase
+        .from('exercise_progress')
+        .select('exercise_id')
+        .eq('user_id', user!.id)
+        .eq('completed', true);
+
+      const completedSet = new Set((completedRows ?? []).map(r => r.exercise_id));
+
+      const countCompleted = (ids: string[]) => ids.filter(id => completedSet.has(id)).length;
+
+      // Step 3: Parallel queries for non-exercise counts
       const [
-        { count: totalVocabExercises },
-        { count: totalGrammarExercises },
         { count: totalWritingPrompts },
         { count: totalReadingTexts },
-        { count: totalExamExercises },
-        { count: completedVocab },
-        { count: completedGrammar },
         { count: writingSubmissions },
         { count: completedReading },
-        { count: completedExam },
         { count: vocabCount },
         { count: dueReviewCount },
-        { count: totalITExercises },
-        { count: completedIT },
-        { count: totalListeningExercises },
-        { count: completedListening },
       ] = await Promise.all([
-        supabase.from('exercises').select('*', { count: 'exact', head: true }).eq('area', 'vocabulary'),
-        supabase.from('exercises').select('*', { count: 'exact', head: true }).in('area', ['grammar', 'sprachbausteine']),
         supabase.from('writing_prompts').select('*', { count: 'exact', head: true }),
         supabase.from('reading_texts').select('*', { count: 'exact', head: true }),
-        supabase.from('exercises').select('*', { count: 'exact', head: true }).not('exam_format', 'is', null),
-        supabase.from('exercise_progress').select('*', { count: 'exact', head: true }).eq('user_id', user!.id).eq('completed', true).in('exercise_id',
-          (await supabase.from('exercises').select('id').eq('area', 'vocabulary')).data?.map(e => e.id) ?? []
-        ),
-        supabase.from('exercise_progress').select('*', { count: 'exact', head: true }).eq('user_id', user!.id).eq('completed', true).in('exercise_id',
-          (await supabase.from('exercises').select('id').in('area', ['grammar', 'sprachbausteine'])).data?.map(e => e.id) ?? []
-        ),
         supabase.from('writing_submissions').select('*', { count: 'exact', head: true }).eq('user_id', user!.id),
         supabase.from('reading_progress').select('*', { count: 'exact', head: true }).eq('user_id', user!.id).eq('completed', true),
-        supabase.from('exercise_progress').select('*', { count: 'exact', head: true }).eq('user_id', user!.id).eq('completed', true).in('exercise_id',
-          (await supabase.from('exercises').select('id').not('exam_format', 'is', null)).data?.map(e => e.id) ?? []
-        ),
         supabase.from('personal_vocabulary').select('*', { count: 'exact', head: true }).eq('user_id', user!.id),
         supabase.from('personal_vocabulary').select('*', { count: 'exact', head: true }).eq('user_id', user!.id).lte('next_review_at', new Date().toISOString()),
-        supabase.from('exercises').select('*', { count: 'exact', head: true }).eq('area', 'berufssprache_it'),
-        supabase.from('exercise_progress').select('*', { count: 'exact', head: true }).eq('user_id', user!.id).eq('completed', true).in('exercise_id',
-          (await supabase.from('exercises').select('id').eq('area', 'berufssprache_it')).data?.map(e => e.id) ?? []
-        ),
-        supabase.from('exercises').select('*', { count: 'exact', head: true }).eq('area', 'listening'),
-        supabase.from('exercise_progress').select('*', { count: 'exact', head: true }).eq('user_id', user!.id).eq('completed', true).in('exercise_id',
-          (await supabase.from('exercises').select('id').eq('area', 'listening')).data?.map(e => e.id) ?? []
-        ),
       ]);
 
-      const totalCompleted = (completedVocab ?? 0) + (completedGrammar ?? 0) + (completedExam ?? 0) + (completedIT ?? 0);
+      const cVocab = countCompleted(vocabIds);
+      const cGrammar = countCompleted(grammarIds);
+      const cExam = countCompleted(examIds);
+      const cIT = countCompleted(itIds);
+      const cListening = countCompleted(listeningIds);
 
       setData({
-        vocabulary: { completed: completedVocab ?? 0, total: totalVocabExercises ?? 0 },
-        grammar: { completed: completedGrammar ?? 0, total: totalGrammarExercises ?? 0 },
+        vocabulary: { completed: cVocab, total: vocabIds.length },
+        grammar: { completed: cGrammar, total: grammarIds.length },
         writing: { completed: writingSubmissions ?? 0, total: totalWritingPrompts ?? 0 },
         reading: { completed: completedReading ?? 0, total: totalReadingTexts ?? 0 },
-        listening: { completed: completedListening ?? 0, total: totalListeningExercises ?? 0 },
-        itDeutsch: { completed: completedIT ?? 0, total: totalITExercises ?? 0 },
-        examPrep: { completed: completedExam ?? 0, total: totalExamExercises ?? 0 },
-        totalExercises: totalCompleted,
+        listening: { completed: cListening, total: listeningIds.length },
+        itDeutsch: { completed: cIT, total: itIds.length },
+        examPrep: { completed: cExam, total: examIds.length },
+        totalExercises: cVocab + cGrammar + cExam + cIT + cListening,
         vocabCount: vocabCount ?? 0,
         writingCount: writingSubmissions ?? 0,
         dueReviewCount: dueReviewCount ?? 0,
