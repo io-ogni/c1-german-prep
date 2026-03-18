@@ -227,6 +227,8 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
       case 'definition_match':
         return <DefinitionMatch {...commonProps} />;
       case 'fill_in':
+        // Content with {original} is a transform-style exercise stored as fill_in
+        if (content?.original) return <Transform key={exercise.id} {...commonProps} />;
         return (content?.sentences || area === 'grammar') ? <GrammarFillIn {...commonProps} /> : <FillIn {...commonProps} />;
       case 'synonym_match':
         return <SynonymMatch {...commonProps} />;
