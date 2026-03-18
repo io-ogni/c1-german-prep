@@ -1,16 +1,16 @@
 import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import HCaptcha from '@hcaptcha/react-hcaptcha';
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { BookOpen, PenTool, Headphones, GraduationCap } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Sparkles, Code } from 'lucide-react';
 
-const HCAPTCHA_SITE_KEY = import.meta.env.VITE_HCAPTCHA_SITE_KEY;
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
 export default function LoginPage() {
   const auth = useAuth();
@@ -19,116 +19,179 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const captchaRef = useRef<HCaptcha>(null);
+  const captchaRef = useRef<TurnstileInstance>(null);
+  const [captchaToken, setCaptchaToken] = useState<string>();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (TURNSTILE_SITE_KEY && !captchaToken) {
+      toast.error('Bitte warten Sie, bis die CAPTCHA-Überprüfung abgeschlossen ist.');
+      return;
+    }
     setLoading(true);
 
-    let token: string | undefined;
-    if (HCAPTCHA_SITE_KEY && captchaRef.current) {
-      try {
-        const res = await captchaRef.current.execute({ async: true });
-        token = res.response;
-      } catch {
-        toast.error('CAPTCHA fehlgeschlagen, bitte erneut versuchen');
-        setLoading(false);
-        return;
-      }
-    }
-
-    const { error } = await auth!.login(email, password, token);
+    const { error } = await auth!.login(email, password, captchaToken);
     setLoading(false);
-    captchaRef.current?.resetCaptcha();
+    captchaRef.current?.reset();
+    setCaptchaToken(undefined);
     if (error) {
       toast.error(error.message);
     } else {
-      navigate('/');
+      navigate('/home');
     }
   };
 
-  const features = [
-    { icon: BookOpen, label: 'Leseverstehen', desc: 'Texte auf C1-Niveau lesen & verstehen' },
-    { icon: PenTool, label: 'Schreiben', desc: 'Aufsätze mit KI-Feedback verbessern' },
-    { icon: Headphones, label: 'Hörverstehen', desc: 'Hörübungen im Prüfungsformat' },
-    { icon: GraduationCap, label: 'Grammatik & Wortschatz', desc: 'Gezielte Übungen für C1' },
-  ];
-
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Left side – info */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-12 xl:px-20 bg-primary/[0.04]">
-        <div className="max-w-md">
-          <h1 className="text-4xl font-bold text-foreground mb-2">
-            <span className="text-primary">C1</span> Werkstatt
-          </h1>
-          <p className="text-lg text-muted-foreground mb-8">
-            Dein interaktives Lernportal für die telc Deutsch C1 Prüfung – mit Übungen, KI-Feedback und Fortschrittskontrolle.
-          </p>
-          <div className="space-y-5">
-            {features.map((f) => (
-              <div key={f.label} className="flex items-start gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <f.icon className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="font-semibold text-foreground">{f.label}</p>
-                  <p className="text-sm text-muted-foreground">{f.desc}</p>
-                </div>
+    <div className="min-h-screen flex bg-background">
+      {/* Left decorative panel */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-primary via-blue-500 to-violet-600">
+        {/* Pattern overlay */}
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+
+        <div className="relative z-10 flex flex-col justify-center px-12 xl:px-16 text-white">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-sm font-medium mb-8">
+              <Sparkles className="h-4 w-4" />
+              Welcome back
+            </div>
+            <h1 className="text-4xl xl:text-5xl font-extrabold leading-tight mb-4">
+              Schön, dass
+              <br />
+              du wieder
+              <br />
+              da bist!
+            </h1>
+            <p className="text-lg text-white/80 max-w-sm leading-relaxed">
+              Pick up right where you left off. Your exercises, vocabulary, and progress are all waiting for you.
+            </p>
+          </motion.div>
+
+          {/* Floating stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="mt-12 flex gap-4"
+          >
+            {[
+              { num: '4', label: 'Skills' },
+              { num: '100+', label: 'Exercises' },
+              { num: 'AI', label: 'Feedback' },
+            ].map((s) => (
+              <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3">
+                <p className="text-2xl font-bold">{s.num}</p>
+                <p className="text-xs text-white/70">{s.label}</p>
               </div>
             ))}
-          </div>
+          </motion.div>
+
+          {/* IT Deutsch callout */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            className="mt-8 flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 max-w-xs"
+          >
+            <Code className="h-5 w-5 shrink-0" />
+            <div>
+              <p className="font-bold text-sm">Deutsch für IT-ler</p>
+              <p className="text-xs text-white/70">250+ Phrasen für Meetings, Refinements & Krisen</p>
+            </div>
+          </motion.div>
         </div>
       </div>
 
-      {/* Right side – login form */}
-      <div className="flex w-full lg:w-1/2 items-center justify-center px-4">
-        <Card className="w-full max-w-sm">
-          <CardHeader className="text-center">
-            <div className="mb-2 text-2xl font-bold lg:hidden">
-              <span className="text-primary">C1</span> Werkstatt
-            </div>
-            <CardTitle className="text-lg">{t('auth_login')}</CardTitle>
-            <p className="text-sm text-muted-foreground lg:hidden mt-1">telc C1 Prüfungsvorbereitung</p>
-          </CardHeader>
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">{t('auth_email')}</Label>
-                <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">{t('auth_password')}</Label>
-                <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-              </div>
-              {HCAPTCHA_SITE_KEY && (
-                <HCaptcha
-                  sitekey={HCAPTCHA_SITE_KEY}
-                  size="invisible"
-                  ref={captchaRef}
-                />
-              )}
-            </CardContent>
-            <CardFooter className="flex flex-col gap-3">
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? t('common_loading') : t('auth_login')}
-              </Button>
-              <div className="flex flex-col items-center gap-1 text-sm text-muted-foreground">
-                <Link to="/forgot-password" className="hover:text-primary">{t('auth_forgot_password')}</Link>
-                <span>
-                  {t('auth_no_account')}{' '}
-                  <Link to="/signup" className="font-medium text-primary hover:underline">{t('auth_signup')}</Link>
-                </span>
-              </div>
-            </CardFooter>
-          </form>
-        </Card>
-      </div>
+      {/* Right form panel */}
+      <div className="flex w-full lg:w-1/2 items-center justify-center px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-sm"
+        >
+          {/* Back to welcome */}
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to home
+          </Link>
 
-      <div className="fixed bottom-4 left-0 right-0 text-center text-xs text-muted-foreground">
-        Built by <a href="https://ioana-ognibeni.eu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Ioana Ognibeni</a> with{' '}
-        <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Claude</a> &{' '}
-        <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Lovable</a>
+          {/* Logo (mobile) */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold lg:hidden mb-1">
+              <span className="text-primary">C1</span> Werkstatt
+            </h2>
+            <h3 className="text-2xl font-bold">{t('auth_login')}</h3>
+            <p className="text-muted-foreground text-sm mt-1">
+              telc C1 Prüfungsvorbereitung · Deutsch für IT-ler
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="email">{t('auth_email')}</Label>
+              <Input
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder=""
+                className="h-11 rounded-xl"
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">{t('auth_password')}</Label>
+                <Link to="/forgot-password" className="text-xs text-primary hover:underline">
+                  {t('auth_forgot_password')}
+                </Link>
+              </div>
+              <Input
+                id="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder=""
+                className="h-11 rounded-xl"
+              />
+            </div>
+
+            {TURNSTILE_SITE_KEY && (
+              <Turnstile
+                siteKey={TURNSTILE_SITE_KEY}
+                ref={captchaRef}
+                onSuccess={setCaptchaToken}
+                onExpire={() => setCaptchaToken(undefined)}
+                options={{ size: 'flexible' }}
+              />
+            )}
+
+            <Button
+              type="submit"
+              className="w-full h-11 rounded-xl text-base font-semibold shadow-lg shadow-primary/20"
+              disabled={loading}
+            >
+              {loading ? t('common_loading') : t('auth_login')}
+            </Button>
+          </form>
+
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            {t('auth_no_account')}{' '}
+            <Link to="/signup" className="font-semibold text-primary hover:underline">
+              {t('auth_signup')}
+            </Link>
+          </p>
+        </motion.div>
       </div>
     </div>
   );

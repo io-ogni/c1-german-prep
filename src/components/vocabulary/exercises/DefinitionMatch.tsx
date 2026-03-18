@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
+import { SelectableText } from '@/components/shared/SelectableText';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -65,7 +66,9 @@ export function DefinitionMatch({ content, solution, instructions, explanation, 
           : null
       }
     >
-      <p className="text-lg font-semibold text-foreground text-center py-2">{content?.word}</p>
+      <div className="text-center py-2">
+        <SelectableText text={content?.word ?? ''} className="text-lg font-semibold" />
+      </div>
       <div className="grid gap-2">
         {shuffled.options.map((opt, idx) => (
           <Button

@@ -244,6 +244,13 @@ export const translations = {
     grammar_filter_separable: "Trennbar",
     grammar_search_verb: "Verb suchen...",
 
+    // IT Deutsch
+    nav_it_deutsch: "IT Deutsch",
+    it_deutsch_subtitle: "Professionelles Deutsch für die IT-Branche — Vokabular, Phrasen und Redewendungen für deinen Arbeitsalltag.",
+    it_phrasen_spickzettel: "Phrasen-Spickzettel",
+    it_redewendungen: "Redewendungen",
+    it_search_phrase: "Phrase suchen...",
+
     // Common
     common_loading: "Laden...",
     common_error: "Ein Fehler ist aufgetreten.",

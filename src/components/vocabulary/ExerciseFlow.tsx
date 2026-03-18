@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -27,8 +27,10 @@ interface ExerciseFlowProps {
 }
 
 export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, onBack }: ExerciseFlowProps) {
+  const queryClient = useQueryClient();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answered, setAnswered] = useState(false);
+  const cleanupRef = useRef<(() => void) | null>(null);
   const { t, lang } = useTranslation();
   const auth = useAuth();
 
@@ -62,12 +64,33 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
       },
       { onConflict: 'user_id,exercise_id' as any }
     );
+    // Invalidate topic lists so progress updates when navigating back
+    queryClient.invalidateQueries({ queryKey: ['grammar-topics'] });
+    queryClient.invalidateQueries({ queryKey: ['vocabulary-topics'] });
   };
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     setAnswered(false);
     setCurrentIndex((i) => i + 1);
-  };
+  }, []);
+
+  // Enter key advances to next exercise when answered
+  // Delay listener attachment so the same Enter keypress that triggered "check" doesn't immediately advance
+  useEffect(() => {
+    if (!answered) return;
+    const timeout = setTimeout(() => {
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === 'Enter') handleNext();
+      };
+      window.addEventListener('keydown', onKey);
+      // Store cleanup ref
+      cleanupRef.current = () => window.removeEventListener('keydown', onKey);
+    }, 50);
+    return () => {
+      clearTimeout(timeout);
+      cleanupRef.current?.();
+    };
+  }, [answered, handleNext]);
 
   if (isLoading) {
     return <Skeleton className="h-64 w-full rounded-lg" />;
@@ -126,9 +149,9 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
       case 'word_family':
         return <WordFamily {...commonProps} />;
       case 'transform':
-        return <Transform {...commonProps} />;
+        return <Transform key={exercise.id} {...commonProps} />;
       case 'sentence_build':
-        return <SentenceBuild {...commonProps} />;
+        return <SentenceBuild key={exercise.id} {...commonProps} />;
       case 'multiple_choice':
         return <MultipleChoice {...commonProps} />;
       case 'match':

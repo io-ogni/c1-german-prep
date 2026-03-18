@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
+import { SelectableText } from '@/components/shared/SelectableText';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -44,8 +45,12 @@ export function SentenceBuild({ content, solution, instructions, explanation, an
       }
     >
       <div className="space-y-2">
-        <div className="rounded-md bg-muted p-3 text-sm text-foreground">1. {content.sentence_a}</div>
-        <div className="rounded-md bg-muted p-3 text-sm text-foreground">2. {content.sentence_b}</div>
+        <div className="rounded-md bg-muted p-3">
+          <SelectableText text={`1. ${content.sentence_a}`} className="text-sm" />
+        </div>
+        <div className="rounded-md bg-muted p-3">
+          <SelectableText text={`2. ${content.sentence_b}`} className="text-sm" />
+        </div>
       </div>
       <Textarea
         value={value}

@@ -3,7 +3,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { useRequiredAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, PenLine, BookOpenCheck, Headphones, GraduationCap, Languages, Flame, BookMarked, FileText } from 'lucide-react';
+import { BookOpen, PenLine, BookOpenCheck, Headphones, Languages, Flame, BookMarked, FileText, Briefcase } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ProgressBar } from '@/components/shared/ProgressBar';
@@ -22,6 +22,7 @@ interface HomeData {
   reading: AreaProgress;
   listening: AreaProgress;
   examPrep: AreaProgress;
+  itDeutsch: AreaProgress;
   totalExercises: number;
   vocabCount: number;
   writingCount: number;
@@ -58,13 +59,17 @@ export default function HomePage() {
         { count: completedExam },
         { count: vocabCount },
         { count: dueReviewCount },
+        { count: totalITExercises },
+        { count: completedIT },
+        { count: totalListeningExercises },
+        { count: completedListening },
       ] = await Promise.all([
         supabase.from('exercises').select('*', { count: 'exact', head: true }).eq('area', 'vocabulary'),
         supabase.from('exercises').select('*', { count: 'exact', head: true }).in('area', ['grammar', 'sprachbausteine']),
         supabase.from('writing_prompts').select('*', { count: 'exact', head: true }),
         supabase.from('reading_texts').select('*', { count: 'exact', head: true }),
         supabase.from('exercises').select('*', { count: 'exact', head: true }).not('exam_format', 'is', null),
-        supabase.from('exercise_progress').select('*', { count: 'exact', head: true }).eq('user_id', user!.id).eq('completed', true).in('exercise_id', 
+        supabase.from('exercise_progress').select('*', { count: 'exact', head: true }).eq('user_id', user!.id).eq('completed', true).in('exercise_id',
           (await supabase.from('exercises').select('id').eq('area', 'vocabulary')).data?.map(e => e.id) ?? []
         ),
         supabase.from('exercise_progress').select('*', { count: 'exact', head: true }).eq('user_id', user!.id).eq('completed', true).in('exercise_id',
@@ -77,16 +82,25 @@ export default function HomePage() {
         ),
         supabase.from('personal_vocabulary').select('*', { count: 'exact', head: true }).eq('user_id', user!.id),
         supabase.from('personal_vocabulary').select('*', { count: 'exact', head: true }).eq('user_id', user!.id).lte('next_review_at', new Date().toISOString()),
+        supabase.from('exercises').select('*', { count: 'exact', head: true }).eq('area', 'berufssprache_it'),
+        supabase.from('exercise_progress').select('*', { count: 'exact', head: true }).eq('user_id', user!.id).eq('completed', true).in('exercise_id',
+          (await supabase.from('exercises').select('id').eq('area', 'berufssprache_it')).data?.map(e => e.id) ?? []
+        ),
+        supabase.from('exercises').select('*', { count: 'exact', head: true }).eq('area', 'listening'),
+        supabase.from('exercise_progress').select('*', { count: 'exact', head: true }).eq('user_id', user!.id).eq('completed', true).in('exercise_id',
+          (await supabase.from('exercises').select('id').eq('area', 'listening')).data?.map(e => e.id) ?? []
+        ),
       ]);
 
-      const totalCompleted = (completedVocab ?? 0) + (completedGrammar ?? 0) + (completedExam ?? 0);
+      const totalCompleted = (completedVocab ?? 0) + (completedGrammar ?? 0) + (completedExam ?? 0) + (completedIT ?? 0);
 
       setData({
         vocabulary: { completed: completedVocab ?? 0, total: totalVocabExercises ?? 0 },
         grammar: { completed: completedGrammar ?? 0, total: totalGrammarExercises ?? 0 },
         writing: { completed: writingSubmissions ?? 0, total: totalWritingPrompts ?? 0 },
         reading: { completed: completedReading ?? 0, total: totalReadingTexts ?? 0 },
-        listening: { completed: 0, total: 0 },
+        listening: { completed: completedListening ?? 0, total: totalListeningExercises ?? 0 },
+        itDeutsch: { completed: completedIT ?? 0, total: totalITExercises ?? 0 },
         examPrep: { completed: completedExam ?? 0, total: totalExamExercises ?? 0 },
         totalExercises: totalCompleted,
         vocabCount: vocabCount ?? 0,
@@ -106,7 +120,7 @@ export default function HomePage() {
     { key: 'nav_writing' as const, path: '/writing', icon: PenLine, data: data?.writing },
     { key: 'nav_reading' as const, path: '/reading', icon: BookOpenCheck, data: data?.reading },
     { key: 'nav_listening' as const, path: '/listening', icon: Headphones, data: data?.listening },
-    { key: 'nav_exam_prep' as const, path: '/exam-prep', icon: GraduationCap, data: data?.examPrep },
+    { key: 'nav_it_deutsch' as const, path: '/it-deutsch', icon: Briefcase, data: data?.itDeutsch, fuchsia: true },
   ];
 
   const streak = profile?.current_streak ?? 0;
@@ -167,7 +181,7 @@ export default function HomePage() {
                 <Card className="transition-shadow hover:shadow-md cursor-pointer h-full">
                   <CardContent className="p-5 space-y-3">
                     <div className="flex items-center gap-3">
-                      <Icon className="h-6 w-6 text-primary" />
+                      <Icon className={`h-6 w-6 ${area.fuchsia ? 'text-fuchsia-500' : 'text-primary'}`} />
                       <span className="font-semibold text-card-foreground">{t(area.key)}</span>
                     </div>
                     {loading ? (
@@ -176,7 +190,7 @@ export default function HomePage() {
                       <p className="text-xs text-muted-foreground">{t('exam_coming_soon')}</p>
                     ) : (
                       <>
-                        <ProgressBar value={pct} />
+                        <ProgressBar value={pct} barClassName={area.fuchsia ? 'bg-fuchsia-500' : undefined} />
                         <p className="text-xs text-muted-foreground">
                           {progress?.completed ?? 0} / {progress?.total ?? 0} {t('home_exercises_completed')}
                         </p>
@@ -227,10 +241,10 @@ export default function HomePage() {
       <div className="pt-4 border-t border-border text-center text-xs text-muted-foreground space-y-1">
         <p>
           Built by <a href="https://ioana-ognibeni.eu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Ioana Ognibeni</a> with{' '}
-          <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Claude</a> &{' '}
-          <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Lovable</a>
+          <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Claude</a>,{' '}
+          <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Lovable</a> &{' '}
+          <a href="https://notebooklm.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">NotebookLM</a>
         </p>
-        <p>CC BY-NC 4.0 — free to use, not for commercial purposes</p>
       </div>
     </div>
   );

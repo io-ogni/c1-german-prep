@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import HCaptcha from '@hcaptcha/react-hcaptcha';
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { toast } from 'sonner';
 
-const HCAPTCHA_SITE_KEY = import.meta.env.VITE_HCAPTCHA_SITE_KEY;
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
 export default function ForgotPasswordPage() {
   const auth = useAuth();
@@ -17,29 +17,21 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const captchaRef = useRef<HCaptcha>(null);
+  const captchaRef = useRef<TurnstileInstance>(null);
+  const [captchaToken, setCaptchaToken] = useState<string>();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (TURNSTILE_SITE_KEY && !captchaToken) {
+      toast.error('Bitte warten Sie, bis die CAPTCHA-Überprüfung abgeschlossen ist.');
+      return;
+    }
     setLoading(true);
 
-    let token: string | undefined;
-    if (HCAPTCHA_SITE_KEY && captchaRef.current) {
-      try {
-        const res = await captchaRef.current.execute({ async: true });
-        token = res.response;
-        console.log('hCaptcha token obtained:', token?.substring(0, 20) + '...');
-      } catch (err) {
-        console.error('hCaptcha execute failed:', err);
-        toast.error('CAPTCHA fehlgeschlagen, bitte erneut versuchen');
-        setLoading(false);
-        return;
-      }
-    }
-    console.log('Calling resetPassword with captchaToken:', !!token);
-    const { error } = await auth!.resetPassword(email, token);
+    const { error } = await auth!.resetPassword(email, captchaToken);
     setLoading(false);
-    captchaRef.current?.resetCaptcha();
+    captchaRef.current?.reset();
+    setCaptchaToken(undefined);
     if (error) {
       toast.error(error.message);
     } else {
@@ -63,11 +55,13 @@ export default function ForgotPasswordPage() {
                 <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
               </div>
             )}
-            {HCAPTCHA_SITE_KEY && (
-              <HCaptcha
-                sitekey={HCAPTCHA_SITE_KEY}
-                size="invisible"
+            {TURNSTILE_SITE_KEY && (
+              <Turnstile
+                siteKey={TURNSTILE_SITE_KEY}
                 ref={captchaRef}
+                onSuccess={setCaptchaToken}
+                onExpire={() => setCaptchaToken(undefined)}
+                options={{ size: 'flexible' }}
               />
             )}
           </CardContent>

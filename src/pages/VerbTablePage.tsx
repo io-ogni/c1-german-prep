@@ -9,9 +9,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ArrowLeft, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useHighlightedPhrases } from '@/hooks/useHighlightedPhrases';
 import type { Tables } from '@/integrations/supabase/types';
 
-type Filter = 'all' | 'irregular' | 'separable';
+type Filter = 'all' | 'irregular' | 'separable' | 'highlighted';
 
 export default function VerbTablePage() {
   const [search, setSearch] = useState('');
@@ -19,6 +20,7 @@ export default function VerbTablePage() {
   const [sortBy, setSortBy] = useState<'frequency' | 'alpha'>('frequency');
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isHighlighted, toggle } = useHighlightedPhrases('verb-table-highlights');
 
   const { data: verbs, isLoading } = useQuery({
     queryKey: ['verb-conjugations'],
@@ -40,16 +42,18 @@ export default function VerbTablePage() {
     }
     if (filter === 'irregular') result = result.filter((v) => v.is_irregular);
     if (filter === 'separable') result = result.filter((v) => v.is_separable);
+    if (filter === 'highlighted') result = result.filter((v) => isHighlighted(v.infinitiv));
     if (sortBy === 'alpha') {
       result = [...result].sort((a, b) => a.infinitiv.localeCompare(b.infinitiv));
     }
     return result;
-  }, [verbs, search, filter, sortBy]);
+  }, [verbs, search, filter, sortBy, isHighlighted]);
 
   const filters: { key: Filter; label: string }[] = [
     { key: 'all', label: t('grammar_filter_all') },
     { key: 'irregular', label: t('grammar_filter_irregular') },
     { key: 'separable', label: t('grammar_filter_separable') },
+    { key: 'highlighted', label: 'Markiert' },
   ];
 
   return (
@@ -93,6 +97,10 @@ export default function VerbTablePage() {
         </Button>
       </div>
 
+      <p className="text-xs text-muted-foreground">
+        Klicken Sie auf eine Zeile, um sie zu markieren. Erneut klicken zum Abwählen.
+      </p>
+
       {isLoading ? (
         <Skeleton className="h-96 w-full rounded-lg" />
       ) : (
@@ -112,7 +120,11 @@ export default function VerbTablePage() {
             </TableHeader>
             <TableBody>
               {filtered.map((v) => (
-                <TableRow key={v.id}>
+                <TableRow
+                  key={v.id}
+                  className={cn('cursor-pointer', isHighlighted(v.infinitiv) && 'bg-primary/10')}
+                  onClick={() => toggle(v.infinitiv)}
+                >
                   <TableCell className={cn('font-medium', v.is_irregular && 'text-primary')}>
                     {v.infinitiv}
                     {v.is_separable && <span className="ml-1 text-xs text-muted-foreground">(trb.)</span>}

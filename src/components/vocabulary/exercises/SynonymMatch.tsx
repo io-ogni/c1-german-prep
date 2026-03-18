@@ -159,7 +159,7 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
           )}
         >
           {Array.from(matches.entries()).every(
-            ([l, r]) => shuffledRight[r].originalIdx === l
+            ([l, r]) => shuffledRight[r].originalIdx === shuffledLeft[l].originalIdx
           )
             ? t('exercise_correct')
             : `${t('exercise_incorrect')} ${explanation ?? ''}`}

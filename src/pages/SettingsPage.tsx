@@ -18,7 +18,21 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { Key, CheckCircle, Loader2, ShieldCheck, Trash2, Lock } from 'lucide-react';
+import { FunctionsHttpError } from '@supabase/supabase-js';
+import { Key, CheckCircle, Loader2, ShieldCheck, Trash2, Lock, Type } from 'lucide-react';
+import { useTextSize, type TextSize } from '@/hooks/useTextSize';
+
+async function getEdgeFunctionError(err: unknown): Promise<string> {
+  if (err instanceof FunctionsHttpError) {
+    try {
+      const body = await err.context.json();
+      return body?.error || err.message;
+    } catch {
+      return err.message;
+    }
+  }
+  return (err as any)?.message || 'Ein unerwarteter Fehler ist aufgetreten';
+}
 
 function ChangePasswordCard() {
   const [currentPw, setCurrentPw] = useState('');
@@ -108,8 +122,8 @@ export default function SettingsPage() {
       toast.success(data?.key_hint ? `Key saved: ${data.key_hint}` : 'API key saved');
       setApiKey('');
       await refreshProfile();
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to save API key');
+    } catch (err: unknown) {
+      toast.error(await getEdgeFunctionError(err));
     } finally {
       setSavingKey(false);
     }
@@ -122,8 +136,8 @@ export default function SettingsPage() {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       toast.success(data?.message || 'API key is valid!');
-    } catch (err: any) {
-      toast.error(err.message || 'API key test failed');
+    } catch (err: unknown) {
+      toast.error(await getEdgeFunctionError(err));
     } finally {
       setTestingKey(false);
     }
@@ -139,8 +153,8 @@ export default function SettingsPage() {
       if (data?.error) throw new Error(data.error);
       toast.success('API key removed');
       await refreshProfile();
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to remove API key');
+    } catch (err: unknown) {
+      toast.error(await getEdgeFunctionError(err));
     } finally {
       setSavingKey(false);
     }
@@ -168,15 +182,24 @@ export default function SettingsPage() {
       const { data, error } = await supabase.functions.invoke('delete-account');
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      await supabase.auth.signOut();
+      // User is already deleted server-side, sign out locally (ignore errors)
+      await supabase.auth.signOut().catch(() => {});
       navigate('/login');
       toast.success('Konto und alle Daten wurden gelöscht.');
-    } catch (err: any) {
-      toast.error(err.message || 'Fehler beim Löschen des Kontos');
+    } catch (err: unknown) {
+      toast.error(await getEdgeFunctionError(err));
     } finally {
       setDeleting(false);
     }
   };
+
+  const { size: textSize, setSize: setTextSize } = useTextSize();
+
+  const TEXT_SIZE_OPTIONS: { value: TextSize; label: string; desc: string }[] = [
+    { value: 'compact', label: 'Kompakt', desc: 'Kleinere Schrift, mehr Inhalt' },
+    { value: 'default', label: 'Standard', desc: 'Empfohlene Größe' },
+    { value: 'large', label: 'Groß', desc: 'Größere Schrift, leichter lesbar' },
+  ];
 
   return (
     <div className="max-w-lg space-y-6">
@@ -194,6 +217,35 @@ export default function SettingsPage() {
       <Button onClick={handleSave} disabled={saving}>
         {saving ? t('common_loading') : t('common_save')}
       </Button>
+
+      {/* Text Size */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Type className="h-4 w-4" />
+            Textgröße
+          </CardTitle>
+          <CardDescription>Passe die Schriftgröße an deine Vorlieben an.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2">
+            {TEXT_SIZE_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setTextSize(opt.value)}
+                className={`flex-1 rounded-lg border px-3 py-2.5 text-left transition-colors ${
+                  textSize === opt.value
+                    ? 'border-primary bg-primary/10 text-foreground'
+                    : 'border-border text-muted-foreground hover:border-primary/50'
+                }`}
+              >
+                <p className="text-sm font-medium">{opt.label}</p>
+                <p className="text-xs text-muted-foreground">{opt.desc}</p>
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Change Password */}
       <ChangePasswordCard />

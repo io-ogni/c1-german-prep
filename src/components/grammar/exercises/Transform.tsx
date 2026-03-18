@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
+import { SelectableText } from '@/components/shared/SelectableText';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { cn } from '@/lib/utils';
+import { Lightbulb } from 'lucide-react';
 
 interface SingleContent {
   original: string;
@@ -31,12 +33,52 @@ interface Props {
   onAnswer: (correct: boolean) => void;
 }
 
+const TRANSFORM_EXAMPLES: Record<string, { input: string; output: string }> = {
+  'nominalisieren': { input: 'Die Mitarbeiter arbeiten zusammen.', output: 'Die Zusammenarbeit der Mitarbeiter.' },
+  'partizip': { input: 'Das Buch, das viel diskutiert wird,', output: 'Das viel diskutierte Buch' },
+  'passiv': { input: 'Man tanzt auf der Party.', output: 'Auf der Party wird getanzt.' },
+  'indirekte': { input: 'Er sagte: "Ich bin krank."', output: 'Er sagte, er sei krank.' },
+  'konjunktiv': { input: 'Sie sagt: "Ich habe keine Zeit."', output: 'Sie sagt, sie habe keine Zeit.' },
+  'passiversatz': { input: 'Das kann gemacht werden.', output: 'Das lässt sich machen.' },
+};
+
+function getExample(instructions: string): { input: string; output: string } | null {
+  const lower = instructions.toLowerCase();
+  for (const [key, example] of Object.entries(TRANSFORM_EXAMPLES)) {
+    if (lower.includes(key)) return example;
+  }
+  return null;
+}
+
 function normalize(s: string | undefined) {
   return (s ?? '').trim().toLowerCase().replace(/[.,;:!?]/g, '').replace(/\s+/g, ' ');
 }
 
 function isMulti(content: any): content is MultiContent {
   return Array.isArray(content?.items);
+}
+
+function ExampleHint({ example }: { example: { input: string; output: string } }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <Lightbulb className="h-3.5 w-3.5" />
+        {open ? 'Beispiel ausblenden' : 'Beispiel anzeigen'}
+      </button>
+      {open && (
+        <p className="text-xs text-muted-foreground mt-1">
+          <span className="italic">{example.input}</span>
+          <span> → </span>
+          <span className="font-medium text-foreground">{example.output}</span>
+        </p>
+      )}
+    </div>
+  );
 }
 
 export function Transform({ content, solution, instructions, explanation, answered, onAnswer }: Props) {
@@ -96,6 +138,7 @@ export function Transform({ content, solution, instructions, explanation, answer
   // Multi-item: show all items sequentially, or single item
   if (multi) {
     const items = content.items;
+    const multiExample = getExample(instructions);
     return (
       <ExerciseCard
         question={instructions}
@@ -105,6 +148,7 @@ export function Transform({ content, solution, instructions, explanation, answer
             : null
         }
       >
+        {multiExample && !answered && <ExampleHint example={multiExample} />}
         <div className="space-y-4">
           {items.map((item, idx) => {
             const visible = idx <= currentIdx || answered;
@@ -116,7 +160,9 @@ export function Transform({ content, solution, instructions, explanation, answer
                 <div className="flex items-start gap-2">
                   <span className="text-xs font-medium text-muted-foreground mt-1">{idx + 1}.</span>
                   <div className="flex-1 space-y-2">
-                    <div className="rounded-md bg-muted p-3 text-sm text-foreground">{item.given}</div>
+                    <div className="rounded-md bg-muted p-3">
+                      <SelectableText text={item.given} className="text-sm" />
+                    </div>
                     <span className="text-xs text-muted-foreground italic">→ {item.transform_to}</span>
                     <Textarea
                       value={values[idx]}
@@ -154,6 +200,8 @@ export function Transform({ content, solution, instructions, explanation, answer
   }
 
   // Single item (original format)
+  const example = getExample(instructions);
+
   return (
     <ExerciseCard
       question={instructions}
@@ -163,7 +211,10 @@ export function Transform({ content, solution, instructions, explanation, answer
           : null
       }
     >
-      <div className="rounded-md bg-muted p-3 text-sm text-foreground">{(content as SingleContent).original}</div>
+      {example && !answered && <ExampleHint example={example} />}
+      <div className="rounded-md bg-muted p-3">
+        <SelectableText text={(content as SingleContent).original} className="text-sm" />
+      </div>
       <Textarea
         value={values[0]}
         onChange={(e) => updateValue(0, e.target.value)}

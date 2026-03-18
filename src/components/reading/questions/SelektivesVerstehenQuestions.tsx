@@ -22,7 +22,7 @@ export function SelektivesVerstehenQuestions({ questions, answers, setAnswers, c
         const questionText = language === 'de'
           ? (q.qüstion_de || q.question_de || q.text || '')
           : (q.qüstion_en || q.question_en || q.text || '');
-        const options: string[] = q.options || [];
+        const options: string[] = q.options || ['a', 'b', 'c', 'd', 'e'];
         const correct = q.correct;
         const isCorrect = checked && userAnswer === correct;
         const isWrong = checked && userAnswer && userAnswer !== correct;

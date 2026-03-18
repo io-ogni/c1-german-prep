@@ -372,7 +372,7 @@ export default function DailyPracticePage() {
             ? 'Keine Übungen oder Karteikarten verfügbar. Probieren Sie Schreiben oder fügen Sie neue Vokabeln hinzu.'
             : 'No exercises or flashcards available. Try writing or add new vocabulary.'}
         </p>
-        <Button onClick={() => navigate('/')}>{lang === 'de' ? 'Zur Startseite' : 'Back to Home'}</Button>
+        <Button onClick={() => navigate('/home')}>{lang === 'de' ? 'Zur Startseite' : 'Back to Home'}</Button>
       </div>
     );
   }
@@ -407,12 +407,12 @@ export default function DailyPracticePage() {
           {profile && (
             <p className="flex items-center justify-center gap-1 text-foreground">
               <Flame className="h-5 w-5 text-orange-500" />
-              {lang === 'de' ? 'Serie' : 'Streak'}: {profile.current_streak} {lang === 'de' ? 'Tage' : 'days'}
+              {lang === 'de' ? 'Serie' : 'Streak'}: {profile.current_streak} {lang === 'de' ? (profile.current_streak === 1 ? 'Tag' : 'Tage') : (profile.current_streak === 1 ? 'day' : 'days')}
             </p>
           )}
         </div>
         <div className="flex gap-3 justify-center">
-          <Button variant="outline" onClick={() => navigate('/')}>
+          <Button variant="outline" onClick={() => navigate('/home')}>
             {lang === 'de' ? 'Startseite' : 'Home'}
           </Button>
           <Button onClick={() => {
@@ -445,7 +445,7 @@ export default function DailyPracticePage() {
         <Button variant="ghost" size="sm" onClick={async () => {
           if (confirm(lang === 'de' ? 'Sitzung abbrechen? Dein Fortschritt wird gespeichert.' : 'End session? Your progress will be saved.')) {
             await endSession();
-            navigate('/');
+            navigate('/home');
           }
         }}>
           <ArrowLeft className="h-4 w-4 mr-1" />{lang === 'de' ? 'Startseite' : 'Home'}

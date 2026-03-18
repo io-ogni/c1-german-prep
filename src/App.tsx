@@ -26,7 +26,15 @@ import MyTextsPage from "@/pages/MyTextsPage";
 import ExamPrepPage from "@/pages/ExamPrepPage";
 import DailyPracticePage from "@/pages/DailyPracticePage";
 import SettingsPage from "@/pages/SettingsPage";
+import ITDeutschPage from "@/pages/ITDeutschPage";
+
+import ITRedewendungenPage from "@/pages/ITRedewendungenPage";
+import ITVokabularPage from "@/pages/ITVokabularPage";
+import ITUebungenPage from "@/pages/ITUebungenPage";
+import FlashcardsPage from "@/pages/FlashcardsPage";
+import WelcomePage from "@/pages/WelcomePage";
 import NotFound from "@/pages/NotFound";
+import { RootRoute } from "@/components/RootRoute";
 
 const queryClient = new QueryClient();
 
@@ -39,7 +47,11 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            {/* Public auth routes */}
+            {/* Root — welcome or dashboard depending on auth */}
+            <Route path="/" element={<RootRoute />} />
+
+            {/* Public routes */}
+            <Route path="/welcome" element={<WelcomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -47,7 +59,7 @@ const App = () => (
 
             {/* Protected routes with layout */}
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-              <Route path="/" element={<HomePage />} />
+              <Route path="/home" element={<HomePage />} />
               <Route path="/vocabulary" element={<VocabularyPage />} />
               <Route path="/grammar" element={<GrammarPage />} />
               <Route path="/grammar/verbs" element={<VerbTablePage />} />
@@ -60,6 +72,12 @@ const App = () => (
               <Route path="/my-vocabulary" element={<MyVocabularyPage />} />
               <Route path="/my-texts" element={<MyTextsPage />} />
               <Route path="/daily-practice" element={<DailyPracticePage />} />
+              <Route path="/it-deutsch" element={<ITDeutschPage />} />
+              <Route path="/it-deutsch/uebungen" element={<ITUebungenPage />} />
+
+              <Route path="/it-deutsch/redewendungen" element={<ITRedewendungenPage />} />
+              <Route path="/it-deutsch/vokabular" element={<ITVokabularPage />} />
+              <Route path="/flashcards" element={<FlashcardsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
 

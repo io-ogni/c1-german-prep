@@ -4,7 +4,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -13,7 +13,11 @@ interface Props {
   textId: string;
   textType: string;
   gapAnswers?: Record<string, string>;
-  onGapClick?: (gapNumber: string) => void;
+  gapOptions?: Record<string, { id: string; text: string }[]>;
+  gapCorrect?: Record<string, string>;
+  checked?: boolean;
+  onGapSelect?: (gapNumber: string, optionId: string) => void;
+  onGapClear?: (gapNumber: string) => void;
 }
 
 function stripPunctuation(word: string): string {
@@ -32,33 +36,186 @@ function getSentenceAtPosition(text: string, charPos: number): string {
 
 type WordKey = `${number}-${number}-${number}`;
 
-export function ClickableText({ content, textId, textType, gapAnswers, onGapClick }: Props) {
+function InlineGap({
+  gapNum,
+  assignedText,
+  assignedId,
+  options,
+  checked,
+  isCorrect,
+  isWrong,
+  correctText,
+  onSelect,
+  onClear,
+}: {
+  gapNum: string;
+  assignedText: string | null;
+  assignedId: string | null;
+  options: { id: string; text: string }[];
+  checked: boolean;
+  isCorrect: boolean;
+  isWrong: boolean;
+  correctText: string | null;
+  onSelect: (optionId: string) => void;
+  onClear: () => void;
+}) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [dropdownOpen]);
+
+  // Filled gap
+  if (assignedText) {
+    return (
+      <span ref={ref} className="inline relative">
+        <span
+          className={cn(
+            'inline rounded px-1.5 py-0.5 mx-0.5 font-medium cursor-pointer transition-colors',
+            checked && isCorrect && 'bg-primary/15 text-primary',
+            checked && isWrong && 'bg-destructive/15 text-destructive line-through',
+            !checked && 'bg-primary/15 text-primary hover:bg-primary/25'
+          )}
+          onClick={() => {
+            if (!checked) onClear();
+          }}
+        >
+          {assignedText}
+          {!checked && (
+            <button
+              className="ml-1 text-primary/60 hover:text-destructive inline align-middle text-xs"
+              onClick={(e) => { e.stopPropagation(); onClear(); }}
+            >
+              <X className="h-3 w-3 inline" />
+            </button>
+          )}
+        </span>
+        {/* Show correct answer below if wrong */}
+        {checked && isWrong && correctText && (
+          <span className="block text-xs text-primary mt-0.5 ml-0.5">
+            → {correctText}
+          </span>
+        )}
+      </span>
+    );
+  }
+
+  // Empty gap — clickable with dropdown
+  return (
+    <span ref={ref} className="inline-block relative align-bottom">
+      <button
+        className={cn(
+          'inline-flex items-center gap-0.5 min-w-[4rem] px-2 py-0.5 mx-0.5 rounded border-2 border-dashed text-sm font-medium transition-colors',
+          dropdownOpen
+            ? 'border-primary bg-primary/10 text-primary'
+            : 'border-muted-foreground/40 text-muted-foreground hover:border-primary/60 hover:bg-primary/5'
+        )}
+        onClick={() => {
+          if (!checked && options.length > 0) setDropdownOpen(!dropdownOpen);
+        }}
+        disabled={checked}
+      >
+        <span className="font-mono text-xs">{gapNum}</span>
+        {!checked && options.length > 0 && <ChevronDown className="h-3 w-3 ml-0.5" />}
+      </button>
+
+      {/* Dropdown */}
+      {dropdownOpen && !checked && (
+        <span className="absolute left-0 top-full mt-1 z-50 w-[min(28rem,85vw)] rounded-lg border bg-popover p-1 shadow-xl">
+          {options.map(opt => (
+            <button
+              key={opt.id}
+              className="w-full text-left rounded-md px-3 py-2 text-xs text-popover-foreground hover:bg-accent transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect(opt.id);
+                setDropdownOpen(false);
+              }}
+            >
+              <span className="line-clamp-2">{opt.text}</span>
+            </button>
+          ))}
+          {options.length === 0 && (
+            <span className="block px-3 py-2 text-xs text-muted-foreground italic">Keine Sätze verfügbar</span>
+          )}
+        </span>
+      )}
+
+      {/* Show correct answer if checked and was empty */}
+      {checked && correctText && (
+        <span className="block text-xs text-primary mt-0.5 ml-0.5">
+          → {correctText}
+        </span>
+      )}
+    </span>
+  );
+}
+
+export function ClickableText({
+  content,
+  textId,
+  textType,
+  gapAnswers,
+  gapOptions,
+  gapCorrect,
+  checked,
+  onGapSelect,
+  onGapClear,
+}: Props) {
   const { t } = useTranslation();
   const { profile } = useRequiredAuth();
   const [lookupCache, setLookupCache] = useState<Record<string, { word_de: string; article: string | null; translation_en: string } | null>>({});
 
-  // Selection state: ordered list of selected word keys
+  // Selection state for vocabulary lookup
   const [selectedWords, setSelectedWords] = useState<WordKey[]>([]);
   const [selectedTexts, setSelectedTexts] = useState<string[]>([]);
   const [customTranslation, setCustomTranslation] = useState('');
   const popupRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // The combined expression from selected words
   const combinedExpression = selectedTexts.join(' ');
   const firstSelectedClean = selectedTexts.length === 1 ? stripPunctuation(selectedTexts[0]) : null;
   const dictEntry = firstSelectedClean ? lookupCache[firstSelectedClean.toLowerCase()] : null;
   const hasDictTranslation = !!dictEntry?.translation_en;
 
   const lookupWord = useCallback(async (cleanWord: string) => {
-    if (lookupCache[cleanWord.toLowerCase()] !== undefined) return;
+    const key = cleanWord.toLowerCase();
+    if (lookupCache[key] !== undefined) return;
+
+    const lw = key;
+    const candidates = [lw];
+    if (lw.endsWith('e')) candidates.push(lw + 'n');
+    if (lw.endsWith('t')) candidates.push(lw.slice(0, -1) + 'en');
+    if (lw.endsWith('st')) candidates.push(lw.slice(0, -2) + 'en');
+    if (lw.endsWith('te')) candidates.push(lw.slice(0, -2) + 'en');
+    if (lw.endsWith('et')) candidates.push(lw.slice(0, -2) + 'en');
+    candidates.push(lw + 'en', lw + 'n');
+
+    const unique = [...new Set(candidates)];
+
     const { data } = await supabase
       .from('dictionary')
       .select('word_de, article, translation_en')
-      .ilike('word_de', cleanWord)
-      .limit(1)
-      .single();
-    setLookupCache(prev => ({ ...prev, [cleanWord.toLowerCase()]: data }));
+      .in('word_de', unique.map(c => c.charAt(0).toUpperCase() + c.slice(1)).concat(unique))
+      .limit(5);
+
+    if (data && data.length > 0) {
+      const exactMatch = data.find(d => d.word_de.toLowerCase() === lw);
+      const verbMatch = data.find(d => !d.article);
+      const best = exactMatch ?? verbMatch ?? data[0];
+      setLookupCache(prev => ({ ...prev, [key]: best }));
+    } else {
+      setLookupCache(prev => ({ ...prev, [key]: null }));
+    }
   }, [lookupCache]);
 
   const clearSelection = useCallback(() => {
@@ -67,7 +224,6 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
     setCustomTranslation('');
   }, []);
 
-  // ESC to dismiss
   useEffect(() => {
     if (selectedWords.length === 0) return;
     const handler = (e: KeyboardEvent) => {
@@ -77,7 +233,6 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
     return () => document.removeEventListener('keydown', handler);
   }, [selectedWords.length, clearSelection]);
 
-  // Click outside to dismiss
   useEffect(() => {
     if (selectedWords.length === 0) return;
     const handler = (e: MouseEvent) => {
@@ -93,7 +248,6 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
   }, [selectedWords.length, clearSelection]);
 
   const handleWordClick = (key: WordKey, cleanWord: string) => {
-    // Toggle: if already selected, remove it
     const idx = selectedWords.indexOf(key);
     if (idx >= 0) {
       setSelectedWords(prev => prev.filter(k => k !== key));
@@ -102,12 +256,9 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
       return;
     }
 
-    // Add to selection
     setSelectedWords(prev => [...prev, key]);
     setSelectedTexts(prev => [...prev, cleanWord]);
     setCustomTranslation('');
-
-    // Lookup single words in dictionary
     lookupWord(cleanWord);
   };
 
@@ -116,7 +267,6 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
     const expression = combinedExpression;
     if (!expression) return;
 
-    // For single words with dict entry, use dict translation; otherwise require custom
     const translation = hasDictTranslation ? dictEntry!.translation_en : customTranslation;
     if (!translation) return;
 
@@ -124,7 +274,6 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
       ? `${dictEntry.article} ${dictEntry.word_de}`
       : expression;
 
-    // Approximate sentence from first selected word position
     const sentence = getSentenceAtPosition(content, content.indexOf(stripPunctuation(selectedTexts[0])));
 
     const { error } = await supabase.from('personal_vocabulary').insert({
@@ -150,7 +299,9 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
   const needsTranslation = selectedTexts.length > 1 || !hasDictTranslation;
   const canAdd = hasSelection && (hasDictTranslation || customTranslation.trim().length > 0);
 
-  // Split content into paragraphs, then words, preserving gaps
+  const isTextrekonstruktion = textType === 'textrekonstruktion';
+  const assignedOptionsSet = new Set(Object.values(gapAnswers ?? {}));
+
   const paragraphs = content.split('\n\n');
 
   return (
@@ -163,24 +314,59 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
             <p key={pIdx}>
               {parts.map((part, partIdx) => {
                 const gapMatch = part.match(/\[___(\d+)___\]/);
-                if (gapMatch) {
+                if (gapMatch && isTextrekonstruktion) {
                   const gapNum = gapMatch[1];
-                  const assigned = gapAnswers?.[gapNum];
+                  const assignedId = gapAnswers?.[gapNum] ?? null;
+
+                  // Find the assigned option's text
+                  let assignedText: string | null = null;
+                  if (assignedId && gapOptions) {
+                    const allOpts = Object.values(gapOptions).flat();
+                    assignedText = allOpts.find(o => o.id === assignedId)?.text ?? null;
+                  }
+
+                  // Get available (unassigned) options for this gap
+                  let availableOpts: { id: string; text: string }[] = [];
+                  if (gapOptions?.[gapNum]) {
+                    // Per-gap options (Format B)
+                    availableOpts = gapOptions[gapNum].filter(o => !assignedOptionsSet.has(o.id) || o.id === assignedId);
+                    // Exclude the currently assigned one from dropdown
+                    availableOpts = availableOpts.filter(o => o.id !== assignedId);
+                  } else if (gapOptions?.['_shared']) {
+                    // Shared pool (Format A)
+                    availableOpts = gapOptions['_shared'].filter(o => !assignedOptionsSet.has(o.id));
+                  }
+
+                  const isCorrect = !!checked && !!assignedId && gapCorrect?.[gapNum] === assignedId;
+                  const isWrong = !!checked && !!assignedId && gapCorrect?.[gapNum] !== assignedId;
+                  const isEmpty = !assignedId;
+                  const isWrongEmpty = !!checked && isEmpty;
+
+                  // Find correct answer text for display when wrong
+                  let correctText: string | null = null;
+                  if ((isWrong || isWrongEmpty) && gapCorrect?.[gapNum] && gapOptions) {
+                    const allOpts = Object.values(gapOptions).flat();
+                    correctText = allOpts.find(o => o.id === gapCorrect[gapNum])?.text ?? null;
+                  }
+
                   return (
-                    <span
+                    <InlineGap
                       key={partIdx}
-                      className={`inline-block min-w-[3rem] mx-1 px-2 py-0.5 rounded border-2 border-dashed text-sm font-medium cursor-pointer transition-colors ${
-                        assigned
-                          ? 'border-primary bg-primary/10 text-primary'
-                          : 'border-muted-foreground/30 text-muted-foreground'
-                      }`}
-                      onClick={() => onGapClick?.(gapNum)}
-                    >
-                      {assigned ? `[${assigned}]` : `___${gapNum}___`}
-                    </span>
+                      gapNum={gapNum}
+                      assignedText={assignedText}
+                      assignedId={assignedId}
+                      options={availableOpts}
+                      checked={!!checked}
+                      isCorrect={isCorrect}
+                      isWrong={isWrong}
+                      correctText={correctText}
+                      onSelect={(optId) => onGapSelect?.(gapNum, optId)}
+                      onClear={() => onGapClear?.(gapNum)}
+                    />
                   );
                 }
 
+                // Regular text — clickable words for dictionary lookup
                 const words = part.split(/(\s+)/);
                 return (
                   <Fragment key={partIdx}>
@@ -222,7 +408,7 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
       {hasSelection && (
         <div
           ref={popupRef}
-          className="sticky bottom-4 mt-4 mx-auto max-w-md rounded-xl border-2 border-primary/30 bg-primary/5 p-4 shadow-xl shadow-primary/10 space-y-2 backdrop-blur-sm"
+          className="sticky bottom-4 mt-4 mx-auto max-w-md rounded-xl border-2 border-primary/30 bg-card p-4 shadow-xl space-y-2"
         >
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
@@ -240,12 +426,10 @@ export function ClickableText({ content, textId, textType, gapAnswers, onGapClic
             </Button>
           </div>
 
-          {/* Show dict translation if available for single word */}
           {hasDictTranslation && (
             <p className="text-xs text-muted-foreground">EN: {dictEntry!.translation_en}</p>
           )}
 
-          {/* Translation input — required when no dict entry or multi-word */}
           {needsTranslation && (
             <div className="space-y-1">
               <Input

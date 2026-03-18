@@ -9,9 +9,12 @@ import { Badge } from '@/components/ui/badge';
 import { TelcBadge } from '@/components/shared/TelcBadge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, Loader2, PenLine, FileText, GraduationCap, AlertCircle, Copy, CheckCheck } from 'lucide-react';
+import { Loader2, PenLine, FileText, GraduationCap, AlertCircle, Copy, CheckCheck } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
+import {
+  Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import type { Tables } from '@/integrations/supabase/types';
 
 type WritingPrompt = Tables<'writing_prompts'>;
@@ -181,32 +184,53 @@ function LevelSelector({ onSelect }: { onSelect: (level: WritingLevel) => void }
   );
 }
 
+// ─── Level label helper ──────────────────────────────
+
+function useLevelLabel(level: WritingLevel | null) {
+  const { t } = useTranslation();
+  if (!level) return '';
+  return t(`writing_${level}` as any) as string;
+}
+
 // ─── Prompt List ──────────────────────────────────────
 
 function PromptList({
   prompts,
   submissions,
   hasApiKey,
+  level,
   onSelect,
   onChangeLevel,
 }: {
   prompts: WritingPrompt[];
   submissions: Map<string, WritingSubmission>;
   hasApiKey: boolean;
+  level: WritingLevel;
   onSelect: (p: WritingPrompt) => void;
   onChangeLevel: () => void;
 }) {
   const { t } = useTranslation();
   const { profile } = useRequiredAuth();
   const lang = profile?.ui_language || 'de';
+  const levelLabel = useLevelLabel(level);
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={onChangeLevel}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-2xl font-bold text-foreground">{t('page_writing')}</h1>
+      <div className="space-y-1">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink className="cursor-pointer" onClick={onChangeLevel}>
+                {t('page_writing')}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{levelLabel}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <h1 className="text-2xl font-bold text-foreground">{levelLabel}</h1>
       </div>
       {!hasApiKey && <ApiKeyBanner />}
       <div className="grid gap-3">
@@ -365,13 +389,17 @@ function WritingInterface({
   prompt,
   existingSubmission,
   hasApiKey,
+  level,
   onBack,
+  onBackToLevels,
   onSubmitted,
 }: {
   prompt: WritingPrompt;
   existingSubmission?: WritingSubmission;
   hasApiKey: boolean;
+  level: WritingLevel;
   onBack: () => void;
+  onBackToLevels: () => void;
   onSubmitted: (sub: WritingSubmission) => void;
 }) {
   const { t } = useTranslation();
@@ -439,17 +467,37 @@ function WritingInterface({
     }
   };
 
+  const levelLabel = useLevelLabel(level);
+
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={onBack}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h2 className="text-xl font-bold text-foreground">
-          {lang === 'de' ? prompt.title_de : prompt.title_en}
-        </h2>
-        {prompt.exam_format === 'telc' && <TelcBadge />}
+      <div className="space-y-1">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink className="cursor-pointer" onClick={onBackToLevels}>
+                {t('page_writing')}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink className="cursor-pointer" onClick={onBack}>
+                {levelLabel}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{lang === 'de' ? prompt.title_de : prompt.title_en}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-bold text-foreground">
+            {lang === 'de' ? prompt.title_de : prompt.title_en}
+          </h2>
+          {prompt.exam_format === 'telc' && <TelcBadge />}
+        </div>
       </div>
 
       {!hasApiKey && <ApiKeyBanner />}
@@ -585,13 +633,21 @@ export default function WritingPage() {
     return <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   }
 
+  const handleChangeLevel = async () => {
+    if (!user) return;
+    await supabase.from('profiles').update({ writing_level: null }).eq('user_id', user.id);
+    await refreshProfile();
+  };
+
   if (selectedPrompt) {
     return (
       <WritingInterface
         prompt={selectedPrompt}
         existingSubmission={submissions.get(selectedPrompt.id)}
         hasApiKey={hasApiKey}
+        level={writingLevel}
         onBack={() => setSelectedPrompt(null)}
+        onBackToLevels={handleChangeLevel}
         onSubmitted={(sub) => {
           setSubmissions((prev) => new Map(prev).set(sub.prompt_id, sub));
         }}
@@ -599,17 +655,12 @@ export default function WritingPage() {
     );
   }
 
-  const handleChangeLevel = async () => {
-    if (!user) return;
-    await supabase.from('profiles').update({ writing_level: null }).eq('user_id', user.id);
-    await refreshProfile();
-  };
-
   return (
     <PromptList
       prompts={prompts}
       submissions={submissions}
       hasApiKey={hasApiKey}
+      level={writingLevel}
       onSelect={setSelectedPrompt}
       onChangeLevel={handleChangeLevel}
     />

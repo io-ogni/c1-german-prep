@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown, BookOpen, FileText } from 'lucide-react';
+import { Menu, X, ChevronDown, BookOpen, FileText, Layers } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useRequiredAuth } from '@/contexts/AuthContext';
 import {
@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-const mainLinks = [
+const examLinks = [
   { key: 'nav_vocabulary' as const, path: '/vocabulary' },
   { key: 'nav_grammar' as const, path: '/grammar' },
   { key: 'nav_writing' as const, path: '/writing' },
@@ -22,6 +22,12 @@ const mainLinks = [
   { key: 'nav_exam_prep' as const, path: '/exam-prep' },
 ];
 
+const itLinks = [
+  { key: 'nav_it_deutsch' as const, path: '/it-deutsch' },
+];
+
+const allLinks = [...examLinks, ...itLinks];
+
 export function Navbar() {
   const { t } = useTranslation();
   const { user, profile, logout } = useRequiredAuth();
@@ -29,20 +35,20 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const isActive = (path: string) => {
-    if (path === '/') return location.pathname === '/';
+    if (path === '/home') return location.pathname === '/home';
     return location.pathname.startsWith(path);
   };
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
       <div className="container mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2 font-bold text-lg text-foreground">
+        <Link to="/home" className="flex items-center gap-2 font-bold text-lg text-foreground">
           <span className="text-primary">C1</span>
           <span>Werkstatt</span>
         </Link>
 
         <div className="hidden items-center gap-1 lg:flex">
-          {mainLinks.map((link) => (
+          {examLinks.map((link) => (
             <Link
               key={link.path}
               to={link.path}
@@ -56,6 +62,18 @@ export function Navbar() {
               {t(link.key)}
             </Link>
           ))}
+          <div className="mx-1 h-5 w-px bg-border" />
+          <Link
+            to="/it-deutsch"
+            className={cn(
+              'rounded-md px-3 py-1.5 text-sm font-bold transition-colors bg-gradient-to-r from-pink-500/10 to-fuchsia-500/10 border border-pink-400/30',
+              isActive('/it-deutsch')
+                ? 'text-fuchsia-600 dark:text-fuchsia-400 border-fuchsia-400/50'
+                : 'text-fuchsia-600/80 dark:text-fuchsia-400/80 hover:border-fuchsia-400/50 hover:from-pink-500/15 hover:to-fuchsia-500/15'
+            )}
+          >
+            {t('nav_it_deutsch')}
+          </Link>
         </div>
 
         <div className="hidden items-center gap-2 lg:flex">
@@ -80,6 +98,12 @@ export function Navbar() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
+                <Link to="/flashcards" className="flex items-center gap-2">
+                  <Layers className="h-4 w-4" />
+                  Lernkarten
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link to="/settings">{t('nav_settings')}</Link>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={logout}>{t('nav_logout')}</DropdownMenuItem>
@@ -98,7 +122,7 @@ export function Navbar() {
       {mobileOpen && (
         <div className="border-t border-border bg-card px-4 pb-4 pt-2 lg:hidden">
           <div className="flex flex-col gap-1">
-            {mainLinks.map((link) => (
+            {examLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
@@ -114,11 +138,27 @@ export function Navbar() {
               </Link>
             ))}
             <div className="my-2 border-t border-border" />
+            <Link
+              to="/it-deutsch"
+              onClick={() => setMobileOpen(false)}
+              className={cn(
+                'rounded-md px-3 py-2 text-sm font-bold transition-colors bg-gradient-to-r from-pink-500/10 to-fuchsia-500/10 border border-pink-400/30',
+                isActive('/it-deutsch')
+                  ? 'text-fuchsia-600 dark:text-fuchsia-400'
+                  : 'text-fuchsia-600/80 dark:text-fuchsia-400/80'
+              )}
+            >
+              {t('nav_it_deutsch')}
+            </Link>
+            <div className="my-2 border-t border-border" />
             <Link to="/my-vocabulary" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
               <BookOpen className="h-4 w-4" /> {t('nav_my_vocabulary')}
             </Link>
             <Link to="/my-texts" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
               <FileText className="h-4 w-4" /> {t('nav_my_texts')}
+            </Link>
+            <Link to="/flashcards" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+              <Layers className="h-4 w-4" /> Lernkarten
             </Link>
             <Link to="/settings" onClick={() => setMobileOpen(false)} className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
               {t('nav_settings')}

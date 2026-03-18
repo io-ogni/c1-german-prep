@@ -27,6 +27,11 @@ const TOPIC_NAMES: Record<string, { de: string; en: string; telc?: boolean }> = 
   n_deklination: { de: 'N-Deklination', en: 'N-Declension' },
   nomen_verb_verbindungen: { de: 'Nomen-Verb-Verbindungen', en: 'Noun-Verb Combinations' },
   subjektlose_passivkonstruktionen: { de: 'Subjektlose Passivkonstruktionen', en: 'Subjectless Passive' },
+  konjunktiv_i: { de: 'Konjunktiv I (Indirekte Rede)', en: 'Subjunctive I (Indirect Speech)' },
+  partizipialgruppen: { de: 'Partizipialgruppen', en: 'Participial Phrases' },
+  modalpartikeln: { de: 'Modalpartikeln', en: 'Modal Particles' },
+  funktionsverbgefuege: { de: 'Funktionsverbgefüge', en: 'Light Verb Constructions' },
+  komplexe_satzstrukturen: { de: 'Komplexe Satzstrukturen', en: 'Complex Sentence Structures' },
   sprachbausteine: { de: 'Sprachbausteine (telc)', en: 'Language Building Blocks (telc)', telc: true },
 };
 

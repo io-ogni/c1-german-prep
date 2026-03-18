@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
+import { SelectableText } from '@/components/shared/SelectableText';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -76,7 +77,7 @@ function SingleWordFamily({ content, solution, instructions, explanation, answer
       }
     >
       <div className="text-center space-y-2 py-2">
-        <p className="text-lg font-semibold text-foreground">{content?.word}</p>
+        <SelectableText text={content?.word ?? ''} className="text-lg font-semibold" />
         <p className="text-sm text-muted-foreground">{content?.target_type}</p>
       </div>
       <div className="flex gap-2">
@@ -160,7 +161,9 @@ function MultiItemWordFamily({
       }
     >
       <div className="space-y-2 py-2">
-        <div className="rounded-md bg-muted p-3 text-sm text-foreground">{current.given}</div>
+        <div className="rounded-md bg-muted p-3">
+          <SelectableText text={current.given} className="text-sm" />
+        </div>
         <p className="text-xs text-muted-foreground italic">→ {current.transform_to}{current.hint ? ` (${current.hint})` : ''}</p>
       </div>
       <div className="flex gap-2">

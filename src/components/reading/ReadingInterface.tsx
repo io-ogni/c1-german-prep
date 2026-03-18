@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { useRequiredAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
@@ -39,6 +39,55 @@ export function ReadingInterface({ text, onBack }: Props) {
   const [selfScore, setSelfScore] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const timerSecondsRef = useRef(0);
+
+  const isTextrekonstruktion = text.text_type === 'textrekonstruktion';
+  const isArrayFormat = isTextrekonstruktion && Array.isArray(text.questions);
+
+  // Build gap options and correct map for textrekonstruktion
+  const { gapOptions, gapCorrect } = useMemo(() => {
+    if (!isTextrekonstruktion) return { gapOptions: undefined, gapCorrect: undefined };
+
+    const q = text.questions;
+    let opts: Record<string, { id: string; text: string }[]> = {};
+    let corr: Record<string, string> = {};
+
+    if (isArrayFormat) {
+      // Format B: per-gap options
+      (q as any[]).forEach((item: any) => {
+        const pos = String(item.position || item.id?.replace('gap', ''));
+        opts[pos] = (item.options || []).map((opt: string) => ({
+          id: `${pos}-${opt}`,
+          text: opt,
+        }));
+        corr[pos] = `${pos}-${item.correct}`;
+      });
+    } else {
+      // Format A: shared pool
+      const options = q.options || [];
+      opts['_shared'] = options;
+      corr = q.correct || {};
+    }
+
+    return { gapOptions: opts, gapCorrect: corr };
+  }, [text.questions, isTextrekonstruktion, isArrayFormat]);
+
+  const handleGapSelect = useCallback((gapNum: string, optionId: string) => {
+    if (checked) return;
+    const newAnswers = { ...answers };
+    // Remove this option from any other gap
+    for (const [gap, val] of Object.entries(newAnswers)) {
+      if (val === optionId) delete newAnswers[gap];
+    }
+    newAnswers[gapNum] = optionId;
+    setAnswers(newAnswers);
+  }, [answers, checked, setAnswers]);
+
+  const handleGapClear = useCallback((gapNum: string) => {
+    if (checked) return;
+    const newAnswers = { ...answers };
+    delete newAnswers[gapNum];
+    setAnswers(newAnswers);
+  }, [answers, checked, setAnswers]);
 
   const handleRetry = () => {
     setAnswers({});
@@ -151,10 +200,12 @@ export function ReadingInterface({ text, onBack }: Props) {
             content={text.text_content}
             textId={text.id}
             textType={text.text_type}
-            gapAnswers={text.text_type === 'textrekonstruktion' ? answers : undefined}
-            onGapClick={text.text_type === 'textrekonstruktion' ? (gap) => {
-              // handled by TextrekonstruktionQuestions
-            } : undefined}
+            gapAnswers={isTextrekonstruktion ? answers : undefined}
+            gapOptions={gapOptions}
+            gapCorrect={gapCorrect}
+            checked={checked}
+            onGapSelect={handleGapSelect}
+            onGapClear={handleGapClear}
           />
         </CardContent>
       </Card>

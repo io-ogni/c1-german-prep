@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
+import { SelectableText } from '@/components/shared/SelectableText';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -83,9 +84,9 @@ function SingleMC({ content, solution, instructions, explanation, answered, onAn
       }
     >
       {(content?.context || content?.sentence) && (
-        <p className="text-sm text-foreground leading-relaxed bg-muted rounded-md p-3">
-          {content.context ?? content.sentence}
-        </p>
+        <div className="bg-muted rounded-md p-3">
+          <SelectableText text={content.context ?? content.sentence} className="text-sm" />
+        </div>
       )}
       <div className="grid gap-2">
         {shuffled.options.map((opt: { text: string; origIdx: number }, idx: number) => (
@@ -135,11 +136,6 @@ function MultiStepMC({
   const correctAnswer = current?.correct ?? answers[subIndex] ?? '';
   const isLast = subIndex === questions.length - 1;
 
-  const sentenceHtml = questionText.replace(
-    /___/g,
-    '<span class="inline-block border-b-2 border-primary px-2 mx-1 min-w-[4rem]">&nbsp;</span>'
-  );
-
   const handleSelect = (idx: number) => {
     if (subAnswered || parentAnswered) return;
     const opt = current.options[idx];
@@ -182,10 +178,7 @@ function MultiStepMC({
           : null
       }
     >
-      <p
-        className="text-base text-foreground leading-relaxed py-2"
-        dangerouslySetInnerHTML={{ __html: sentenceHtml }}
-      />
+      <SelectableText text={questionText} className="py-2" />
       <div className="grid gap-2 sm:grid-cols-2">
         {current.options.map((opt, idx) => (
           <Button

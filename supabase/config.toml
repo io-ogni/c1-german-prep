@@ -1,5 +1,8 @@
 project_id = "ctyblvmermwkcuavzkdr"
 
+[functions.delete-account]
+verify_jwt = false
+
 [functions.evaluate-writing]
 verify_jwt = false
 

@@ -11,9 +11,9 @@ export function LevelTabs({ value, onValueChange }: LevelTabsProps) {
 
   return (
     <Tabs value={value} onValueChange={(v) => onValueChange(v as 'b2' | 'c1')}>
-      <TabsList>
-        <TabsTrigger value="b2">{t('level_b2_refresh')}</TabsTrigger>
-        <TabsTrigger value="c1">{t('level_c1_new')}</TabsTrigger>
+      <TabsList className="bg-muted/80 border border-border">
+        <TabsTrigger value="b2" className="data-[state=inactive]:text-foreground/70 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">{t('level_b2_refresh')}</TabsTrigger>
+        <TabsTrigger value="c1" className="data-[state=inactive]:text-foreground/70 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">{t('level_c1_new')}</TabsTrigger>
       </TabsList>
     </Tabs>
   );

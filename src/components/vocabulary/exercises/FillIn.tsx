@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
+import { SelectableText } from '@/components/shared/SelectableText';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -24,11 +25,6 @@ export function FillIn({ content, solution, instructions, explanation, answered,
     onAnswer(idx === solution.correct);
   };
 
-  // Highlight the blank
-  const sentenceHtml = (content?.sentence ?? '').replace(
-    /___/g,
-    '<span class="inline-block border-b-2 border-primary px-2 mx-1 min-w-[4rem]">&nbsp;</span>'
-  );
   const options = content?.options ?? [];
 
   return (
@@ -45,10 +41,7 @@ export function FillIn({ content, solution, instructions, explanation, answered,
           : null
       }
     >
-      <p
-        className="text-base text-foreground leading-relaxed py-2"
-        dangerouslySetInnerHTML={{ __html: sentenceHtml }}
-      />
+      <SelectableText text={content?.sentence ?? ''} className="py-2" />
       <div className="grid gap-2 sm:grid-cols-2">
         {options.map((opt, idx) => (
           <Button

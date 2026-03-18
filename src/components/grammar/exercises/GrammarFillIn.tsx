@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
+import { SelectableText } from '@/components/shared/SelectableText';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -58,18 +59,34 @@ function SingleSentenceFillIn({ content, solution, instructions, explanation, an
   const [value, setValue] = useState('');
   const { t } = useTranslation();
 
-  const correctAnswer = solution?.correct ?? '';
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Reset input and focus when exercise changes
+  const prevContent = useRef(content);
+  useEffect(() => {
+    if (prevContent.current !== content) {
+      prevContent.current = content;
+      setValue('');
+    }
+    inputRef.current?.focus();
+  }, [content]);
+
+  const rawCorrect = solution?.correct ?? '';
+  // correct may be a string, array, or numeric index into content.options
+  let correctAnswer: string;
+  if (typeof rawCorrect === 'number' && content?.options) {
+    correctAnswer = content.options[rawCorrect] ?? String(rawCorrect);
+  } else if (Array.isArray(rawCorrect)) {
+    correctAnswer = rawCorrect[0] ?? '';
+  } else {
+    correctAnswer = String(rawCorrect);
+  }
   const isCorrect = value.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
 
   const handleCheck = () => {
     if (!value.trim()) return;
     onAnswer(isCorrect);
   };
-
-  const sentenceHtml = (content?.sentence ?? '').replace(
-    /___/g,
-    '<span class="inline-block border-b-2 border-primary px-2 mx-1 min-w-[4rem]">&nbsp;</span>'
-  );
 
   return (
     <ExerciseCard
@@ -80,26 +97,25 @@ function SingleSentenceFillIn({ content, solution, instructions, explanation, an
               correct: isCorrect,
               message: isCorrect
                 ? t('exercise_correct')
-                : `${t('exercise_correct_answer')}: ${solution.full_answer ?? solution.correct}${explanation ? ` — ${explanation}` : ''}`,
+                : `${t('exercise_correct_answer')}: ${solution.full_answer ?? correctAnswer}${explanation ? ` — ${explanation}` : ''}`,
             }
           : null
       }
     >
-      <p
-        className="text-base text-foreground leading-relaxed py-2"
-        dangerouslySetInnerHTML={{ __html: sentenceHtml }}
-      />
+      <SelectableText text={content?.sentence ?? ''} className="py-2" />
       {content?.hint && (
         <p className="text-xs text-muted-foreground italic">{content.hint}</p>
       )}
       <div className="flex gap-2">
         <Input
+          ref={inputRef}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && !answered && handleCheck()}
           placeholder="..."
           disabled={answered}
           className="flex-1"
+          autoFocus
         />
         {!answered && (
           <Button onClick={handleCheck} disabled={!value.trim()}>
@@ -148,13 +164,16 @@ function MultiSentenceFillIn({
   }, [sentences]);
 
   const current = sentences[subIndex] ?? { text: '', options: [] };
-  const correctAnswer = answers[subIndex] ?? '';
+  const rawAnswer = answers[subIndex] ?? '';
+  let correctAnswer: string;
+  if (typeof rawAnswer === 'number' && current?.options) {
+    correctAnswer = current.options[rawAnswer] ?? String(rawAnswer);
+  } else if (Array.isArray(rawAnswer)) {
+    correctAnswer = rawAnswer[0] ?? '';
+  } else {
+    correctAnswer = String(rawAnswer);
+  }
   const isLast = subIndex === sentences.length - 1;
-
-  const sentenceHtml = (current?.text ?? '').replace(
-    /___/g,
-    '<span class="inline-block border-b-2 border-primary px-2 mx-1 min-w-[4rem]">&nbsp;</span>'
-  );
 
   const handleSelect = (idx: number) => {
     if (subAnswered || parentAnswered) return;
@@ -199,10 +218,7 @@ function MultiSentenceFillIn({
           : null
       }
     >
-      <p
-        className="text-base text-foreground leading-relaxed py-2"
-        dangerouslySetInnerHTML={{ __html: sentenceHtml }}
-      />
+      <SelectableText text={current?.text ?? ''} className="py-2" />
       {current.options && (
         <div className="grid gap-2 sm:grid-cols-2">
           {current.options.map((opt, idx) => (
