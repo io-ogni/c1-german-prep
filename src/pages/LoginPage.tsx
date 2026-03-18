@@ -101,7 +101,7 @@ export default function LoginPage() {
             <Code className="h-5 w-5 shrink-0" />
             <div>
               <p className="font-bold text-sm">Deutsch für IT-ler</p>
-              <p className="text-xs text-white/70">265+ Phrasen für Meetings, Refinements & Krisen</p>
+              <p className="text-xs text-white/70">265+ Phrasen für Meetings & Refinements</p>
             </div>
           </motion.div>
         </div>

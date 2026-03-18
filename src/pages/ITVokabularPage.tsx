@@ -1,6 +1,6 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
-import { Search, Languages, Zap, Link2, Presentation, GitBranch, Shield, AlertTriangle, Star } from 'lucide-react';
+import { Search, Languages, Zap, Link2, Presentation, GitBranch, Shield, AlertTriangle, Star, Volume2 } from 'lucide-react';
 import { ITDeutschNav } from '@/components/layout/ITDeutschNav';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
@@ -355,6 +355,11 @@ const PHASE_COLORS: Record<string, string> = {
   Estimation: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
   Critique: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
   'Agile Process': 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300',
+  'Technische Probleme': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+  'Unterbrochen werden': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+  'Wortsuche': 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300',
+  'Re-Sync': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+  'Aufgabe ablehnen': 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
 };
 
 function matches(text: string, query: string): boolean {
@@ -363,6 +368,7 @@ function matches(text: string, query: string): boolean {
 
 const WORKSHOP_PHASES = ['Alle', 'Opening', 'Flow', 'Interruption', 'Change Topic', 'Conflict', 'Engagement', 'Action', 'Closing', 'Idioms'] as const;
 const REFINEMENT_CATEGORIES = ['Alle', 'Opening', 'Unclear Story', 'Value/User', 'Acceptance Criteria', 'Implementation', 'Negotiation', 'Estimation', 'Critique', 'Agile Process', 'Idioms', 'Closing'] as const;
+const COMPOSURE_SITUATIONS = ['Alle', 'Technische Probleme', 'Unterbrochen werden', 'Wortsuche', 'Re-Sync', 'Aufgabe ablehnen'] as const;
 
 const FUCHSIA_TAB = 'data-[state=active]:bg-fuchsia-500 data-[state=active]:text-white data-[state=active]:shadow-sm';
 
@@ -386,6 +392,17 @@ export default function ITVokabularPage() {
   const [search, setSearch] = useState('');
   const [workshopPhase, setWorkshopPhase] = useState('Alle');
   const [refinementCategory, setRefinementCategory] = useState('Alle');
+  const [composureSituation, setComposureSituation] = useState('Alle');
+  const speakingRef = useRef(false);
+
+  const speak = useCallback((text: string) => {
+    if (speakingRef.current) { speechSynthesis.cancel(); speakingRef.current = false; return; }
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'de-DE';
+    u.onend = () => { speakingRef.current = false; };
+    speakingRef.current = true;
+    speechSynthesis.speak(u);
+  }, []);
   const [selectedRows, setSelectedRows] = useState<Set<string>>(() => loadHighlights(userId));
 
   useEffect(() => { saveHighlights(userId, selectedRows); }, [userId, selectedRows]);
@@ -430,8 +447,11 @@ export default function ITVokabularPage() {
   );
 
   const filteredComposure = useMemo(
-    () => COMPOSURE_PHRASES.filter(p => !search || matches(p.de, search) || matches(p.en, search) || matches(p.situation, search)),
-    [search]
+    () => COMPOSURE_PHRASES.filter(p =>
+      (composureSituation === 'Alle' || p.situation === composureSituation) &&
+      (!search || matches(p.de, search) || matches(p.en, search) || matches(p.situation, search))
+    ),
+    [search, composureSituation]
   );
 
   const filteredCrisis = useMemo(
@@ -755,14 +775,26 @@ export default function ITVokabularPage() {
 
         {/* ── Souveränität ── */}
         <TabsContent value="souveraenitaet">
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {COMPOSURE_SITUATIONS.map(s => (
+              <Badge
+                key={s}
+                variant={composureSituation === s ? 'default' : 'outline'}
+                className={`cursor-pointer text-[10px] ${composureSituation === s ? '' : (PHASE_COLORS[s] || '')}`}
+                onClick={() => setComposureSituation(s)}
+              >
+                {s}
+              </Badge>
+            ))}
+          </div>
           <div className="hidden md:block rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[40px] text-xs font-semibold text-muted-foreground">#</TableHead>
-                  <TableHead className="min-w-[160px] text-xs font-semibold text-muted-foreground">Situation</TableHead>
-                  <TableHead className="min-w-[400px] text-xs font-semibold text-muted-foreground">Deutsch</TableHead>
+                  <TableHead className="min-w-[120px] text-xs font-semibold text-muted-foreground">Situation</TableHead>
                   <TableHead className="min-w-[300px] text-xs font-semibold text-muted-foreground">English</TableHead>
+                  <TableHead className="min-w-[400px] text-xs font-semibold text-muted-foreground">Deutsch</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -774,9 +806,16 @@ export default function ITVokabularPage() {
                       <TableCell className="text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">{sel && <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-400 shrink-0" />}{i + 1}</span>
                       </TableCell>
-                      <TableCell><Badge variant="outline" className="text-[10px] font-semibold">{p.situation}</Badge></TableCell>
-                      <TableCell className="text-base font-semibold text-foreground">{p.de}</TableCell>
+                      <TableCell><Badge className={`text-[10px] font-semibold border-0 ${PHASE_COLORS[p.situation] || ''}`}>{p.situation}</Badge></TableCell>
                       <TableCell className="text-sm text-muted-foreground">{p.en}</TableCell>
+                      <TableCell>
+                        <div className="flex items-start gap-2">
+                          <span className="text-base font-semibold text-foreground">{p.de}</span>
+                          <button onClick={(e) => { e.stopPropagation(); speak(p.de); }} className="shrink-0 mt-0.5 text-muted-foreground hover:text-fuchsia-500 transition-colors">
+                            <Volume2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -790,8 +829,13 @@ export default function ITVokabularPage() {
               return (
                 <div key={i} onClick={() => toggleRow(key)} className={`relative rounded-lg border p-4 space-y-2 cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
                   {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
-                  <Badge variant="outline" className="text-[10px] font-semibold">{p.situation}</Badge>
-                  <p className="text-base font-semibold text-foreground">{p.de}</p>
+                  <Badge className={`text-[10px] font-semibold border-0 ${PHASE_COLORS[p.situation] || ''}`}>{p.situation}</Badge>
+                  <div className="flex items-start gap-2">
+                    <p className="text-base font-semibold text-foreground">{p.de}</p>
+                    <button onClick={(e) => { e.stopPropagation(); speak(p.de); }} className="shrink-0 mt-0.5 text-muted-foreground hover:text-fuchsia-500 transition-colors">
+                      <Volume2 className="h-4 w-4" />
+                    </button>
+                  </div>
                   <p className="text-sm text-muted-foreground">{p.en}</p>
                 </div>
               );
@@ -807,8 +851,8 @@ export default function ITVokabularPage() {
                 <TableRow>
                   <TableHead className="w-[40px] text-xs font-semibold text-muted-foreground">#</TableHead>
                   <TableHead className="min-w-[250px] text-xs font-semibold text-muted-foreground">Krise / Trigger</TableHead>
-                  <TableHead className="min-w-[350px] text-xs font-semibold text-muted-foreground">C1 Kill-Phrase</TableHead>
                   <TableHead className="min-w-[200px] text-xs font-semibold text-muted-foreground">Strategie</TableHead>
+                  <TableHead className="min-w-[350px] text-xs font-semibold text-muted-foreground">C1 Kill-Phrase</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -821,8 +865,15 @@ export default function ITVokabularPage() {
                         <span className="flex items-center gap-1">{sel && <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-400 shrink-0" />}{i + 1}</span>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{c.trigger}</TableCell>
-                      <TableCell className="text-base font-semibold text-fuchsia-600 dark:text-fuchsia-400">{c.response}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{c.strategy}</TableCell>
+                      <TableCell>
+                        <div className="flex items-start gap-2">
+                          <span className="text-base font-semibold text-fuchsia-600 dark:text-fuchsia-400">{c.response}</span>
+                          <button onClick={(e) => { e.stopPropagation(); speak(c.response); }} className="shrink-0 mt-0.5 text-muted-foreground hover:text-fuchsia-500 transition-colors">
+                            <Volume2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -837,7 +888,12 @@ export default function ITVokabularPage() {
                 <div key={i} onClick={() => toggleRow(key)} className={`relative rounded-lg border p-4 space-y-2 cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
                   {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
                   <p className="text-sm text-muted-foreground">{c.trigger}</p>
-                  <p className="text-base font-semibold text-fuchsia-600 dark:text-fuchsia-400">{c.response}</p>
+                  <div className="flex items-start gap-2">
+                    <p className="text-base font-semibold text-fuchsia-600 dark:text-fuchsia-400">{c.response}</p>
+                    <button onClick={(e) => { e.stopPropagation(); speak(c.response); }} className="shrink-0 mt-0.5 text-muted-foreground hover:text-fuchsia-500 transition-colors">
+                      <Volume2 className="h-4 w-4" />
+                    </button>
+                  </div>
                   <p className="text-xs text-muted-foreground">{c.strategy}</p>
                 </div>
               );
