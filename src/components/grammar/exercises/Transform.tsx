@@ -9,6 +9,7 @@ import { Lightbulb } from 'lucide-react';
 
 interface SingleContent {
   original: string;
+  instruction?: string;
 }
 
 interface MultiContent {
@@ -212,6 +213,9 @@ export function Transform({ content, solution, instructions, explanation, answer
       }
     >
       {example && !answered && <ExampleHint example={example} />}
+      {(content as SingleContent).instruction && (
+        <p className="text-sm font-medium text-primary">{(content as SingleContent).instruction}</p>
+      )}
       <div className="rounded-md bg-muted p-3">
         <SelectableText text={(content as SingleContent).original} className="text-sm" />
       </div>

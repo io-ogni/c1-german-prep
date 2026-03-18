@@ -45,12 +45,24 @@ export function SentenceBuild({ content, solution, instructions, explanation, an
       }
     >
       <div className="space-y-2">
-        <div className="rounded-md bg-muted p-3">
-          <SelectableText text={`1. ${content.sentence_a}`} className="text-sm" />
-        </div>
-        <div className="rounded-md bg-muted p-3">
-          <SelectableText text={`2. ${content.sentence_b}`} className="text-sm" />
-        </div>
+        {content.sentence_a && (
+          <div className="rounded-md bg-muted p-3">
+            <SelectableText text={`1. ${content.sentence_a}`} className="text-sm" />
+          </div>
+        )}
+        {content.sentence_b && (
+          <div className="rounded-md bg-muted p-3">
+            <SelectableText text={`2. ${content.sentence_b}`} className="text-sm" />
+          </div>
+        )}
+        {(content as any).original && (
+          <div className="rounded-md bg-muted p-3">
+            <SelectableText text={(content as any).original} className="text-sm" />
+          </div>
+        )}
+        {(content as any).instruction && (
+          <p className="text-sm font-medium text-primary">{(content as any).instruction}</p>
+        )}
       </div>
       <Textarea
         value={value}
