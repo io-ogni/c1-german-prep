@@ -383,6 +383,13 @@ export default function SpeakingPage() {
           </div>
           <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
         </Link>
+        <Link to="/speaking/expressions" className="flex items-center justify-between rounded-lg border border-border bg-card p-4 hover:bg-accent/50 transition-colors group">
+          <div>
+            <p className="font-semibold text-foreground">C1/C2 Ausdrücke</p>
+            <p className="text-xs text-muted-foreground">72 gehobene Ausdrücke mit Illustrationen</p>
+          </div>
+          <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+        </Link>
       </div>
     </div>
   );
