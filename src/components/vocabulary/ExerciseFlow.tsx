@@ -35,6 +35,13 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
   const { t, lang } = useTranslation();
   const auth = useAuth();
 
+  // Invalidate progress cache on unmount so next entry gets fresh data
+  useEffect(() => {
+    return () => {
+      queryClient.invalidateQueries({ queryKey: ['exercise-progress', area, topic] });
+    };
+  }, [queryClient, area, topic]);
+
   const dbLevel = level === 'b2' ? 'b2_refresh' : level;
 
   // Fetch all exercises for this topic
@@ -72,32 +79,42 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
     enabled: !!allExercises?.length && !!auth?.user,
   });
 
-  // Build the exercise queue: failed first → unattempted → skip completed
-  // In restart mode, show all exercises in original order
-  const exercises = useMemo(() => {
-    if (!allExercises?.length) return [];
-    if (restartMode || !progressMap || Object.keys(progressMap).length === 0) return allExercises;
+  // Build the exercise queue ONCE: failed first → unattempted → skip completed
+  // Frozen after initial build so mid-session progress changes don't shift the list
+  const [exercises, setExercises] = useState<Tables<'exercises'>[]>([]);
+  const queueBuilt = useRef(false);
 
+  useEffect(() => {
+    if (restartMode) {
+      setExercises(allExercises ?? []);
+      setCurrentIndex(0);
+      queueBuilt.current = true;
+      return;
+    }
+    if (queueBuilt.current || !allExercises?.length || loadingProgress) return;
+    if (progressMap === undefined) return;
+
+    // Build queue once
     const failed: Tables<'exercises'>[] = [];
     const unattempted: Tables<'exercises'>[] = [];
     let allDone = true;
 
     for (const ex of allExercises) {
       const status = progressMap[ex.id];
-      if (status === true) continue; // completed — skip
+      if (status === true) continue;
       allDone = false;
       if (status === false) {
-        failed.push(ex); // attempted but wrong
+        failed.push(ex);
       } else {
-        unattempted.push(ex); // never tried
+        unattempted.push(ex);
       }
     }
 
-    if (allDone) return []; // all completed — show completion screen
-    return [...failed, ...unattempted];
-  }, [allExercises, progressMap, restartMode]);
+    setExercises(allDone ? [] : [...failed, ...unattempted]);
+    queueBuilt.current = true;
+  }, [allExercises, progressMap, loadingProgress, restartMode]);
 
-  const isLoading = loadingExercises || loadingProgress;
+  const isLoading = loadingExercises || loadingProgress || !queueBuilt.current;
 
   const handleAnswer = async (correct: boolean, exerciseId: string) => {
     setAnswered(true);
@@ -113,8 +130,8 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
       },
       { onConflict: 'user_id,exercise_id' as any }
     );
-    // Invalidate progress so it's fresh next time
-    queryClient.invalidateQueries({ queryKey: ['exercise-progress', area, topic, dbLevel, auth.user.id] });
+    // Only invalidate topic lists (for progress display), NOT the exercise-progress
+    // query — the queue must stay stable during the session
     queryClient.invalidateQueries({ queryKey: ['grammar-topics'] });
     queryClient.invalidateQueries({ queryKey: ['vocabulary-topics'] });
   };
@@ -125,6 +142,7 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
   }, []);
 
   const handleRestart = () => {
+    queueBuilt.current = false;
     setRestartMode(true);
     setCurrentIndex(0);
     setAnswered(false);
