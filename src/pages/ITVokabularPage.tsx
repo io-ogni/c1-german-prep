@@ -370,6 +370,16 @@ const WORKSHOP_PHASES = ['Alle', 'Opening', 'Flow', 'Interruption', 'Change Topi
 const REFINEMENT_CATEGORIES = ['Alle', 'Opening', 'Unclear Story', 'Value/User', 'Acceptance Criteria', 'Implementation', 'Negotiation', 'Estimation', 'Critique', 'Agile Process', 'Idioms', 'Closing'] as const;
 const COMPOSURE_SITUATIONS = ['Alle', 'Technische Probleme', 'Unterbrochen werden', 'Wortsuche', 'Re-Sync', 'Aufgabe ablehnen'] as const;
 
+const LABEL_DE: Record<string, string> = {
+  Opening: 'Eröffnung', Flow: 'Gesprächsfluss', Interruption: 'Unterbrechung',
+  'Change Topic': 'Themenwechsel', Conflict: 'Konflikt', Engagement: 'Beteiligung',
+  Action: 'Maßnahmen', Closing: 'Abschluss', Idioms: 'Redewendungen',
+  'Unclear Story': 'Unklare Story', 'Value/User': 'Nutzen/User',
+  'Acceptance Criteria': 'Akzeptanzkriterien', Implementation: 'Umsetzung',
+  Negotiation: 'Verhandlung', Estimation: 'Schätzung', Critique: 'Kritik',
+  'Agile Process': 'Agiler Prozess',
+};
+
 const FUCHSIA_TAB = 'data-[state=active]:bg-fuchsia-500 data-[state=active]:text-white data-[state=active]:shadow-sm';
 
 const STORAGE_KEY = 'it-vokabular-highlights';
@@ -650,7 +660,7 @@ export default function ITVokabularPage() {
                   onClick={() => setWorkshopPhase(phase)}
                   className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${colorClass}`}
                 >
-                  {phase}
+                  {LABEL_DE[phase] || phase}
                 </button>
               );
             })}
@@ -676,8 +686,8 @@ export default function ITVokabularPage() {
                       <TableCell className="text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">{sel && <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-400 shrink-0" />}{i + 1}</span>
                       </TableCell>
-                      <TableCell><Badge variant="secondary" className={`text-[10px] font-semibold ${PHASE_COLORS[p.phase] ?? ''}`}>{p.phase}</Badge></TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{p.category}</TableCell>
+                      <TableCell><Badge variant="secondary" className={`text-[10px] font-semibold ${PHASE_COLORS[p.phase] ?? ''}`}>{LABEL_DE[p.phase] || p.phase}</Badge></TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{LABEL_DE[p.category] || p.category}</TableCell>
                       <TableCell className="text-base font-semibold text-foreground">{p.de}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{p.en}</TableCell>
                       <TableCell><span className="text-base font-medium text-foreground bg-muted/50 rounded px-2 py-1.5 inline-block">{p.example}</span></TableCell>
@@ -695,8 +705,8 @@ export default function ITVokabularPage() {
                 <div key={i} onClick={() => toggleRow(key)} className={`relative rounded-lg border p-4 space-y-2 cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
                   {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="secondary" className={`text-[10px] font-semibold ${PHASE_COLORS[p.phase] ?? ''}`}>{p.phase}</Badge>
-                    <span className="text-xs text-muted-foreground">{p.category}</span>
+                    <Badge variant="secondary" className={`text-[10px] font-semibold ${PHASE_COLORS[p.phase] ?? ''}`}>{LABEL_DE[p.phase] || p.phase}</Badge>
+                    <span className="text-xs text-muted-foreground">{LABEL_DE[p.category] || p.category}</span>
                   </div>
                   <p className="text-base font-semibold text-foreground">{p.de}</p>
                   <p className="text-sm text-muted-foreground">{p.en}</p>
@@ -721,7 +731,7 @@ export default function ITVokabularPage() {
                   onClick={() => setRefinementCategory(cat)}
                   className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${colorClass}`}
                 >
-                  {cat}
+                  {LABEL_DE[cat] || cat}
                 </button>
               );
             })}
@@ -746,7 +756,7 @@ export default function ITVokabularPage() {
                       <TableCell className="text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">{sel && <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-400 shrink-0" />}{i + 1}</span>
                       </TableCell>
-                      <TableCell><Badge variant="secondary" className={`text-[10px] font-semibold ${PHASE_COLORS[p.category] ?? 'bg-secondary'}`}>{p.category}</Badge></TableCell>
+                      <TableCell><Badge variant="secondary" className={`text-[10px] font-semibold ${PHASE_COLORS[p.category] ?? 'bg-secondary'}`}>{LABEL_DE[p.category] || p.category}</Badge></TableCell>
                       <TableCell className="text-base font-semibold text-foreground">{p.de}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{p.en}</TableCell>
                       <TableCell><span className="text-base font-medium text-foreground bg-muted/50 rounded px-2 py-1.5 inline-block">{p.example}</span></TableCell>
@@ -763,7 +773,7 @@ export default function ITVokabularPage() {
               return (
                 <div key={i} onClick={() => toggleRow(key)} className={`relative rounded-lg border p-4 space-y-2 cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
                   {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
-                  <Badge variant="secondary" className={`text-[10px] font-semibold ${PHASE_COLORS[p.category] ?? 'bg-secondary'}`}>{p.category}</Badge>
+                  <Badge variant="secondary" className={`text-[10px] font-semibold ${PHASE_COLORS[p.category] ?? 'bg-secondary'}`}>{LABEL_DE[p.category] || p.category}</Badge>
                   <p className="text-base font-semibold text-foreground">{p.de}</p>
                   <p className="text-sm text-muted-foreground">{p.en}</p>
                   <p className="text-sm text-foreground bg-muted/50 rounded px-2 py-1.5">{p.example}</p>
@@ -776,16 +786,21 @@ export default function ITVokabularPage() {
         {/* ── Souveränität ── */}
         <TabsContent value="souveraenitaet">
           <div className="flex flex-wrap gap-1.5 mb-4">
-            {COMPOSURE_SITUATIONS.map(s => (
-              <Badge
-                key={s}
-                variant={composureSituation === s ? 'default' : 'outline'}
-                className={`cursor-pointer text-[10px] ${composureSituation === s ? '' : (PHASE_COLORS[s] || '')}`}
-                onClick={() => setComposureSituation(s)}
-              >
-                {s}
-              </Badge>
-            ))}
+            {COMPOSURE_SITUATIONS.map((s) => {
+              const isActive = composureSituation === s;
+              const colorClass = s === 'Alle'
+                ? (isActive ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:bg-accent')
+                : (isActive ? (PHASE_COLORS[s] ?? 'bg-secondary') : 'bg-muted text-muted-foreground hover:bg-accent');
+              return (
+                <button
+                  key={s}
+                  onClick={() => setComposureSituation(s)}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${colorClass}`}
+                >
+                  {s}
+                </button>
+              );
+            })}
           </div>
           <div className="hidden md:block rounded-md border overflow-x-auto">
             <Table>
@@ -806,7 +821,7 @@ export default function ITVokabularPage() {
                       <TableCell className="text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">{sel && <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-400 shrink-0" />}{i + 1}</span>
                       </TableCell>
-                      <TableCell><Badge className={`text-[10px] font-semibold border-0 ${PHASE_COLORS[p.situation] || ''}`}>{p.situation}</Badge></TableCell>
+                      <TableCell><Badge variant="secondary" className={`text-[10px] font-semibold ${PHASE_COLORS[p.situation] ?? ''}`}>{p.situation}</Badge></TableCell>
                       <TableCell className="text-sm text-muted-foreground">{p.en}</TableCell>
                       <TableCell>
                         <div className="flex items-start gap-2">
@@ -829,7 +844,7 @@ export default function ITVokabularPage() {
               return (
                 <div key={i} onClick={() => toggleRow(key)} className={`relative rounded-lg border p-4 space-y-2 cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
                   {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
-                  <Badge className={`text-[10px] font-semibold border-0 ${PHASE_COLORS[p.situation] || ''}`}>{p.situation}</Badge>
+                  <Badge variant="secondary" className={`text-[10px] font-semibold ${PHASE_COLORS[p.situation] ?? ''}`}>{p.situation}</Badge>
                   <div className="flex items-start gap-2">
                     <p className="text-base font-semibold text-foreground">{p.de}</p>
                     <button onClick={(e) => { e.stopPropagation(); speak(p.de); }} className="shrink-0 mt-0.5 text-muted-foreground hover:text-fuchsia-500 transition-colors">
