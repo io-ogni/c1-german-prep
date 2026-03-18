@@ -108,7 +108,7 @@ export default function ReadingPage() {
                   <Card
                     key={text.id}
                     className="cursor-pointer transition-colors hover:bg-accent/50"
-                    onClick={() => setSelectedText(text)}
+                    onClick={() => { setSelectedText(text); window.scrollTo(0, 0); }}
                   >
                     <CardContent className="p-4 space-y-2">
                       <div className="flex items-start justify-between gap-2">

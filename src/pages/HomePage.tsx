@@ -124,7 +124,7 @@ export default function HomePage() {
     { key: 'nav_writing' as const, path: '/writing', icon: PenLine, data: data?.writing },
     { key: 'nav_reading' as const, path: '/reading', icon: BookOpenCheck, data: data?.reading },
     { key: 'nav_listening' as const, path: '/listening', icon: Headphones, data: data?.listening },
-    { key: 'nav_it_deutsch' as const, path: '/it-deutsch', icon: Briefcase, data: data?.itDeutsch, fuchsia: true },
+    { key: 'nav_it_deutsch' as const, path: '/it-deutsch/uebungen', icon: Briefcase, data: data?.itDeutsch, fuchsia: true },
   ];
 
   const streak = profile?.current_streak ?? 0;
