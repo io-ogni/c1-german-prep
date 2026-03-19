@@ -107,17 +107,17 @@ export default function ReadingNewPage() {
               className="cursor-pointer rounded-xl border border-border bg-card p-4 transition-all hover:shadow-md"
             >
               {image ? (
-                <div className="mb-3 overflow-hidden rounded-lg bg-muted/30 flex items-center justify-center">
+                <div className="mb-2 overflow-hidden rounded-lg bg-muted/30 flex items-center justify-center">
                   <img
                     src={image}
                     alt={topic.title}
-                    className="w-full h-40 object-cover rounded-lg"
+                    className="w-full h-28 object-cover rounded-lg"
                     loading="lazy"
                   />
                 </div>
               ) : (
-                <div className="mb-3 h-40 rounded-lg bg-muted/30 flex items-center justify-center">
-                  <span className="text-3xl">📖</span>
+                <div className="mb-2 h-28 rounded-lg bg-muted/30 flex items-center justify-center">
+                  <span className="text-2xl">📖</span>
                 </div>
               )}
 
@@ -127,9 +127,16 @@ export default function ReadingNewPage() {
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-semibold text-sm text-foreground leading-snug">{topic.title}</p>
+                    <p className="font-semibold text-xs text-foreground leading-snug">{topic.title}</p>
                     {topic.isTelc && <TelcBadge />}
                   </div>
+                  <div className="flex items-center gap-3 mt-1.5 text-[11px] text-muted-foreground">
+                    <span>280 Wörter</span>
+                    <span>~15 Minuten</span>
+                  </div>
+                  <span className="inline-block mt-1.5 text-[10px] font-medium text-muted-foreground bg-muted/50 rounded px-1.5 py-0.5">
+                    Noch nicht begonnen
+                  </span>
                 </div>
               </div>
             </div>
