@@ -111,7 +111,7 @@ export default function ReadingNewPage() {
                   <img
                     src={image}
                     alt={topic.title}
-                    className="w-full h-28 object-cover rounded-lg opacity-60"
+                    className="w-full h-28 object-cover rounded-lg"
                     loading="lazy"
                   />
                 </div>
