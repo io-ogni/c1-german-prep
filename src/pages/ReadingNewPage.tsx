@@ -126,10 +126,7 @@ export default function ReadingNewPage() {
                   {topic.id}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-semibold text-xs text-foreground leading-snug">{topic.title}</p>
-                    {topic.isTelc && <TelcBadge />}
-                  </div>
+                  <p className="font-semibold text-sm text-foreground leading-snug">{topic.title}</p>
                   <div className="flex items-center gap-3 mt-1.5 text-[11px] text-muted-foreground">
                     <span>280 Wörter</span>
                     <span>~15 Minuten</span>
