@@ -116,7 +116,7 @@ export default function ReadingNewPage() {
                   />
                 </div>
               ) : (
-                <div className="mb-2 h-28 rounded-lg bg-muted/30 flex items-center justify-center opacity-60">
+                <div className="mb-2 h-28 rounded-lg bg-muted/30 flex items-center justify-center">
                   <span className="text-2xl">📖</span>
                 </div>
               )}
