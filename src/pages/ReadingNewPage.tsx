@@ -107,16 +107,16 @@ export default function ReadingNewPage() {
               className="cursor-pointer rounded-xl border border-border bg-card p-4 transition-all hover:shadow-md"
             >
               {image ? (
-                <div className="relative mb-2 overflow-hidden rounded-lg bg-muted/30">
+                <div className="relative mb-2 overflow-hidden rounded-lg bg-muted/30 after:absolute after:inset-0 after:bg-background/40 after:rounded-lg">
                   <img
                     src={image}
                     alt={topic.title}
-                    className="w-full h-28 object-cover rounded-lg opacity-60"
+                    className="w-full h-28 object-cover rounded-lg"
                     loading="lazy"
                   />
                 </div>
               ) : (
-                <div className="mb-2 h-28 rounded-lg bg-muted/30 flex items-center justify-center opacity-60">
+                <div className="mb-2 h-28 rounded-lg bg-muted/30 flex items-center justify-center">
                   <span className="text-2xl">📖</span>
                 </div>
               )}
