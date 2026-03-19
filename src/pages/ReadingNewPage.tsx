@@ -107,7 +107,7 @@ export default function ReadingNewPage() {
               className="cursor-pointer rounded-xl border border-border bg-card p-4 transition-all hover:shadow-md"
             >
               {image ? (
-                <div className="relative mb-2 overflow-hidden rounded-lg bg-muted/30 after:absolute after:inset-0 after:bg-background/40 after:rounded-lg">
+                <div className="mb-4 overflow-hidden rounded-lg bg-muted/30">
                   <img
                     src={image}
                     alt={topic.title}
@@ -116,25 +116,20 @@ export default function ReadingNewPage() {
                   />
                 </div>
               ) : (
-                <div className="mb-2 h-28 rounded-lg bg-muted/30 flex items-center justify-center">
+                <div className="mb-4 h-28 rounded-lg bg-muted/30 flex items-center justify-center">
                   <span className="text-2xl">📖</span>
                 </div>
               )}
 
-              <div className="flex items-start gap-2">
-                <span className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold w-5 h-5 shrink-0 mt-0.5">
-                  {topic.id}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm text-foreground leading-snug">{topic.title}</p>
-                  <div className="flex items-center gap-3 mt-1.5 text-[11px] text-muted-foreground">
-                    <span>280 Wörter</span>
-                    <span>~15 Minuten</span>
-                  </div>
-                  <span className="inline-block mt-1.5 text-[10px] font-medium text-muted-foreground bg-muted/50 rounded px-1.5 py-0.5">
-                    Noch nicht begonnen
-                  </span>
+              <div>
+                <p className="font-semibold text-sm text-foreground leading-snug">{topic.title}</p>
+                <div className="flex items-center gap-3 mt-1.5 text-[11px] text-muted-foreground">
+                  <span>280 Wörter</span>
+                  <span>~15 Minuten</span>
                 </div>
+                <span className="inline-block mt-1.5 text-[10px] font-medium text-muted-foreground bg-muted/50 rounded px-1.5 py-0.5">
+                  Noch nicht begonnen
+                </span>
               </div>
             </div>
           );
