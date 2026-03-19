@@ -14,6 +14,7 @@ import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import HomePage from "@/pages/HomePage";
 import ScaffoldPage from "@/pages/ScaffoldPage";
 import ReadingPage from "@/pages/ReadingPage";
+import ReadingNewPage from "@/pages/ReadingNewPage";
 import ListeningPage from "@/pages/ListeningPage";
 import VocabularyPage from "@/pages/VocabularyPage";
 import GrammarPage from "@/pages/GrammarPage";
