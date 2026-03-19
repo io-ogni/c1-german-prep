@@ -107,7 +107,7 @@ export default function ReadingNewPage() {
               className="cursor-pointer rounded-xl border border-border bg-card p-4 transition-all hover:shadow-md"
             >
               {image ? (
-                <div className="relative mb-2 overflow-hidden rounded-lg bg-muted/30">
+                <div className="relative mb-2 overflow-hidden rounded-lg bg-muted/30 after:absolute after:inset-0 after:bg-background/40 after:rounded-lg">
                   <img
                     src={image}
                     alt={topic.title}
