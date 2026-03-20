@@ -406,14 +406,14 @@ export default function SpeakingPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="praesentation">
+      <Tabs defaultValue="redewendungen">
         <TabsList className={`${NAV_CONTAINER} h-auto gap-1`}>
+          <TabsTrigger value="redewendungen" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><Drama className="h-4 w-4" />Redewendungen</TabsTrigger>
           <TabsTrigger value="praesentation" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><Presentation className="h-4 w-4" />Präsentation</TabsTrigger>
           <TabsTrigger value="diskussion" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><MessageSquare className="h-4 w-4" />Diskussion</TabsTrigger>
           <TabsTrigger value="zusammenfassung" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><FileText className="h-4 w-4" />Zusammenfassung</TabsTrigger>
           <TabsTrigger value="redemittel" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><MessagesSquare className="h-4 w-4" />Redemittel</TabsTrigger>
           <TabsTrigger value="schnellreferenz" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><Zap className="h-4 w-4" />Schnellreferenz</TabsTrigger>
-          <TabsTrigger value="redewendungen" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><Drama className="h-4 w-4" />Redewendungen</TabsTrigger>
         </TabsList>
 
         {/* Phrase tabs */}

@@ -146,7 +146,7 @@ export default function HomePage() {
       </div>
 
       {/* Session Builder */}
-      <Card className="bg-gradient-to-r from-blue-50 via-violet-50 to-fuchsia-50 dark:from-blue-950/20 dark:via-violet-950/20 dark:to-fuchsia-950/20 border-blue-100/50 dark:border-violet-900/30">
+      <Card className="bg-gradient-to-r from-blue-100/70 via-violet-100/70 to-fuchsia-100/70 dark:from-blue-950/30 dark:via-violet-950/30 dark:to-fuchsia-950/30 border-blue-200/50 dark:border-violet-900/40">
         <CardContent className="px-5 py-4 space-y-2">
           <div className="flex items-center gap-2">
             <Flame className="h-5 w-5 text-primary" />
@@ -265,8 +265,9 @@ export default function HomePage() {
         <p>
           Built by <a href="https://ioana-ognibeni.eu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Ioana Ognibeni</a> with{' '}
           <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Claude</a>,{' '}
-          <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Lovable</a> &{' '}
-          <a href="https://notebooklm.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">NotebookLM</a>
+          <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Lovable</a>,{' '}
+          <a href="https://notebooklm.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">NotebookLM</a> &{' '}
+          <a href="https://cloud.google.com/text-to-speech" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google Cloud</a>
         </p>
       </div>
     </div>

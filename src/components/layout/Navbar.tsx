@@ -43,7 +43,7 @@ export function Navbar() {
       <div className="container mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link to="/home" className="flex items-center gap-2 font-bold text-lg text-foreground">
           <img src="/logo.png" alt="C1" className="h-7 w-7 rounded-md" />
-          <span className="bg-gradient-to-r from-blue-600 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent">Werkstatt</span>
+          <span className="hidden sm:inline bg-gradient-to-r from-blue-600 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent">Werkstatt</span>
         </Link>
 
         <div className="hidden items-center gap-1 lg:flex">

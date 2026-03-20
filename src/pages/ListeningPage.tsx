@@ -145,7 +145,7 @@ export default function ListeningPage() {
                     <button
                       key={exercise.id}
                       onClick={() => setActiveExercise(exercise)}
-                      className="w-full flex items-center justify-between rounded-md px-3 py-2 text-sm hover:bg-accent/50 transition-colors text-left"
+                      className="w-full flex items-center justify-between rounded-lg px-3 py-2.5 text-sm bg-muted/40 hover:bg-primary/10 hover:text-primary transition-colors text-left cursor-pointer"
                     >
                       <span className={isCompleted ? 'text-foreground' : 'text-muted-foreground'}>
                         {t('listening_teil')} {idx + 1}: {t(teilKey as any)}

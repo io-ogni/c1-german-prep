@@ -53,7 +53,7 @@ export default function WelcomePage() {
           className="absolute top-0 left-0 right-0 flex items-center justify-between px-6 md:px-12 py-5"
         >
           <span className="text-xl font-bold flex items-center gap-2">
-            <img src="/logo.png" alt="C1" className="h-7 w-7 rounded-md" /> Werkstatt
+            <img src="/logo.png" alt="C1" className="h-11 w-11 rounded-lg" /> <span className="hidden sm:inline bg-gradient-to-r from-blue-600 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent">Werkstatt</span>
           </span>
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" asChild>
@@ -71,33 +71,38 @@ export default function WelcomePage() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-fuchsia-100 text-fuchsia-600 font-semibold dark:bg-fuchsia-900/30 dark:text-fuchsia-300 text-sm font-medium mb-8"
           >
             <Sparkles className="h-4 w-4" />
-            Built for expats who want more than just pass the C1 exam
+            Built for the IT industry
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.1] mb-6"
+            className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.1] mb-3"
           >
-            Deutsch C1
-            <br />
-            <span className="bg-gradient-to-r from-primary via-blue-400 to-violet-500 bg-clip-text text-transparent">
-              Einmal mit Profis arbeiten.
-            </span>
+            The Real Deutsch C1
           </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-primary via-blue-400 to-violet-500 bg-clip-text text-transparent mb-6"
+          >
+            Einmal mit Profis arbeiten.
+          </motion.p>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.25 }}
-            className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto mb-10 leading-relaxed"
+            className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto mb-14 leading-relaxed"
           >
-            Interactive exercises, AI-powered feedback, and real exam formats —
-            everything you need from today, to telc C1, to the next Refinement meeting.
+            Interactive exercises, real-life examples and AI feedback —
+            everything you need from B2 to C1 and your next Refinement meeting.
           </motion.p>
 
           <motion.div
@@ -124,8 +129,8 @@ export default function WelcomePage() {
             className="mt-8 flex items-center justify-center gap-6 text-sm text-muted-foreground"
           >
             <span className="flex items-center gap-1.5"><Zap className="h-4 w-4 text-amber-500" /> AI-powered</span>
-            <span className="flex items-center gap-1.5"><Target className="h-4 w-4 text-emerald-500" /> IT-flavoured</span>
-            <span className="flex items-center gap-1.5">🇩🇪 Made for expats</span>
+            <span className="flex items-center gap-1.5"><Target className="h-4 w-4 text-fuchsia-500" /> IT-flavoured</span>
+            <span className="flex items-center gap-1.5">🇩🇪 B2 → C1</span>
           </motion.div>
         </div>
 
@@ -151,7 +156,7 @@ export default function WelcomePage() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Everything you need. Nothing you don't.
+              For B2 IT expats who want more than just pass the C1 exam.
             </h2>
             <p className="text-muted-foreground text-lg max-w-lg mx-auto">
               Four skills. One platform. Zero fluff.
@@ -255,13 +260,14 @@ export default function WelcomePage() {
       <footer className="border-t px-6 py-8">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <span className="font-semibold text-foreground flex items-center gap-2">
-            <img src="/logo.png" alt="C1" className="h-5 w-5 rounded-sm" /> Werkstatt
+            <img src="/logo.png" alt="C1" className="h-5 w-5 rounded-sm" /> <span className="bg-gradient-to-r from-blue-600 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent">Werkstatt</span>
           </span>
           <div className="text-center">
             Built by <a href="https://ioana-ognibeni.eu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Ioana Ognibeni</a> with{' '}
             <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Claude</a>,{' '}
-            <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Lovable</a> &{' '}
-            <a href="https://notebooklm.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">NotebookLM</a>
+            <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Lovable</a>,{' '}
+            <a href="https://notebooklm.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">NotebookLM</a> &{' '}
+            <a href="https://cloud.google.com/text-to-speech" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google Cloud</a>
           </div>
         </div>
       </footer>

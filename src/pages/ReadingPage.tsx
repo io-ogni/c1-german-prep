@@ -200,14 +200,14 @@ export default function ReadingPage() {
                       <p className="font-semibold text-sm text-foreground leading-snug">
                         {language === 'de' ? text.title_de : text.title_en}
                       </p>
-                      <div className="flex items-center gap-3 mt-1.5 text-[11px] text-muted-foreground">
+                      <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
                         <span>{text.word_count} {t('reading_words')}</span>
                         <span className="flex items-center gap-0.5">
                           <Clock className="h-3 w-3" />
                           ~{text.estimated_minutes} {t('reading_minutes')}
                         </span>
                       </div>
-                      <div className="mt-1.5 text-[10px]">
+                      <div className="mt-1.5 text-xs">
                         {prog?.completed ? (
                           <span className="inline-flex items-center gap-1 font-medium text-primary bg-primary/10 rounded px-1.5 py-0.5">
                             <CheckCircle className="h-3 w-3" />
