@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown, BookOpen, FileText, Layers } from 'lucide-react';
+import { Menu, X, ChevronDown, BookOpen, FileText, ClipboardCheck } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useRequiredAuth } from '@/contexts/AuthContext';
 import {
@@ -19,7 +19,6 @@ const examLinks = [
   { key: 'nav_reading' as const, path: '/reading' },
   { key: 'nav_listening' as const, path: '/listening' },
   { key: 'nav_speaking' as const, path: '/speaking' },
-  { key: 'nav_exam_prep' as const, path: '/exam-prep' },
 ];
 
 const itLinks = [
@@ -43,8 +42,8 @@ export function Navbar() {
     <nav className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
       <div className="container mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link to="/home" className="flex items-center gap-2 font-bold text-lg text-foreground">
-          <span className="text-primary">C1</span>
-          <span>Werkstatt</span>
+          <img src="/logo.png" alt="C1" className="h-7 w-7 rounded-md" />
+          <span className="bg-gradient-to-r from-blue-600 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent">Werkstatt</span>
         </Link>
 
         <div className="hidden items-center gap-1 lg:flex">
@@ -66,10 +65,10 @@ export function Navbar() {
           <Link
             to="/it-deutsch"
             className={cn(
-              'rounded-md px-3 py-1.5 text-sm font-bold transition-colors bg-gradient-to-r from-pink-500/10 to-fuchsia-500/10 border border-pink-400/30',
+              'rounded-md px-3 py-1.5 text-sm font-bold transition-colors',
               isActive('/it-deutsch')
-                ? 'text-fuchsia-600 dark:text-fuchsia-400 border-fuchsia-400/50'
-                : 'text-fuchsia-600/80 dark:text-fuchsia-400/80 hover:border-fuchsia-400/50 hover:from-pink-500/15 hover:to-fuchsia-500/15'
+                ? 'text-fuchsia-600 dark:text-fuchsia-400 bg-fuchsia-50 dark:bg-fuchsia-900/20'
+                : 'text-fuchsia-600/80 dark:text-fuchsia-400/80 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-900/20'
             )}
           >
             {t('nav_it_deutsch')}
@@ -98,9 +97,9 @@ export function Navbar() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/flashcards" className="flex items-center gap-2">
-                  <Layers className="h-4 w-4" />
-                  Lernkarten
+                <Link to="/exam-prep" className="flex items-center gap-2">
+                  <ClipboardCheck className="h-4 w-4" />
+                  {t('nav_exam_prep')}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
@@ -142,10 +141,10 @@ export function Navbar() {
               to="/it-deutsch"
               onClick={() => setMobileOpen(false)}
               className={cn(
-                'rounded-md px-3 py-2 text-sm font-bold transition-colors bg-gradient-to-r from-pink-500/10 to-fuchsia-500/10 border border-pink-400/30',
+                'rounded-md px-3 py-2 text-sm font-bold transition-colors',
                 isActive('/it-deutsch')
-                  ? 'text-fuchsia-600 dark:text-fuchsia-400'
-                  : 'text-fuchsia-600/80 dark:text-fuchsia-400/80'
+                  ? 'text-fuchsia-600 dark:text-fuchsia-400 bg-fuchsia-50 dark:bg-fuchsia-900/20'
+                  : 'text-fuchsia-600/80 dark:text-fuchsia-400/80 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-900/20'
               )}
             >
               {t('nav_it_deutsch')}
@@ -157,8 +156,8 @@ export function Navbar() {
             <Link to="/my-texts" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
               <FileText className="h-4 w-4" /> {t('nav_my_texts')}
             </Link>
-            <Link to="/flashcards" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
-              <Layers className="h-4 w-4" /> Lernkarten
+            <Link to="/exam-prep" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+              <ClipboardCheck className="h-4 w-4" /> {t('nav_exam_prep')}
             </Link>
             <Link to="/settings" onClick={() => setMobileOpen(false)} className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
               {t('nav_settings')}

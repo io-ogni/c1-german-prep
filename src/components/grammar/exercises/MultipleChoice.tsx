@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
 import { SelectableText } from '@/components/shared/SelectableText';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useNumberKeys } from '@/hooks/useNumberKeys';
 
 interface Props {
   content: any;
@@ -63,11 +64,13 @@ function SingleMC({ content, solution, instructions, explanation, answered, onAn
 
   const isCorrect = selected === shuffled.correctIdx;
 
-  const handleSelect = (idx: number) => {
+  const handleSelect = useCallback((idx: number) => {
     if (answered) return;
     setSelected(idx);
     onAnswer(idx === shuffled.correctIdx);
-  };
+  }, [answered, shuffled.correctIdx, onAnswer]);
+
+  useNumberKeys(handleSelect, shuffled.options.length, answered);
 
   return (
     <ExerciseCard
@@ -83,9 +86,9 @@ function SingleMC({ content, solution, instructions, explanation, answered, onAn
           : null
       }
     >
-      {(content?.context || content?.sentence) && (
+      {(content?.context || content?.sentence || content?.expression) && (
         <div className="bg-muted rounded-md p-3">
-          <SelectableText text={content.context ?? content.sentence} className="text-sm" />
+          <SelectableText text={content.context ?? content.sentence ?? content.expression} className={content?.expression && !content?.context && !content?.sentence ? "text-lg font-semibold text-center" : "text-sm"} />
         </div>
       )}
       <div className="grid gap-2">
@@ -101,7 +104,7 @@ function SingleMC({ content, solution, instructions, explanation, answered, onAn
             onClick={() => handleSelect(idx)}
             disabled={answered}
           >
-            <span className="font-semibold mr-2">{LABELS[idx]})</span> {opt.text}
+            <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{idx + 1}</kbd> {opt.text}
           </Button>
         ))}
       </div>
@@ -136,7 +139,7 @@ function MultiStepMC({
   const correctAnswer = current?.correct ?? answers[subIndex] ?? '';
   const isLast = subIndex === questions.length - 1;
 
-  const handleSelect = (idx: number) => {
+  const handleSelect = useCallback((idx: number) => {
     if (subAnswered || parentAnswered) return;
     const opt = current.options[idx];
     const isCorrect = opt?.toLowerCase() === correctAnswer.toLowerCase();
@@ -153,7 +156,9 @@ function MultiStepMC({
       setEliminated(prev => new Set(prev).add(idx));
       setTimeout(() => setSelected(null), 400);
     }
-  };
+  }, [subAnswered, parentAnswered, current, correctAnswer, correctCount, isLast, onAnswer, eliminated]);
+
+  useNumberKeys(handleSelect, current.options.length, subAnswered || parentAnswered);
 
   const handleNext = () => {
     setSubIndex(i => i + 1);
@@ -193,7 +198,7 @@ function MultiStepMC({
             onClick={() => handleSelect(idx)}
             disabled={subAnswered || parentAnswered || eliminated.has(idx)}
           >
-            <span className="font-semibold mr-2">{LABELS[idx]})</span> {opt}
+            <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{idx + 1}</kbd> {opt}
           </Button>
         ))}
       </div>

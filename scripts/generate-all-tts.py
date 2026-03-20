@@ -1,0 +1,578 @@
+#!/usr/bin/env python3
+"""Batch generate German TTS mp3s using Google Cloud TTS API (Neural2)."""
+
+import json
+import base64
+import os
+import subprocess
+import urllib.request
+
+PROJECT = "german-app-490611"
+VOICE = "de-DE-Neural2-D"  # Male. Alternative: de-DE-Neural2-C (female)
+RATE = 0.95
+
+def get_token():
+    return subprocess.check_output(["gcloud", "auth", "print-access-token"]).decode().strip()
+
+def synthesize(text, outfile, token):
+    if os.path.exists(outfile):
+        return "skip"
+    body = json.dumps({
+        "input": {"text": text},
+        "voice": {"languageCode": "de-DE", "name": VOICE},
+        "audioConfig": {"audioEncoding": "MP3", "speakingRate": RATE}
+    }).encode()
+    req = urllib.request.Request(
+        "https://texttospeech.googleapis.com/v1/text:synthesize",
+        data=body,
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+            "x-goog-user-project": PROJECT,
+        }
+    )
+    resp = urllib.request.urlopen(req)
+    data = json.loads(resp.read())
+    audio = base64.b64decode(data["audioContent"])
+    os.makedirs(os.path.dirname(outfile), exist_ok=True)
+    with open(outfile, "wb") as f:
+        f.write(audio)
+    return "ok"
+
+# ─── All phrases to generate ───
+
+SECTIONS = {}
+
+# IT Vokabular — Nouns (example sentences)
+SECTIONS["nouns"] = [
+    "Die schrittweise Implementierung der Microservices-Architektur hat die Systemkomplexität deutlich reduziert.",
+    "Bei der Auswahl des Tech-Stacks stand die horizontale Skalierbarkeit unter Hochlast im Vordergrund.",
+    "Wir haben die Belastbarkeit der API durch intensive Lasttests unter Extrembedingungen verifiziert.",
+    "Um Datenverlust auszuschließen, haben wir eine geografische Redundanz für unsere Datenbanken etabliert.",
+    "Eine saubere Dokumentation der Schnittstelle ist essenziell für die nahtlose Integration von Drittanbietern.",
+    "Durch konsequentes Refactoring wurde die langfristige Wartbarkeit des Legacy-Codes sichergestellt.",
+    "Diese technologische Entscheidung sichert die Zukunftsfähigkeit unserer gesamten Plattform.",
+    "Wir müssen die Durchgängigkeit des Datenflusses vom Frontend bis zum Data Warehouse gewährleisten.",
+    "Die KI-gestützte Fehlerprognose ist das technologische Alleinstellungsmerkmal unseres Produkts.",
+    "Vor dem Projektstart führen wir eine umfassende Machbarkeitsstudie bezüglich der Cloud-Migration durch.",
+    "Unsere agile Vorgehensweise erlaubt es uns, flexibel auf sich ändernde Marktanforderungen zu reagieren.",
+    "Eine klare Zielsetzung ist die Grundvoraussetzung für ein effizientes Sprint-Backlog.",
+    "Die Fehlerbehebung im Produktivsystem genießt aktuell unsere höchste Priorität.",
+    "Mithilfe einer Engpassanalyse konnten wir die Verzögerungen in der Deployment-Pipeline identifizieren.",
+    "Eine vorausschauende Ressourcenplanung verhindert Burnout-Szenarien während der Release-Phase.",
+    "Automatisierte Unit-Tests sind ein integraler Bestandteil unserer Qualitätssicherung.",
+    "Nach erfolgreichem UAT erfolgt die formale Abnahme durch den Product Owner.",
+    "Mit dem Go-Live des Payment-Moduls haben wir einen entscheidenden Meilenstein erreicht.",
+    "Unsere Aufwandsschätzung basierte auf historischen Daten vergleichbarer User Stories.",
+    "Nach dem ersten Feedback der Beta-Tester ist eine feingliedrige Nachjustierung der UI erforderlich.",
+    "Höchste Datensicherheit wird durch eine durchgehende Ende-zu-Ende-Verschlüsselung garantiert.",
+    "Sämtliche Prozesse wurden im Hinblick auf die Konformität mit der DSGVO auditiert.",
+    "Das Prinzip der minimalen Zugriffsberechtigung schützt unsere sensiblen Kundendaten.",
+    "Ohne eine robuste Verschlüsselung ist der Transfer personenbezogener Daten unzulässig.",
+    "Wir schulen alle Entwickler regelmäßig bezüglich unserer internen Compliance-Richtlinien.",
+    "Die zeitnahe Schließung der kritischen Sicherheitslücke verhinderte einen potenziellen Datenabfluss.",
+    "Audit-Logs gewährleisten die lückenlose Nachverfolgbarkeit aller Systemänderungen.",
+    "Durch Load-Balancing erreichen wir eine Ausfallsicherheit von 99,99 %.",
+    "Vor Einsicht in den Quellcode muss eine entsprechende Geheimhaltungsvereinbarung unterzeichnet werden.",
+    "Im Falle eines Systemausfalls liegt die Beweislast beim externen Hosting-Anbieter.",
+    "Die Einführung von Containerisierung führte zu einer messbaren Effizienzsteigerung im Deployment.",
+    "Durch den Wechsel zu Serverless Computing konnten wir eine signifikante Kostenoptimierung erzielen.",
+    "Wir überwachen jede relevante Performance-Metrik in Echtzeit über unser Dashboard.",
+    "Die Markteinführung der App wurde durch eine großangelegte Marketingkampagne begleitet.",
+    "Unser Ziel ist es, dem Endnutzer durch innovative Features einen echten Mehrwert zu bieten.",
+    "Bei der Priorisierung der Roadmap steht die Kundenorientierung an erster Stelle.",
+    "Durch konsequente Prozessautomatisierung haben wir manuelle Fehlerquellen eliminiert.",
+    "Seit der Einführung von Pair-Programming ist die Fehlerquote im Code merklich gesunken.",
+    "Wir müssen die Auslastung der Serverkapazitäten optimieren, um Latenzen zu vermeiden.",
+    "Kontinuierliche Innovation ist der Schlüssel zur Sicherung unserer globalen Wettbewerbsfähigkeit.",
+    "Wir fördern eine Kultur der Eigenverantwortung, in der jeder Entwickler für seinen Code bürgt.",
+    "In bereichsübergreifenden Projekten ist die Kommunikationsfähigkeit der Techniker entscheidend.",
+    "Trotz technischer Hürden bewies das Team eine beeindruckende Lösungsorientierung.",
+    "Die genaue Ausgestaltung des Budgets für neue Lizenzen ist noch Verhandlungssache.",
+    "Bei Architekturfragen ist oft eine gewisse Kompromissbereitschaft zwischen Dev und Ops nötig.",
+    "Neben technischem Know-how ist Führungskompetenz für diese Senior-Stelle unverzichtbar.",
+    "Regelmäßige Teamevents stärken die Teamdynamik und das gegenseitige Vertrauen.",
+    "Während der Black-Friday-Woche müssen wir auf extreme Belastungsspitzen vorbereitet sein.",
+    "Um Frust zu vermeiden, müssen wir die Erwartungshaltung der Stakeholder frühzeitig managen.",
+    "In unserem Startup schätzen wir Entwickler mit einer ausgeprägten Hands-on-Mentalität.",
+]
+
+# IT Vokabular — Verbs (example sentences)
+SECTIONS["verbs"] = [
+    "Wir müssen die Datensicherheit auch bei hohen Zugriffszahlen gewährleisten.",
+    "Die neuen Algorithmen helfen uns dabei, die Serverlast signifikant zu optimieren.",
+    "Wir planen, im nächsten Quartal eine automatisierte CI/CD-Pipeline zu implementieren.",
+    "Unser Team will die Umstellung auf eine Cloud-Native-Architektur aktiv vorantreiben.",
+    "Wir analysieren derzeit die Logfiles, um die Ursache für den Systemabsturz zu finden.",
+    "Ich habe die Aufgabe, ein modulares Design-System für unsere Web-Apps zu konzipieren.",
+    "Als Lead-Developer koordiniere ich die Zusammenarbeit zwischen Backend und Frontend.",
+    "Wir möchten Pair-Programming als Standard in unserem Entwicklungsprozess etablieren.",
+    "Wir evaluieren momentan verschiedene NoSQL-Datenbanken für unser neues Projekt.",
+    "Das System ist so aufgebaut, dass es bei Bedarf problemlos horizontal skalieren kann.",
+    "Wir müssen die API-Spezifikationen eng mit dem Mobil-Team abstimmen.",
+    "Die Einführung von Docker konnte unsere Deployment-Zyklen massiv beschleunigen.",
+    "Mit der neuen Infrastruktur können wir auch extreme Lastspitzen mühelos bewältigen.",
+    "Es ist unerlässlich, jede Code-Änderung für die langfristige Wartbarkeit zu dokumentieren.",
+    "Wir werden am Wochenende ein umfassendes Datenbank-Audit durchführen.",
+    "Wir müssen gemeinsam eine Lösung für das Problem der Dateninkonsistenz erarbeiten.",
+    "Die neue Schnittstelle wird es Partnern ermöglichen, ihre Dienste direkt anzubinden.",
+    "Durch Refactoring konnten wir eine Reduzierung der Latenz um 200ms erreichen.",
+    "Wir fördern den Wissensaustausch durch regelmäßige Tech-Talks im Team.",
+    "Mithilfe von Monitoring-Tools konnten wir den Speicherfresser schnell identifizieren.",
+    "Das neue Messaging-Modul lässt sich nahtlos in die bestehende Architektur integrieren.",
+    "Ich muss die Firewall-Regeln neu konfigurieren, um den Zugriff einzuschränken.",
+    "In meinem letzten Projekt habe ich ein Team von fünf Entwicklern erfolgreich geleitet.",
+    "Wir haben das Skalierungsproblem durch den Einsatz von Caching-Layern gelöst.",
+    "Unser Ziel ist es, die Downtime während des Updates auf ein Minimum zu minimieren.",
+    "Wir müssen unsere Legacy-Systeme schrittweise modernisieren, um wettbewerbsfähig zu bleiben.",
+    "Bitte prüfen Sie den Pull-Request hinsichtlich der Einhaltung unserer Coding-Standards.",
+    "Wir haben das neue Feature innerhalb von zwei Sprints komplett realisiert.",
+    "Durch Kompression konnten wir das übertragene Datenvolumen deutlich reduzieren.",
+    "Wir müssen sicherstellen, dass alle Backups regelmäßig und korrekt ausgeführt werden.",
+    "Das System steuert die Verteilung der Anfragen automatisch über verschiedene Regionen.",
+    "Ich habe geholfen, das Jira-Board neu zu strukturieren, um die Übersicht zu verbessern.",
+    "Wir überwachen die Systemgesundheit rund um die Uhr mit automatisierten Alerts.",
+    "Ich werde die Verantwortung für das Release-Management im nächsten Monat übernehmen.",
+    "Wir haben die Anforderungen des Kunden technisch präzise umgesetzt.",
+    "Die neue Plattform wird mehrere Programmiersprachen nativ unterstützen.",
+    "Benutzereingaben müssen immer serverseitig auf ihre Richtigkeit validiert werden.",
+    "Wir arbeiten ständig daran, die Benutzererfahrung unserer App zu verbessern.",
+    "Durch die Abstraktion konnten wir die Handhabung der API massiv vereinfachen.",
+    "Unsere Plattform verfügt über eine hochmoderne Verschlüsselungstechnologie.",
+    "Wir müssen die Kundendaten mit den Transaktionsprotokollen sinnvoll verknüpfen.",
+    "Durch sauberen Code lassen sich viele Bugs bereits im Vorfeld vermeiden.",
+    "Mit Kubernetes können wir unsere Container-Infrastruktur effizient verwalten.",
+    "Wir verwenden modernste Frameworks, um die Entwicklungszeit zu verkürzen.",
+    "Unvorhergesehene API-Änderungen könnten den Release-Termin leider verzögern.",
+    "Ich würde vorschlagen, auf eine ereignisgesteuerte Architektur umzusteigen.",
+    "Als DevOps-Engineer warte ich die Server und installiere regelmäßig Sicherheitsupdates.",
+    "Im Notfall können wir das gesamte System innerhalb von Minuten wiederherstellen.",
+    "Wir arbeiten eng mit der Design-Abteilung zusammen, um die Usability zu steigern.",
+    "Die Aufgaben im Sprint wurden den Entwicklern basierend auf ihrer Expertise zugewiesen.",
+]
+
+# IT Vokabular — Collocations (example sentences)
+SECTIONS["kollokationen"] = [
+    "Wir müssen die REST-Schnittstelle implementieren, um den Datenaustausch zu ermöglichen.",
+    "Das System wurde so entworfen, dass wir die horizontale Skalierbarkeit gewährleisten.",
+    "Es ist von höchster Priorität, dass wir diese kritische Sicherheitslücke umgehend schließen.",
+    "Mit dem erfolgreichen Beta-Test haben wir einen wichtigen Meilenstein erreicht.",
+    "Bevor wir mit dem Refactoring beginnen, sollten wir die Vorgehensweise kurz abstimmen.",
+    "Die neue Analyse-Funktion wird für unsere Endnutzer einen erheblichen Mehrwert generieren.",
+    "Wir müssen eine Engpassanalyse durchführen, um die Latenzprobleme im Backend zu klären.",
+    "Das Team hat ein innovatives Konzept zur Migration der Legacy-Daten erarbeitet.",
+    "Durch die Spiegelung der Server konnten wir die notwendige Redundanz schaffen.",
+    "Wir haben alle technischen Anforderungen des Kunden fristgerecht umgesetzt.",
+    "Durch den Einsatz von KI konnten wir die internen Freigabeprozesse deutlich optimieren.",
+    "In der aktuellen Projektphase sind unsere personellen Kapazitäten vollständig ausgelastet.",
+    "Wir müssen heute eine Entscheidung bezüglich der Cloud-Strategie herbeiführen.",
+    "Das Entwicklungsteam konnte den kritischen Fehler im Produktivsystem bereits beheben.",
+    "Aus Sicherheitsgründen müssen wir den Zugriff auf die Datenbank streng beschränken.",
+    "Durch Serverless Computing konnten wir die monatlichen Infrastrukturkosten massiv senken.",
+    "Umfangreiche Unit-Tests helfen uns dabei, das Risiko von Regressionen zu minimieren.",
+    "Nach dem Vorfall haben wir sofort alle notwendigen Maßnahmen ergriffen.",
+    "Wir möchten Clean Code als verbindlichen Standard in unserer Abteilung etablieren.",
+    "Wir führen A/B-Tests durch, um unsere Hypothese zum Nutzerverhalten zu validieren.",
+    "Durch zwei Sprints mit Fokus auf Bugfixing konnten wir den technischen Rückstand aufholen.",
+    "Das Caching-Modul wurde implementiert, um die Performance der Webseite zu steigern.",
+    "Nach langer Diskussion konnten wir im Team einen Konsens über das Framework erzielen.",
+    "Ein spezialisiertes Team ist dafür zuständig, das System kontinuierlich zu warten.",
+    "Die Marketingabteilung muss die erhobenen Daten für den Quartalsbericht auswerten.",
+    "Bevor wir starten können, müssen beide Parteien den Vertrag unterzeichnen.",
+    "Das neue Release muss die hohen Erwartungen unserer Großkunden erfüllen.",
+    "In dieser Position müssen Sie die volle Verantwortung für das Budget übernehmen.",
+    "Trotz der Verzögerungen konnten wir den Termin für den Go-Live einhalten.",
+    "Sobald die Planung steht, wird die Geschäftsleitung das Budget freigeben.",
+    "Wir müssen eine Lösung konzipieren, die sowohl sicher als auch benutzerfreundlich ist.",
+    "Die Automatisierung soll die Effizienz unserer Workflows signifikant erhöhen.",
+    "Interne Workshops sind ideal, um den Wissensaustausch zwischen den Teams zu fördern.",
+    "Ich wurde beauftragt, eine neue Architektur für die Microservices zu entwerfen.",
+    "Wir sollten den Code vereinfachen, um die Komplexität des Projekts zu reduzieren.",
+    "Wir werden heute Nacht ein kritisches Update auf den Server einspielen.",
+    "Wir müssen mehr Ressourcen für die Qualitätssicherung allozieren.",
+    "Könntest du bitte meinen Code reviewen, bevor ich den Merge-Request sende?",
+    "Im nächsten Meeting werden wir die langfristige Strategie der IT-Abteilung festlegen.",
+    "Der Penetrationstest hat eine kritische Schwachstelle in der Firewall identifiziert.",
+    "Für den Zugriff auf die Live-Datenbank müssen Sie eine Genehmigung einholen.",
+    "Das Programm kann derzeit keine Verbindung zum Datenbankserver herstellen.",
+    "Es ist wichtig, dass wir für jede neue Funktion eine saubere Dokumentation erstellen.",
+    "Wir sollten frühzeitig Feedback von den Endanwendern einholen.",
+    "Ich muss die Konfiguration anpassen, damit der Logger im Debug-Modus läuft.",
+    "Wir werden das Deployment heute um 22:00 Uhr durchführen, um den Betrieb nicht zu stören.",
+    "Aufgrund der Deadline müssen wir jetzt klare Prioritäten setzen.",
+    "Vor jedem großen Datenbank-Update müssen wir ein manuelles Backup anlegen.",
+    "Loadbalancer helfen uns dabei, die Verfügbarkeit der Plattform sicherzustellen.",
+    "Der Projektleiter muss der Geschäftsführung wöchentlich einen Bericht vorlegen.",
+]
+
+# IT Vokabular — Workshop (example sentences)
+SECTIONS["workshop"] = [
+    "Schön, dass ihr alle da seid zu unserem Workshop zur Cloud-Strategie.",
+    "Wir wollen heute gemeinsam einen Fahrplan für das nächste Quartal aufstellen.",
+    "Lass uns kurz die Agenda für den Vormittag durchgehen.",
+    "Unser Zeitplan sieht vor, dass wir gegen 12:00 Uhr in die Pause gehen.",
+    "Ich würde gerne zuerst eure Erwartungen an den heutigen Tag abfragen.",
+    "Zum Einstieg machen wir eine kurze Vorstellungsrunde.",
+    "Ich werde heute moderieren und euch durch die verschiedenen Sessions führen.",
+    "Damit möchte ich zum nächsten Punkt überleiten.",
+    "Hinsichtlich des Budgets müssen wir heute klare Prioritäten setzen.",
+    "Lasst uns den Fokus jetzt auf die technischen Details legen.",
+    "Darauf werden wir später im Deep Dive noch näher eingehen.",
+    "Zusammenfassend lässt sich sagen, dass wir uns hier einig sind.",
+    "Ich werde eure Ideen direkt am Whiteboard festhalten.",
+    "Kannst du das bitte anhand eines Beispiels veranschaulichen?",
+    "Darf ich kurz einhaken, damit wir nicht vom Thema abkommen?",
+    "Wir müssen im Zeitplan bleiben, deshalb müssen wir jetzt weitermachen.",
+    "Könnten wir bitte wieder auf das Hauptproblem zurückkommen?",
+    "Lass uns diesen Punkt auf den Themenparkplatz schieben.",
+    "Ich muss dich bitten, dich jetzt etwas kurz zu fassen.",
+    "Kannst du deine Aussage bitte noch einmal präzisieren?",
+    "Ich möchte nun einen neuen Punkt aufwerfen.",
+    "Lasst uns nun zur methodischen Ebene wechseln.",
+    "Davon abgesehen sollten wir auch die Security-Aspekte prüfen.",
+    "Ich würde gerne den Blick weiten und das große Ganze betrachten.",
+    "Lasst uns das auf die operative Ebene herunterbrechen.",
+    "Lasst uns die Situation sachlich und objektiv betrachten.",
+    "Hier scheinen eure Meinungen etwas widersprüchlich zu sein.",
+    "Wie können wir hier einen tragfähigen Kompromiss finden?",
+    "Ich versuche hier zwischen euren beiden Positionen zu vermitteln.",
+    "Ich schlage vor, wir vertagen diese Diskussion auf morgen.",
+    "Wer möchte noch etwas zu diesem Thema beitragen?",
+    "Mich würde hierzu brennend deine Einschätzung interessieren.",
+    "Ich möchte sicherstellen, dass heute jeder zu Wort kommt.",
+    "Ich möchte an dieser Stelle kurz ein Stimmungsbild von euch einholen.",
+    "Ich möchte die Runde nun für eure Fragen öffnen.",
+    "Wer von euch wird für die Umsetzung verantwortlich sein?",
+    "Lasst uns nun die konkreten nächsten Schritte festlegen.",
+    "Wir sollten uns hierfür eine realistische Deadline setzen.",
+    "Wer würde sich bereit erklären, heute Protokoll zu schreiben?",
+    "Ich werde nächste Woche diesbezüglich noch einmal bei euch nachfassen.",
+    "Lasst uns diesen Workshop nun offiziell abschließen.",
+    "Was ist für euch das wichtigste Learning des Tages?",
+    "Danke euch für eure aktive Teilnahme und den coolen Input.",
+    "Zum Abschluss möchte ich noch einen kurzen Ausblick geben.",
+    "Machen wir zum Ende ein kurzes Blitzlicht: Wie geht's euch jetzt?",
+    "Danke, das hat das Problem perfekt auf den Punkt gebracht.",
+    "Wir müssen hier einen gemeinsamen Nenner finden.",
+    "Lasst uns tief in die Materie eintauchen.",
+    "Der rote Faden fehlt mir in eurer Argumentation noch etwas.",
+    "Wir müssen die Lücke zwischen Theorie und Praxis endlich schließen.",
+]
+
+# IT Vokabular — Refinement (example sentences)
+SECTIONS["refinement"] = [
+    "Lass uns kurz das erste Ticket durchgehen.",
+    "Wir müssen zuerst den Scope für dieses Feature sauber abgrenzen.",
+    "Die User Story ist für mich aktuell noch nicht greifbar.",
+    "Die Beschreibung ist noch etwas schwammig formuliert.",
+    "Ich sehe hier noch erheblichen Informationsbedarf seitens der Stakeholder.",
+    "Die Dokumentation der Edge-Cases ist leider noch lückenhaft.",
+    "Kannst du das Ziel der Story bitte noch einmal präzisieren?",
+    "Ich sehe ehrlich gesagt noch keinen echten Mehrwert für den Endnutzer.",
+    "Entspricht das wirklich einem tatsächlichen Nutzerbedürfnis?",
+    "Ohne dieses Feature verliert die Story ihre Daseinsberechtigung.",
+    "Hinsichtlich der Conversion-Rate hat das Ticket keine hohe Relevanz.",
+    "Welchen Impact versprechen wir uns von dieser Änderung?",
+    "Sind die Akzeptanzkriterien bereits final abgestimmt?",
+    "Wer legt die Abnahmekriterien für dieses Modul fest?",
+    "Das Kriterium 'schneller' ist nicht messbar; wir brauchen Zahlen.",
+    "Das Ergebnis muss für das QA-Team eindeutig erkennbar sein.",
+    "Das ist eine zwingende Voraussetzung für den Release.",
+    "Ist dieser Ansatz in der aktuellen Architektur technisch umsetzbar?",
+    "Welchen Lösungsansatz würdest du hier favorisieren?",
+    "Das würde massiv neue technische Schulden verursachen.",
+    "Pass auf, dass wir hier kein Overengineering betreiben.",
+    "Suchen wir eine nachhaltige Lösung oder reicht ein Quick-and-Dirty-Fix?",
+    "Bevor wir das implementieren, ist ein Refactoring notwendig.",
+    "Welche Abhängigkeiten zu anderen Services müssen wir beachten?",
+    "Wie sieht die Schnittstelle zum Legacy-System aus?",
+    "In diesem Punkt bin ich kompromissbereit, solange die Performance stimmt.",
+    "Wir müssen eventuell beim Design Abstriche machen.",
+    "Hier muss ich als Architekt ein Veto einlegen.",
+    "Die Priorisierung der Sub-Tasks ist noch Verhandlungssache.",
+    "Das müssen wir direkt mit dem Product Owner aushandeln.",
+    "Lass uns kurz den Aufwand für diesen Task schätzen.",
+    "Ich glaube, wir unterschätzen die Komplexität der Datenmigration.",
+    "In welcher Größenordnung bewegen wir uns bei den Story Points?",
+    "Wir sollten hier unbedingt einen Puffer einplanen.",
+    "Meiner Meinung nach ist dieser Ansatz zu kurz gedacht.",
+    "Wir sollten die Notwendigkeit dieses Features kritisch hinterfragen.",
+    "Ich habe einen Einwand bezüglich der Skalierbarkeit.",
+    "Bei dieser Lösung habe ich ehrlich gesagt Bauchschmerzen.",
+    "Logisch betrachtet geht das so einfach nicht auf.",
+    "Das steht im Widerspruch zu unseren bisherigen Standards.",
+    "Ist das Ticket jetzt offiziell Ready for Dev?",
+    "Entspricht die Story unserer Definition of Ready?",
+    "Können wir das Ticket in kleinere Sub-Tasks runterbrechen?",
+    "Lass uns die UI-Anpassungen in ein separates Ticket auslagern.",
+    "Wir müssen die Backlog-Items neu priorisieren.",
+    "Das müssen wir für den nächsten Sprint auf dem Schirm haben.",
+    "Die Datenbank könnte hier zum Flaschenhals werden.",
+    "Das Ticket klingt nach der eierlegenden Wollmilchsau.",
+    "Lass uns jetzt Nägel mit Köpfen machen und die Story finalisieren.",
+    "Ich nehme das Thema mit und kläre es bis morgen.",
+]
+
+# IT Vokabular — Notfall-Kit (response sentences)
+SECTIONS["notfallkit"] = [
+    "Das ist noch etwas schwammig. Können wir das präzisieren, damit es greifbar wird?",
+    "Lass uns nicht den Teufel an die Wand malen. Wir müssen erst die Logs auswerten.",
+    "Darf ich das kurz zu Ende führen? Ich bin gleich fertig, dann gebe ich das Wort weiter.",
+    "Ich habe Bauchschmerzen dabei. Wir sollten keine neuen Altlasten produzieren.",
+    "Ich stehe gerade total auf dem Schlauch. Wie heißt nochmal der Fachbegriff für...?",
+    "Können wir das kurz resetten? Ich glaube, wir haben gerade den roten Faden verloren.",
+    "Ich würde gerne helfen, aber meine Kapazitäten sind für diesen Sprint ausgelastet.",
+    "Das ist bei mir akustisch gerade nicht angekommen. Kannst du das kurz wiederholen?",
+    "Nur um sicherzugehen, dass wir vom Gleichen reden: Wie definieren wir hier...?",
+    "Wir müssen im Zeitplan bleiben. Sollen wir den Rest auf den Themenparkplatz schieben?",
+    "Welchen Lösungsansatz würdest du denn favorisieren, um das Risiko zu minimieren?",
+    "Wir sind gerade mitten in der Engpassanalyse. Ich gebe dir nachher ein kurzes Update.",
+    "Deine Leitung hackt gerade ein bisschen. Kannst du den letzten Satz noch einmal sagen?",
+    "Lass uns jetzt Nägel mit Köpfen machen und eine Entscheidung herbeiführen.",
+    "Das würde den Rahmen sprengen. Lass uns das für das nächste Release auslagern.",
+    "Pass auf, dass wir hier kein Overengineering betreiben. Reicht ein MVP?",
+    "Welchen Mehrwert generieren wir hier eigentlich für den Endnutzer?",
+    "Lasst uns bitte sachlich und objektiv bleiben, um eine Lösung zu finden.",
+    "Ich möchte kurz ein Stimmungsbild einholen. Was ist eure Einschätzung?",
+    "Ich bin leider schon auf dem Sprung. Lass uns den Rest per Slack klären.",
+    "Könntest du das für mich noch einmal kurz zusammenfassen? Ich habe gerade den Faden verloren.",
+    "Darf ich da ganz kurz einhaken? Ich hätte dazu eine Anmerkung.",
+    "Danke für den Input! Lass uns das Thema hier kurz parken und auch die anderen zu Wort kommen lassen.",
+    "Das ist ein wichtiger Punkt, aber lass uns den Fokus wieder auf die Kernfrage lenken.",
+    "Ich glaube, dein Mikrofon schluckt ein paar Wörter. Kannst du das nochmal wiederholen?",
+]
+
+# Sprechen — Präsentation
+SECTIONS["sprechen-praesentation"] = [
+    "Guten Tag, ich möchte Ihnen heute das Thema ... vorstellen.",
+    "In meinem Vortrag geht es um die Frage, ob, wie oder warum ...",
+    "Ich habe dieses Thema gewählt, weil ...",
+    "Das Thema ... ist derzeit besonders aktuell, da ...",
+    "Ich freue mich, Ihnen heute etwas über ... erzählen zu dürfen.",
+    "Gestatten Sie mir, Ihnen heute einige Überlegungen zum Thema ... vorzustellen.",
+    "Mein heutiger Beitrag widmet sich der Frage ...",
+    "Erlauben Sie mir, auf ein Thema einzugehen, das uns alle betrifft.",
+    "Ich möchte mich heute einem Thema zuwenden, das in jüngster Zeit viel Aufmerksamkeit erregt hat.",
+    "Mein Vortrag gliedert sich in drei Teile: Zunächst ..., dann ..., und schließlich ...",
+    "Ich werde zunächst auf ... eingehen, anschließend ... und zum Schluss ...",
+    "Ich möchte drei Aspekte ansprechen.",
+    "Meine Ausführungen umfassen folgende Schwerpunkte.",
+    "Ich habe meinen Vortrag wie folgt gegliedert.",
+    "Damit komme ich zum nächsten Punkt.",
+    "Nun möchte ich auf ... eingehen.",
+    "Ein weiterer wichtiger Aspekt ist ...",
+    "Kommen wir nun zu der Frage, ob, wie oder warum ...",
+    "Das bringt mich zu meinem nächsten Punkt.",
+    "Eng damit verbunden ist die Frage nach ...",
+    "An dieser Stelle möchte ich den Fokus auf ... verlagern.",
+    "Lassen Sie mich nun einen anderen Blickwinkel einnehmen.",
+    "Aus meiner persönlichen Erfahrung kann ich sagen, dass ...",
+    "In meinem Heimatland ist es so, dass ...",
+    "Ich habe selbst erlebt, dass ...",
+    "Ein Beispiel aus meinem Alltag.",
+    "Zusammenfassend möchte ich sagen, dass ...",
+    "Damit bin ich am Ende meines Vortrags angelangt.",
+    "Abschließend lässt sich festhalten, dass ...",
+    "Vielen Dank für Ihre Aufmerksamkeit. Haben Sie Fragen?",
+]
+
+# Sprechen — Diskussion
+SECTIONS["sprechen-diskussion"] = [
+    "Meiner Meinung nach ...",
+    "Ich bin der Überzeugung, dass ...",
+    "Aus meiner Sicht ...",
+    "Ich vertrete die Ansicht, dass ...",
+    "Persönlich halte ich ... für ...",
+    "Wenn Sie mich fragen, würde ich sagen, dass ...",
+    "Meines Erachtens ...",
+    "Ich neige zu der Auffassung, dass ...",
+    "Ich würde sogar so weit gehen zu behaupten, dass ...",
+    "Nach reiflicher Überlegung bin ich zu dem Schluss gekommen, dass ...",
+    "Da stimme ich Ihnen vollkommen zu.",
+    "Genauso sehe ich das auch.",
+    "Das ist ein sehr guter Punkt.",
+    "Da haben Sie absolut recht.",
+    "Das entspricht auch meiner Erfahrung.",
+    "Dem kann ich nur zustimmen.",
+    "Da haben Sie einerseits recht, aber ...",
+    "Das stimmt zwar, allerdings ...",
+    "Grundsätzlich teile ich Ihre Meinung, jedoch ...",
+    "Bis zu einem gewissen Punkt stimme ich zu, aber ...",
+    "Das mag sein, dennoch sollte man bedenken, dass ...",
+    "Da bin ich leider anderer Meinung.",
+    "Ich sehe das etwas anders.",
+    "Erlauben Sie mir, eine andere Perspektive einzubringen.",
+    "Ich kann Ihren Standpunkt nachvollziehen, aber ...",
+    "Da muss ich Ihnen leider widersprechen.",
+    "Das sehe ich nicht ganz so.",
+    "So berechtigt Ihr Einwand auch sein mag — ich würde dennoch dagegenhalten, dass ...",
+    "Ich möchte da einen Gegenstandpunkt einnehmen.",
+    "Ihr Argument hat durchaus seine Berechtigung, aber es greift meines Erachtens zu kurz.",
+    "Bei allem Respekt — ich halte diese Schlussfolgerung für nicht ganz zutreffend.",
+    "Da möchte ich doch eine differenziertere Betrachtung vorschlagen.",
+    "Könnten Sie das bitte näher erläutern?",
+    "Was genau meinen Sie damit?",
+    "Haben Sie dafür ein konkretes Beispiel?",
+    "Wie kommen Sie zu dieser Einschätzung?",
+    "Darf ich nachfragen?",
+    "Sie haben vorhin erwähnt, dass ... — dazu möchte ich sagen ...",
+    "Wenn ich Sie richtig verstanden habe, meinen Sie, dass ...",
+    "Das ist ein interessanter Gedanke. Ich möchte hinzufügen, dass ...",
+    "Was halten Sie denn von ...?",
+    "Wie sehen Sie das?",
+    "Vielleicht können wir uns darauf einigen, dass ...",
+    "Ein Kompromiss wäre vielleicht ...",
+    "Wir sind uns zumindest einig, dass ...",
+    "Lassen Sie uns einen Mittelweg finden.",
+    "Könnten wir uns auf folgenden gemeinsamen Nenner verständigen?",
+    "Beide Seiten haben berechtigte Punkte — vielleicht liegt die Wahrheit in der Mitte.",
+    "Trotz unserer unterschiedlichen Standpunkte lässt sich festhalten, dass ...",
+]
+
+# Sprechen — Zusammenfassung
+SECTIONS["sprechen-zusammenfassung"] = [
+    "Der Text oder die Sendung handelt von ...",
+    "Im Wesentlichen geht es darum, dass ...",
+    "Die wichtigsten Punkte sind ...",
+    "Es wird berichtet, dass ...",
+    "Der Autor oder die Autorin vertritt die These, dass ...",
+    "Dazu möchte ich anmerken, dass ...",
+    "Ich finde es bemerkenswert, dass ...",
+    "In Bezug auf mein Heimatland kann ich sagen, dass ...",
+]
+
+# Sprechen — Redemittel
+SECTIONS["sprechen-redemittel"] = [
+    "Das ist eine gute Frage. Lassen Sie mich kurz überlegen.",
+    "Darüber habe ich noch nicht so genau nachgedacht, aber ...",
+    "Spontan würde ich sagen, dass ...",
+    "Anders gesagt ...",
+    "Was ich damit sagen möchte, ist ...",
+    "Ich formuliere es mal anders.",
+    "Mit anderen Worten ...",
+    "Entschuldigung, darf ich kurz etwas dazu sagen?",
+    "Einen Moment, ich möchte meinen Gedanken noch zu Ende führen.",
+    "Lassen Sie mich bitte noch kurz ausreden.",
+    "Verzeihung, dass ich Sie unterbreche, aber ...",
+    "Ich bin mir nicht ganz sicher, aber ich glaube, dass ...",
+    "Soweit ich weiß ...",
+    "Wenn ich mich nicht irre ...",
+    "Es könnte sein, dass ...",
+    "Im Allgemeinen kann man sagen, dass ...",
+    "In der Regel ist es so, dass ...",
+    "Grundsätzlich gilt, dass ...",
+    "Man kann davon ausgehen, dass ...",
+    "Das gilt allerdings nur für ...",
+    "Man muss dabei berücksichtigen, dass ...",
+    "Natürlich gibt es auch Ausnahmen.",
+    "Das hängt natürlich davon ab, ob oder wie ...",
+]
+
+# C1 Expressions (Redewendungen)
+SECTIONS["expressions"] = [
+    "Die gleichzeitige Zunahme von digitaler Vernetzung und sozialer Isolation stellt ein Paradoxon dar.",
+    "Moderne Unternehmen müssen der Work-Life-Balance ihrer Mitarbeiter Rechnung tragen.",
+    "Algorithmen von sozialen Medien stehen aufgrund mangelnder Transparenz oft in der Kritik.",
+    "Statistiken ohne Kontext können ein verzerrtes Bild der tatsächlichen wirtschaftlichen Lage abgeben.",
+    "Wir sollten unser Augenmerk verstärkt auf die Umschulung von Arbeitskräften richten.",
+    "Dass der Klimawandel menschengemacht ist, steht mittlerweile außer Zweifel.",
+    "Man kann die Vorteile der KI nicht einfach in Abrede stellen, nur weil Risiken existieren.",
+    "In der deutschen Unternehmenskultur nimmt Pünktlichkeit nach wie vor einen hohen Stellenwert ein.",
+    "Das aktuelle Rentensystem stößt aufgrund des demografischen Wandels an seine Grenzen.",
+    "Durch die Sparmaßnahmen stehen viele soziale Projekte zur Disposition.",
+    "Es ist schwierig, beim Thema Tempolimit einen gesellschaftlichen Konsens zu erzielen.",
+    "Die ständige Erreichbarkeit ist die Kehrseite der Medaille der digitalen Freiheit.",
+    "Während der Krise rückten ökologische Ziele leider oft in den Hintergrund.",
+    "Die Entscheidung für oder gegen Atomkraft wird weitreichende Folgen für Generationen haben.",
+    "Erst nach Auswertung aller Daten lässt sich ein fundiertes Urteil über das Projekt fällen.",
+    "Bildungserfolg und soziale Herkunft stehen in Deutschland leider oft in engem Zusammenhang.",
+    "Um Innovationen zu fördern, muss man bereit sein, den Status quo regelmäßig zu hinterfragen.",
+    "Neue Gesetzentwürfe müssen einer kritischen Prüfung durch Experten unterzogen werden.",
+    "Mit Investitionen in Wasserstoff stellt das Land die Weichen für die energetische Zukunft.",
+    "Übertriebene Bürokratie kann ein Hemmschuh für die wirtschaftliche Entwicklung sein.",
+    "Wettbewerb ist notwendig, um technische Innovationen voranzutreiben.",
+    "Gezielte Zuwanderung kann dabei helfen, dem Fachkräftemangel entgegenzuwirken.",
+    "Die Architektur der Zukunft muss nachhaltige Akzente setzen, um CO2 zu sparen.",
+    "Wenn die Finanzierung wegbricht, ist der gesamte Sektor in der Bredouille.",
+    "Effizienz sollte in der Pflege nicht das Maß aller Dinge sein; Menschlichkeit zählt mehr.",
+    "Nur durch Digitalisierung kann der Mittelstand auf dem Weltmarkt wettbewerbsfähig bleiben.",
+    "Politiker sollten ihre Handlungsspielräume nutzen, um soziale Gerechtigkeit zu fördern.",
+    "Die Regulierung von KI ist eine Gratwanderung zwischen Sicherheit und Fortschritt.",
+    "Die Inflation droht, die soziale Ungleichheit weiter zu verschärfen.",
+    "Das Gesundheitssystem muss sich anpassen, um den demografischen Wandel zu bewältigen.",
+    "Viele Wissenschaftler äußern ethische Bedenken gegenüber dem Klonen von Lebewesen.",
+    "Skandinavische Länder sind Vorreiter auf dem Gebiet der digitalen Verwaltung.",
+    "Durch die Fusion der beiden Firmen lassen sich wertvolle Synergieeffekte erzielen.",
+    "Oft verhindern ökonomische Zwänge den schnellen Umstieg auf Bio-Produkte.",
+    "Die Globalisierung ist ein zweischneidiges Schwert: Sie schafft Wohlstand, aber auch Abhängigkeit.",
+    "Man darf die Verantwortung für den Umweltschutz nicht allein auf die Bürger abschieben.",
+    "Mit Ihrer Analyse der Bildungsmisere haben Sie den Kern der Sache getroffen.",
+    "Das haben wir schon immer so gemacht, ist leider oft ein Totschlagargument.",
+    "Ein kluger Kompromiss kann den Kritikern den Wind aus den Segeln nehmen.",
+    "Er konnte die komplexe Problematik in nur zwei Sätzen auf den Punkt bringen.",
+    "Nur durch Bildung können wir den Teufelskreis aus Armut und Perspektivlosigkeit durchbrechen.",
+    "Bei der knappen Wahl könnten die Erstwähler das Zünglein an der Waage sein.",
+    "Eine überstürzte Gesetzesänderung zieht oft einen Rattenschwanz an Problemen nach sich.",
+    "Aggressive Rhetorik in Talkshows gießt nur unnötig Öl ins Feuer.",
+    "In der Debatte um die Steuerreform müssen die Parteien endlich Farbe bekennen.",
+    "Wenn es um Missstände in der Firma geht, nimmt der Betriebsratsvorsitzende kein Blatt vor den Mund.",
+    "Nach langem Streit musste der Chef ein Machtwort sprechen, um das Projekt zu retten.",
+    "Da der Referent krank wurde, musste eine Kollegin kurzfristig in die Bresche springen.",
+    "Erfolgreiche Unternehmer müssen oft den Mut haben, gegen den Strom zu schwimmen.",
+    "Radikale Tendenzen müssen wir in einer Demokratie bereits im Keim ersticken.",
+    "Bevor wir entscheiden, müssen wir der Ursache für den Fehler auf den Grund gehen.",
+    "Obwohl die Firma spät startete, konnte sie den Markt von hinten aufräumen.",
+    "Mit Verboten sollte man vorsichtig sein, um nicht über das Ziel hinauszuschießen.",
+    "Es ist unfair, wenn die Politik bei Großkonzernen und Kleinbetrieben mit zweierlei Maß misst.",
+    "Es ist ein Trugschluss zu glauben, dass technischer Fortschritt allein alle Probleme löst.",
+    "Nach Jahren der Übung sind die Handgriffe dem Chirurgen in Fleisch und Blut übergegangen.",
+    "Der Vorschlag zur Arbeitszeitverkürzung fiel bei den Gewerkschaften auf fruchtbaren Boden.",
+    "Nach dem Datenskandal musste das Unternehmen erst einmal Schadensbegrenzung betreiben.",
+    "Investigativer Journalismus erlaubt es uns, hinter die Kulissen der Macht zu blicken.",
+    "Die Wähler verpassten der Regierung bei der Landtagswahl einen Denkzettel.",
+    "Die Behauptungen über den angeblichen Betrug sind völlig aus der Luft gegriffen.",
+    "Ohne solide Finanzierung steht das gesamte Vorhaben auf tönernen Füßen.",
+    "Die geringe Rentenerhöhung ist ein Schlag ins Gesicht für viele Geringverdiener.",
+    "Der Minister hüllte sich während der gesamten Befragung in Schweigen.",
+    "Auslandsaufenthalte während des Studiums helfen dabei, den eigenen Horizont zu erweitern.",
+    "Er machte keinen Hehl daraus, dass er mit der Entscheidung unzufrieden war.",
+    "Bei der konservativen Geschäftsführung biss er mit seinen Reformvorschlägen auf Granit.",
+    "Es ist unkollegial, wenn sich der Teamleiter mit den fremden Federn seiner Mitarbeiter schmückt.",
+    "Manchmal verliert man sich im Detail und sieht den Wald vor lauter Bäumen nicht mehr.",
+    "Die Firma setzte alles auf eine Karte und investierte ihr gesamtes Kapital in die neue App.",
+    "Vor allem bei der digitalen Infrastruktur an Schulen liegt in Deutschland vieles im Argen.",
+    "Das neue iPhone-Modell wird erneut Maßstäbe für die gesamte Branche setzen.",
+]
+
+if __name__ == "__main__":
+    token = get_token()
+    base = "src/assets/audio"
+
+    total = sum(len(v) for v in SECTIONS.values())
+    done = 0
+    errors = 0
+
+    print(f"Generating TTS for {total} phrases across {len(SECTIONS)} sections...")
+    print(f"Voice: {VOICE}, Rate: {RATE}")
+    print()
+
+    for section, phrases in SECTIONS.items():
+        print(f"── {section} ({len(phrases)} phrases) ──")
+        for i, text in enumerate(phrases):
+            idx = i + 1
+            padded = str(idx).zfill(2)
+            outfile = os.path.join(base, section, f"{section}-{padded}.mp3")
+            short = text[:60] + ("..." if len(text) > 60 else "")
+            try:
+                result = synthesize(text, outfile, token)
+                if result == "skip":
+                    print(f"  [{padded}] skip (exists)")
+                else:
+                    print(f"  [{padded}] {short}")
+                done += 1
+            except Exception as e:
+                print(f"  [{padded}] ERROR: {e}")
+                errors += 1
+        print()
+
+    print(f"Done! {done} generated, {errors} errors.")

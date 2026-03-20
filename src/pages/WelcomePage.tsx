@@ -52,8 +52,8 @@ export default function WelcomePage() {
           animate={{ opacity: 1, y: 0 }}
           className="absolute top-0 left-0 right-0 flex items-center justify-between px-6 md:px-12 py-5"
         >
-          <span className="text-xl font-bold">
-            <span className="text-primary">C1</span> Werkstatt
+          <span className="text-xl font-bold flex items-center gap-2">
+            <img src="/logo.png" alt="C1" className="h-7 w-7 rounded-md" /> Werkstatt
           </span>
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" asChild>
@@ -124,7 +124,7 @@ export default function WelcomePage() {
             className="mt-8 flex items-center justify-center gap-6 text-sm text-muted-foreground"
           >
             <span className="flex items-center gap-1.5"><Zap className="h-4 w-4 text-amber-500" /> AI-powered</span>
-            <span className="flex items-center gap-1.5"><Target className="h-4 w-4 text-emerald-500" /> Exam-focused</span>
+            <span className="flex items-center gap-1.5"><Target className="h-4 w-4 text-emerald-500" /> IT-flavoured</span>
             <span className="flex items-center gap-1.5">🇩🇪 Made for expats</span>
           </motion.div>
         </div>
@@ -241,7 +241,7 @@ export default function WelcomePage() {
             Ready to stop procrastinating?
           </h2>
           <p className="text-lg text-muted-foreground mb-10">
-            Join other expats who are actually having fun preparing for C1. Free to start, no credit card needed.
+            Join other expats who are actually having fun preparing for C1. 100% free — no ads, no costs.
           </p>
           <Button size="lg" className="text-base px-10 h-13 rounded-xl shadow-lg shadow-primary/25" asChild>
             <Link to="/signup">
@@ -254,8 +254,8 @@ export default function WelcomePage() {
       {/* Footer */}
       <footer className="border-t px-6 py-8">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">
-            <span className="text-primary">C1</span> Werkstatt
+          <span className="font-semibold text-foreground flex items-center gap-2">
+            <img src="/logo.png" alt="C1" className="h-5 w-5 rounded-sm" /> Werkstatt
           </span>
           <div className="text-center">
             Built by <a href="https://ioana-ognibeni.eu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Ioana Ognibeni</a> with{' '}

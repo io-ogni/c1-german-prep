@@ -1,8 +1,11 @@
 import { useTranslation } from '@/i18n/useTranslation';
 import { ITDeutschNav } from '@/components/layout/ITDeutschNav';
 import { Card, CardContent } from '@/components/ui/card';
-import { Play, Headphones, Video } from 'lucide-react';
+import { Play, Headphones, Video, Monitor, MessageSquareText } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { DialogueList, DialogueView } from '@/components/it-deutsch/DialogueReader';
+import { IT_DIALOGUES } from '@/data/itDialogues';
+import type { ITDialogue } from '@/data/itDialogues';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const MEDIA_BASE = `${SUPABASE_URL}/storage/v1/object/public/Media%20IT`;
@@ -77,6 +80,7 @@ function AudioCard({ podcast }: { podcast: typeof PODCASTS[0] }) {
         <audio
           ref={audioRef}
           src={`${MEDIA_BASE}/${podcast.file}`}
+          controlsList="nodownload"
           preload="none"
           onEnded={() => setPlaying(false)}
           onPause={() => setPlaying(false)}
@@ -90,18 +94,44 @@ function AudioCard({ podcast }: { podcast: typeof PODCASTS[0] }) {
 }
 
 export default function ITDeutschPage() {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
+  const [selectedDialogue, setSelectedDialogue] = useState<ITDialogue | null>(null);
+
+  if (selectedDialogue) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <Monitor className="h-6 w-6" />
+            {t('nav_it_deutsch')}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">Berufssprache für die IT-Branche — Vokabular, Redewendungen und Dialoge für den Arbeitsalltag.</p>
+        </div>
+        <ITDeutschNav />
+        <DialogueView dialogue={selectedDialogue} onBack={() => setSelectedDialogue(null)} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <h1 className="text-2xl font-bold text-foreground">{t('nav_it_deutsch')}</h1>
-        <ITDeutschNav />
+      <div>
+        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <Monitor className="h-6 w-6" />
+          {t('nav_it_deutsch')}
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">Berufssprache für die IT-Branche — Vokabular, Redewendungen und Dialoge für den Arbeitsalltag.</p>
       </div>
+      <ITDeutschNav />
 
-      <p className="text-sm text-muted-foreground">
-        Podcasts und Videos zum Thema Berufssprache IT — produziert mit NotebookLM.
-      </p>
+      {/* Dialogues — prominent placement */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <MessageSquareText className="h-4 w-4 text-fuchsia-500" />
+          <h2 className="font-semibold text-foreground">{lang === 'de' ? 'Dialoge' : 'Dialogues'}</h2>
+        </div>
+        <DialogueList dialogues={IT_DIALOGUES} onSelect={setSelectedDialogue} />
+      </div>
 
       {/* Featured video */}
       <div>
@@ -109,11 +139,12 @@ export default function ITDeutschPage() {
           <Video className="h-4 w-4 text-fuchsia-500" />
           <h2 className="font-semibold text-foreground">Video</h2>
         </div>
-        <Card>
+        <Card className="max-w-2xl">
           <CardContent className="p-0 overflow-hidden rounded-lg">
             <video
               src={`${MEDIA_BASE}/${VIDEO.file}`}
               controls
+              controlsList="nodownload"
               preload="metadata"
               className="w-full aspect-video bg-black"
               poster=""

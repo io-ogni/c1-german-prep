@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { flashcards, type Flashcard } from '@/data/flashcards';
-import { RotateCcw, SkipForward, Check, X, Eye, Trophy, Sparkles } from 'lucide-react';
+import { RotateCcw, SkipForward, Check, X, Eye, Trophy, Sparkles, Monitor } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ITDeutschNav } from '@/components/layout/ITDeutschNav';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -113,10 +113,14 @@ export default function FlashcardsPage() {
     const percentage = total > 0 ? Math.round((correctCount / total) * 100) : 0;
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <h1 className="text-2xl font-bold text-foreground">{t('nav_it_deutsch')}</h1>
+        <div>
+        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <Monitor className="h-6 w-6" />
+          {t('nav_it_deutsch')}
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">Berufssprache für die IT-Branche — Vokabular, Redewendungen und Dialoge für den Arbeitsalltag.</p>
+      </div>
           <ITDeutschNav />
-        </div>
         <div className="min-h-[50vh] flex items-center justify-center">
         <div className="w-full max-w-lg text-center space-y-8 animate-scale-in">
           {/* Trophy */}
@@ -180,10 +184,14 @@ export default function FlashcardsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <h1 className="text-2xl font-bold text-foreground">{t('nav_it_deutsch')}</h1>
-        <ITDeutschNav />
+      <div>
+        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <Monitor className="h-6 w-6" />
+          {t('nav_it_deutsch')}
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">Berufssprache für die IT-Branche — Vokabular, Redewendungen und Dialoge für den Arbeitsalltag.</p>
       </div>
+      <ITDeutschNav />
 
       <div className="flex flex-col items-center gap-6 relative">
 

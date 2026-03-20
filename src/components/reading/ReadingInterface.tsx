@@ -1,18 +1,24 @@
-import { useState, useRef, useCallback, useMemo } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { useRequiredAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { TelcBadge } from '@/components/shared/TelcBadge';
 import { Timer } from '@/components/shared/Timer';
 import { toast } from 'sonner';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Play, Pause, Square } from 'lucide-react';
 import { ClickableText } from './ClickableText';
 import { TextrekonstruktionQuestions } from './questions/TextrekonstruktionQuestions';
 import { DetailverstehenQuestions } from './questions/DetailverstehenQuestions';
 import { SelektivesVerstehenQuestions } from './questions/SelektivesVerstehenQuestions';
 import { GeneralQuestions } from './questions/GeneralQuestions';
+
+const readingAudio = import.meta.glob('/src/assets/audio/reading/*.mp3', { eager: true, import: 'default' }) as Record<string, string>;
+
+function getReadingAudioUrl(sortOrder: number): string | undefined {
+  const padded = String(sortOrder).padStart(2, '0');
+  return readingAudio[`/src/assets/audio/reading/reading-${padded}.mp3`];
+}
 
 interface ReadingText {
   id: string;
@@ -23,6 +29,7 @@ interface ReadingText {
   word_count: number;
   text_content: string;
   questions: any;
+  sort_order: number;
 }
 
 interface Props {
@@ -38,7 +45,48 @@ export function ReadingInterface({ text, onBack }: Props) {
   const [score, setScore] = useState<{ correct: number; total: number } | null>(null);
   const [selfScore, setSelfScore] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerSecondsRef = useRef(0);
+
+  const audioUrl = getReadingAudioUrl(text.sort_order);
+
+  const toggleAudio = useCallback(() => {
+    if (isPlaying && audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+      return;
+    }
+    if (audioRef.current && audioRef.current.currentTime > 0) {
+      audioRef.current.play();
+      setIsPlaying(true);
+      return;
+    }
+    if (!audioUrl) return;
+    const audio = new Audio(audioUrl);
+    audioRef.current = audio;
+    audio.onended = () => setIsPlaying(false);
+    audio.play();
+    setIsPlaying(true);
+  }, [isPlaying, audioUrl]);
+
+  const stopAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setIsPlaying(false);
+    }
+  }, []);
+
+  // Stop audio on unmount (leaving the page)
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    };
+  }, []);
 
   const isTextrekonstruktion = text.text_type === 'textrekonstruktion';
   const isArrayFormat = isTextrekonstruktion && Array.isArray(text.questions);
@@ -184,10 +232,9 @@ export function ReadingInterface({ text, onBack }: Props) {
         <div className="flex-1">
           <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
             {title}
-            {text.exam_format === 'telc' && <TelcBadge />}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {text.text_type.replace(/_/g, ' ')} | ~{text.word_count} {t('reading_words')}
+            <span className="capitalize">{text.text_type.replace(/_/g, ' ')}</span> | ~{text.word_count} {t('reading_words')}
           </p>
         </div>
         <Timer className="shrink-0" />
@@ -196,6 +243,48 @@ export function ReadingInterface({ text, onBack }: Props) {
       {/* Text content */}
       <Card>
         <CardContent className="p-6">
+          {/* Listen button — top right, styled like PlayAllButton */}
+          {audioUrl && (() => {
+            const disabled = isTextrekonstruktion && !checked;
+            return (
+              <div className="mb-4 flex justify-end">
+              <div className="relative group inline-block">
+                <div className="inline-flex items-center gap-1">
+                  <button
+                    onClick={disabled ? undefined : toggleAudio}
+                    className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                      disabled
+                        ? 'text-muted-foreground/50 cursor-default'
+                        : isPlaying
+                          ? 'bg-primary/10 text-primary dark:bg-primary/20'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    }`}
+                  >
+                    {isPlaying
+                      ? <Pause className="h-3 w-3 fill-primary text-primary" />
+                      : <Play className={`h-3 w-3 ${disabled ? 'fill-muted-foreground/50 text-muted-foreground/50' : 'fill-primary text-primary'}`} />}
+                    {isPlaying
+                      ? (language === 'de' ? 'Pause' : 'Pause')
+                      : (language === 'de' ? 'Text anhören' : 'Listen to text')}
+                  </button>
+                  {isPlaying && (
+                    <button
+                      onClick={stopAudio}
+                      className="inline-flex items-center rounded-full p-1 text-primary hover:bg-muted transition-colors"
+                    >
+                      <Square className="h-3 w-3 fill-primary text-primary" />
+                    </button>
+                  )}
+                </div>
+                {disabled && (
+                  <div className="absolute right-0 top-full mt-1 hidden group-hover:block z-10 rounded-md bg-popover border border-border px-2.5 py-1.5 text-xs text-muted-foreground shadow-md whitespace-nowrap">
+                    {language === 'de' ? 'Verfügbar nach dem Lösen' : 'Available after solving'}
+                  </div>
+                )}
+              </div>
+              </div>
+            );
+          })()}
           <ClickableText
             content={text.text_content}
             textId={text.id}
@@ -263,6 +352,7 @@ export function ReadingInterface({ text, onBack }: Props) {
                   </p>
                 </div>
               )}
+
 
               {/* Self-assessment */}
               <div className="space-y-2">

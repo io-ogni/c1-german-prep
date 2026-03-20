@@ -77,7 +77,7 @@ function SingleWordFamily({ content, solution, instructions, explanation, answer
       }
     >
       <div className="text-center space-y-2 py-2">
-        <SelectableText text={content?.word ?? ''} className="text-lg font-semibold" />
+        <SelectableText text={content?.given ?? content?.word ?? ''} className="text-lg font-semibold" />
         <p className="text-sm text-muted-foreground">{content?.target_type}</p>
       </div>
       <div className="flex gap-2">
@@ -147,46 +147,48 @@ function MultiItemWordFamily({
   const isCorrect = subAnswered && normalize(input) === normalize(correctAnswer);
 
   return (
-    <ExerciseCard
-      question={`${instructions} (${subIndex + 1}/${items.length})`}
-      feedback={
-        subAnswered
-          ? {
-              correct: isCorrect,
-              message: isCorrect
-                ? t('exercise_correct')
-                : `${t('exercise_correct_answer')}: ${correctAnswer}${explanation ? ` — ${explanation}` : ''}`,
-            }
-          : null
-      }
-    >
-      <div className="space-y-2 py-2">
-        <div className="rounded-md bg-muted p-3">
-          <SelectableText text={current.given} className="text-sm" />
+    <>
+      <ExerciseCard
+        question={`${instructions} (${subIndex + 1}/${items.length})`}
+        feedback={
+          subAnswered
+            ? {
+                correct: isCorrect,
+                message: isCorrect
+                  ? t('exercise_correct')
+                  : `${t('exercise_correct_answer')}: ${correctAnswer}${explanation ? ` — ${explanation}` : ''}`,
+              }
+            : null
+        }
+      >
+        <div className="space-y-2 py-2">
+          <div className="rounded-md bg-muted p-3">
+            <SelectableText text={current.given} className="text-sm" />
+          </div>
+          <p className="text-xs text-muted-foreground italic">→ {current.transform_to}{current.hint ? ` (${current.hint})` : ''}</p>
         </div>
-        <p className="text-xs text-muted-foreground italic">→ {current.transform_to}{current.hint ? ` (${current.hint})` : ''}</p>
-      </div>
-      <div className="flex gap-2">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="..."
-          disabled={subAnswered || parentAnswered}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !subAnswered && !parentAnswered && input.trim()) handleCheck();
-          }}
-        />
-        {!subAnswered && !parentAnswered && (
-          <Button onClick={handleCheck} disabled={!input.trim()}>
-            {t('exercise_check')}
-          </Button>
-        )}
-      </div>
+        <div className="flex gap-2">
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="..."
+            disabled={subAnswered || parentAnswered}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !subAnswered && !parentAnswered && input.trim()) handleCheck();
+            }}
+          />
+          {!subAnswered && !parentAnswered && (
+            <Button onClick={handleCheck} disabled={!input.trim()}>
+              {t('exercise_check')}
+            </Button>
+          )}
+        </div>
+      </ExerciseCard>
       {subAnswered && !isLast && !parentAnswered && (
-        <div className="flex justify-end pt-2">
+        <div className="flex justify-end">
           <Button size="sm" onClick={handleNext}>{t('exercise_next')}</Button>
         </div>
       )}
-    </ExerciseCard>
+    </>
   );
 }

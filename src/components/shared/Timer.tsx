@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { Play, Pause, RotateCcw } from 'lucide-react';
+import { TimerIcon, TimerOff, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface TimerProps {
@@ -38,7 +38,7 @@ export function Timer({ className }: TimerProps) {
         {mm}:{ss}
       </span>
       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={running ? stop : start}>
-        {running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+        {running ? <TimerOff className="h-4 w-4" /> : <TimerIcon className="h-4 w-4" />}
       </Button>
       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={reset}>
         <RotateCcw className="h-4 w-4" />

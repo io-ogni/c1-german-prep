@@ -27,17 +27,17 @@ export const translations = {
     auth_reset_password: "Passwort zurücksetzen",
     auth_no_account: "Noch kein Konto?",
     auth_has_account: "Bereits ein Konto?",
-    auth_reset_sent: "Falls ein Konto mit dieser E-Mail existiert, haben wir Ihnen einen Link zum Zurücksetzen geschickt.",
-    auth_check_email: "Bitte überprüfen Sie Ihre E-Mail für die Bestätigung.",
+    auth_reset_sent: "Falls ein Konto mit dieser E-Mail existiert, haben wir dir einen Link zum Zurücksetzen geschickt.",
+    auth_check_email: "Bitte überprüfe deine E-Mail für die Bestätigung.",
     auth_password_hint: "Mindestens 6 Zeichen",
     auth_passwords_no_match: "Passwörter stimmen nicht überein.",
     auth_new_password: "Neues Passwort",
     auth_set_new_password: "Neues Passwort setzen",
-    auth_password_updated: "Passwort wurde aktualisiert. Sie können sich jetzt anmelden.",
+    auth_password_updated: "Passwort wurde aktualisiert. Du kannst dich jetzt anmelden.",
 
     // Home
     home_welcome: "Willkommen",
-    home_subtitle: "Dein Weg zur telc C1 Prüfung",
+    home_subtitle: "Dein Weg zur telc C1 Prüfung — und dazu, im Meeting endlich das zu sagen, was du wirklich denkst.",
     home_progress: "Fortschritt",
     home_exercises_completed: "Übungen abgeschlossen",
     home_review_vocabulary: "Wortschatz wiederholen",
@@ -50,6 +50,7 @@ export const translations = {
     // Level tabs
     level_b2_refresh: "B2 Auffrischung",
     level_c1_new: "C1 Neu",
+    level_c1: "C1 Prüfung",
 
     // Exercise types
     exercise_definition_match: "Definitionszuordnung",
@@ -71,10 +72,11 @@ export const translations = {
     exercise_explanation: "Erklärung",
     exercise_progress: "Fortschritt",
     exercise_back_to_topics: "Zurück zu den Themen",
+    exercise_type_answer: "Antwort eingeben",
     exercise_of: "von",
 
     // Writing
-    writing_level_select: "Wählen Sie Ihr Niveau",
+    writing_level_select: "Wähle dein Niveau",
     writing_rusty: "Eingerostet",
     writing_rusty_desc: "Ich habe lange kein Deutsch geschrieben",
     writing_solid_b2: "Solides B2",
@@ -85,14 +87,14 @@ export const translations = {
     writing_evaluating: "Text wird bewertet...",
     writing_word_count: "Wörter",
     writing_target: "Ziel",
-    writing_cost_note: "Jede Bewertung kostet ca. $0,01-0,03 von Ihrem API-Schlüssel",
-    writing_api_key_needed: "Fügen Sie Ihren Anthropic API-Schlüssel in den Einstellungen hinzu, um die Schreibbewertung freizuschalten.",
+    writing_cost_note: "Jede Bewertung kostet ca. $0,01-0,03 von deinem API-Schlüssel",
+    writing_api_key_needed: "Füge deinen Anthropic API-Schlüssel in den Einstellungen hinzu, um die Schreibbewertung freizuschalten.",
     writing_not_started: "Noch nicht begonnen",
     writing_submitted: "Eingereicht",
     writing_save_to_texts: "In Meine Texte speichern",
     writing_copy_prompt: "Prompt kopieren — in ChatGPT etc. einfügen",
     writing_copied: "Prompt in die Zwischenablage kopiert!",
-    writing_no_api_alternative: "Kein API-Schlüssel? Kein Problem — schreiben Sie Ihren Text und kopieren Sie den Bewertungs-Prompt für ChatGPT oder ein anderes LLM.",
+    writing_no_api_alternative: "Für die automatische Bewertung hinterlege deinen OpenAI API-Schlüssel in den Einstellungen. Kein Schlüssel? Kein Problem — schreib deinen Text und kopiere den Bewertungs-Prompt für ChatGPT oder ein anderes LLM.",
 
     // Writing evaluation
     eval_results: "Bewertungsergebnisse",
@@ -111,7 +113,7 @@ export const translations = {
     reading_start: "Starten",
     reading_pause: "Pause",
     reading_check_answers: "Antworten überprüfen",
-    reading_self_assessment: "Wie gut haben Sie den Text verstanden?",
+    reading_self_assessment: "Wie gut hast du den Text verstanden?",
     reading_save_progress: "Fortschritt speichern",
     reading_richtig: "richtig",
     reading_falsch: "falsch",
@@ -156,10 +158,10 @@ export const translations = {
     settings_key_invalid: "Schlüssel ist ungültig",
     settings_writing_level: "Schreibniveau",
     settings_clear_progress: "Fortschritt zurücksetzen",
-    settings_clear_confirm: "Dies setzt allen Übungs- und Lesefortschritt zurück. Ihre Texte, Ihr Wortschatz und Ihre Einstellungen bleiben erhalten. Dies kann nicht rückgängig gemacht werden.",
+    settings_clear_confirm: "Dies setzt allen Übungs- und Lesefortschritt zurück. Deine Texte, dein Wortschatz und deine Einstellungen bleiben erhalten. Dies kann nicht rückgängig gemacht werden.",
     settings_export_data: "Meine Daten exportieren",
     settings_delete_account: "Konto löschen",
-    settings_delete_confirm: "Dies löscht Ihr Konto und ALLE Daten unwiderruflich. Geben Sie 'DELETE' ein zur Bestätigung.",
+    settings_delete_confirm: "Dies löscht dein Konto und ALLE Daten unwiderruflich. Gib 'DELETE' ein zur Bestätigung.",
 
     // Exam Prep
     exam_section_practice: "Abschnitt üben",
@@ -177,7 +179,7 @@ export const translations = {
 
     // Listening
     listening_title: "Hörverstehen",
-    listening_subtitle: "Hören Sie den Audio-Beitrag extern an und bearbeiten Sie dann die Aufgaben hier.",
+    listening_subtitle: "Höre den Audio-Beitrag extern an und bearbeite dann die Aufgaben hier.",
     listening_set: "Set",
     listening_teil: "Teil",
     listening_completed: "abgeschlossen",
@@ -193,8 +195,8 @@ export const translations = {
     listening_correct_answer: "Richtige Antwort",
     listening_score: "Ergebnis",
     listening_correct: "richtig",
-    listening_match_instructions: "Ordnen Sie jedem Sprecher die passende Aussage zu. Zwei Aussagen passen zu keinem Sprecher.",
-    listening_fill_instructions: "Füllen Sie die Lücken aus (maximal 4 Wörter pro Lücke).",
+    listening_match_instructions: "Ordne jedem Sprecher die passende Aussage zu. Zwei Aussagen passen zu keinem Sprecher.",
+    listening_fill_instructions: "Fülle die Lücken aus (maximal 4 Wörter pro Lücke).",
     listening_speaker: "Sprecher",
     listening_statement: "Aussage",
     listening_question: "Frage",

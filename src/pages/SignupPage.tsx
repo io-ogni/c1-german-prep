@@ -30,7 +30,7 @@ export default function SignupPage() {
       return;
     }
     if (TURNSTILE_SITE_KEY && !captchaToken) {
-      toast.error('Bitte warten Sie, bis die CAPTCHA-Überprüfung abgeschlossen ist.');
+      toast.error('Bitte warte, bis die CAPTCHA-Überprüfung abgeschlossen ist.');
       return;
     }
     setLoading(true);

@@ -20,6 +20,9 @@ import { Transform } from '@/components/grammar/exercises/Transform';
 import { SentenceBuild } from '@/components/grammar/exercises/SentenceBuild';
 import { MultipleChoice } from '@/components/grammar/exercises/MultipleChoice';
 import { Match } from '@/components/grammar/exercises/Match';
+import { ErrorCorrection } from '@/components/vocabulary/exercises/ErrorCorrection';
+import { AntonymMatch } from '@/components/vocabulary/exercises/AntonymMatch';
+import { Sprachbausteine } from '@/components/grammar/exercises/Sprachbausteine';
 
 // ----- Types -----
 interface VocabCard {
@@ -51,10 +54,10 @@ interface ExerciseItem {
 type SessionStatus = 'loading' | 'empty' | 'flashcards' | 'exercises' | 'completed';
 
 const TIME_ESTIMATES: Record<string, number> = {
-  definition_match: 1, multiple_choice: 1, richtig_falsch: 1,
-  fill_in: 1.5, word_family: 1.5,
-  synonym_match: 2, match: 2,
-  transform: 2.5, sentence_build: 2.5,
+  definition_match: 0.3, multiple_choice: 0.3, richtig_falsch: 0.3,
+  fill_in: 0.4, word_family: 0.4,
+  synonym_match: 0.5, match: 0.5,
+  transform: 0.6, sentence_build: 0.6,
 };
 
 const BOX_INTERVALS = [1, 3, 7, 14, 30];
@@ -95,6 +98,34 @@ export default function DailyPracticePage() {
   const currentFlashcard = isFlashcardPhase ? flashcards[currentIndex] : null;
   const currentExercise = status === 'exercises' ? exercises[currentIndex - flashcards.length] : null;
 
+  // ----- Keyboard shortcuts -----
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      // Don't intercept when typing in an input/textarea
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+      if (isFlashcardPhase && currentFlashcard) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (!showAnswer) setShowAnswer(true);
+        }
+        if (showAnswer) {
+          if (e.key === '1') { e.preventDefault(); handleFlashcard(true); }
+          if (e.key === '2') { e.preventDefault(); handleFlashcard(false); }
+        }
+      }
+
+      // Enter to skip during exercise feedback delay
+      if (status === 'exercises' && exerciseFeedback && e.key === 'Enter') {
+        e.preventDefault();
+        advance();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [isFlashcardPhase, currentFlashcard, showAnswer, status, exerciseFeedback]);
+
   // ----- Timer -----
   useEffect(() => {
     if (status === 'flashcards' || status === 'exercises') {
@@ -134,9 +165,9 @@ export default function DailyPracticePage() {
 
     // Flashcards — cap at 30% of time
     const maxFlashcardTime = minutes * 0.3;
-    const maxCards = Math.floor(maxFlashcardTime / 0.3);
+    const maxCards = Math.floor(maxFlashcardTime / 0.1);
     const selectedCards = dueCards.slice(0, maxCards);
-    const flashcardTime = selectedCards.length * 0.3;
+    const flashcardTime = selectedCards.length * 0.1;
 
     // Remaining time for exercises
     let remainingTime = minutes - flashcardTime;
@@ -264,11 +295,16 @@ export default function DailyPracticePage() {
   };
 
   const renderDailyExercise = (ex: ExerciseItem) => {
-    const content = ex.content as any;
+    let content = ex.content as any;
     const solution = ex.solution as any;
     const instructions = lang === 'de' ? ex.instructions_de : ex.instructions_en;
     const explanation = lang === 'de' ? ex.explanation_de : ex.explanation_en;
     const answered = !!exerciseFeedback;
+
+    // Fallback: if definition_match has options but no word, use exercise title
+    if (ex.exercise_type === 'definition_match' && content?.options && !content.word) {
+      content = { ...content, word: lang === 'de' ? ex.title_de : ex.title_en };
+    }
 
     const commonProps = {
       content,
@@ -299,6 +335,12 @@ export default function DailyPracticePage() {
         return <MultipleChoice {...commonProps} />;
       case 'match':
         return <Match {...commonProps} />;
+      case 'error_correction':
+        return <ErrorCorrection {...commonProps} />;
+      case 'antonym_match':
+        return <AntonymMatch {...commonProps} />;
+      case 'sprachbausteine':
+        return <Sprachbausteine {...commonProps} />;
       default:
         return <p className="text-muted-foreground">Unsupported: {ex.exercise_type}</p>;
     }
@@ -369,7 +411,7 @@ export default function DailyPracticePage() {
         <h2 className="text-xl font-bold text-foreground">{lang === 'de' ? 'Alles erledigt!' : 'All done!'}</h2>
         <p className="text-sm text-muted-foreground max-w-md mx-auto">
           {lang === 'de'
-            ? 'Keine Übungen oder Karteikarten verfügbar. Probieren Sie Schreiben oder fügen Sie neue Vokabeln hinzu.'
+            ? 'Keine Übungen oder Karteikarten verfügbar. Probiere Schreiben oder füge neue Vokabeln hinzu.'
             : 'No exercises or flashcards available. Try writing or add new vocabulary.'}
         </p>
         <Button onClick={() => navigate('/home')}>{lang === 'de' ? 'Zur Startseite' : 'Back to Home'}</Button>
@@ -469,19 +511,22 @@ export default function DailyPracticePage() {
             </p>
             <p className="text-xl font-bold text-foreground">{currentFlashcard.word_de}</p>
             {!showAnswer ? (
-              <Button onClick={() => setShowAnswer(true)} variant="outline">
-                <Eye className="h-4 w-4 mr-1" />{t('vocab_show_answer')}
-              </Button>
+              <div className="space-y-2">
+                <Button onClick={() => setShowAnswer(true)} variant="outline">
+                  <Eye className="h-4 w-4 mr-1" />{t('vocab_show_answer')}
+                </Button>
+                <p className="text-xs text-muted-foreground">Enter</p>
+              </div>
             ) : (
               <div className="space-y-3">
                 <p className="text-lg text-foreground">→ {currentFlashcard.translation_en}</p>
                 {currentFlashcard.translation_custom && <p className="text-sm text-muted-foreground">→ {currentFlashcard.translation_custom}</p>}
                 <div className="flex gap-3 justify-center pt-2">
                   <Button onClick={() => handleFlashcard(true)} className="gap-1">
-                    <CheckCircle className="h-4 w-4" />{t('vocab_knew_it')}
+                    <CheckCircle className="h-4 w-4" /><span className="hidden sm:inline">{t('vocab_knew_it')}</span><kbd className="ml-1 text-[10px] opacity-60">1</kbd>
                   </Button>
                   <Button onClick={() => handleFlashcard(false)} variant="destructive" className="gap-1">
-                    <XCircle className="h-4 w-4" />{t('vocab_didnt_know')}
+                    <XCircle className="h-4 w-4" /><span className="hidden sm:inline">{t('vocab_didnt_know')}</span><kbd className="ml-1 text-[10px] opacity-60">2</kbd>
                   </Button>
                 </div>
               </div>

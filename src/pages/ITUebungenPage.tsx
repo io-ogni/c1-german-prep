@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ITDeutschNav } from '@/components/layout/ITDeutschNav';
+import { Monitor } from 'lucide-react';
 
 const TOPIC_NAMES: Record<string, { de: string; en: string }> = {
   power_nomen: { de: 'Power-Nomen', en: 'Power Nouns' },
@@ -77,11 +78,14 @@ export default function ITUebungenPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <h1 className="text-2xl font-bold text-foreground">{t('nav_it_deutsch')}</h1>
-        <ITDeutschNav />
+      <div>
+        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <Monitor className="h-6 w-6" />
+          {t('nav_it_deutsch')}
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">Berufssprache für die IT-Branche — Vokabular, Redewendungen und Dialoge für den Arbeitsalltag.</p>
       </div>
-
+      <ITDeutschNav />
       <p className="text-sm text-muted-foreground">{t('it_deutsch_subtitle')}</p>
 
       {isLoading ? (

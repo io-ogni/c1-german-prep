@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
 import { SelectableText } from '@/components/shared/SelectableText';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useNumberKeys } from '@/hooks/useNumberKeys';
 
 interface Props {
   content: { sentence: string; options: string[] };
@@ -19,13 +20,15 @@ export function FillIn({ content, solution, instructions, explanation, answered,
   const { t } = useTranslation();
   const isCorrect = selected === solution.correct;
 
-  const handleSelect = (idx: number) => {
+  const handleSelect = useCallback((idx: number) => {
     if (answered) return;
     setSelected(idx);
     onAnswer(idx === solution.correct);
-  };
+  }, [answered, solution.correct, onAnswer]);
 
   const options = content?.options ?? [];
+
+  useNumberKeys(handleSelect, options.length, answered);
 
   return (
     <ExerciseCard
@@ -55,7 +58,7 @@ export function FillIn({ content, solution, instructions, explanation, answered,
             onClick={() => handleSelect(idx)}
             disabled={answered}
           >
-            {opt}
+            <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{idx + 1}</kbd> {opt}
           </Button>
         ))}
       </div>

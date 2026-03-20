@@ -3,12 +3,12 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { useRequiredAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, PenLine, BookOpenCheck, Headphones, Languages, Flame, BookMarked, FileText, Briefcase } from 'lucide-react';
+import { BookOpen, PenLine, BookOpenCheck, Headphones, Languages, Flame, Briefcase } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ProgressBar } from '@/components/shared/ProgressBar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
+import { ReviewCard } from '@/components/shared/ReviewCard';
 
 interface AreaProgress {
   completed: number;
@@ -37,6 +37,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<HomeData | null>(null);
+  const [homeDueCards, setHomeDueCards] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -46,11 +47,34 @@ export default function HomePage() {
   async function loadProgress() {
     setLoading(true);
     try {
-      // Step 1: Get all exercise IDs grouped by area
-      const { data: allExercises } = await supabase
-        .from('exercises')
-        .select('id, area, exam_format');
+      // Lazy-import sync to avoid pulling in ITVokabularPage/SpeakingPage/WritingPage modules on home load
+      const syncPromise = import('@/lib/syncStarredVocab').then(m => m.syncStarredToDb(user!.id));
 
+      // Fire exercise/content queries in parallel with sync
+      const [
+        { data: allExercises },
+        { data: completedRows },
+        { count: totalWritingPrompts },
+        { count: totalReadingTexts },
+        { count: writingSubmissions },
+        { count: completedReading },
+      ] = await Promise.all([
+        supabase.from('exercises').select('id, area, exam_format'),
+        supabase.from('exercise_progress').select('exercise_id, completed').eq('user_id', user!.id),
+        supabase.from('writing_prompts').select('*', { count: 'exact', head: true }),
+        supabase.from('reading_texts').select('*', { count: 'exact', head: true }),
+        supabase.from('writing_submissions').select('*', { count: 'exact', head: true }).eq('user_id', user!.id),
+        supabase.from('reading_progress').select('*', { count: 'exact', head: true }).eq('user_id', user!.id).eq('completed', true),
+        syncPromise,
+      ]);
+
+      // Vocab queries run AFTER sync so newly starred items are included
+      const [{ count: vocabCount }, { data: dueData }] = await Promise.all([
+        supabase.from('personal_vocabulary').select('*', { count: 'exact', head: true }).eq('user_id', user!.id),
+        supabase.from('personal_vocabulary').select('*').eq('user_id', user!.id).lte('next_review_at', new Date().toISOString()).order('next_review_at'),
+      ]);
+
+      // Process exercises
       const exercisesByArea: Record<string, string[]> = {};
       const examIds: string[] = [];
       for (const ex of allExercises ?? []) {
@@ -59,44 +83,25 @@ export default function HomePage() {
         if (ex.exam_format) examIds.push(ex.id);
       }
 
+      const completedSet = new Set((completedRows ?? []).filter(r => r.completed).map(r => r.exercise_id));
+      const countCompleted = (ids: string[]) => ids.filter(id => completedSet.has(id)).length;
+
       const vocabIds = exercisesByArea['vocabulary'] ?? [];
       const grammarIds = [...(exercisesByArea['grammar'] ?? []), ...(exercisesByArea['sprachbausteine'] ?? [])];
       const itIds = exercisesByArea['berufssprache_it'] ?? [];
       const listeningIds = exercisesByArea['listening'] ?? [];
-
-      // Step 2: Get all completed exercise IDs for this user in one query
-      const { data: completedRows } = await supabase
-        .from('exercise_progress')
-        .select('exercise_id')
-        .eq('user_id', user!.id)
-        .eq('completed', true);
-
-      const completedSet = new Set((completedRows ?? []).map(r => r.exercise_id));
-
-      const countCompleted = (ids: string[]) => ids.filter(id => completedSet.has(id)).length;
-
-      // Step 3: Parallel queries for non-exercise counts
-      const [
-        { count: totalWritingPrompts },
-        { count: totalReadingTexts },
-        { count: writingSubmissions },
-        { count: completedReading },
-        { count: vocabCount },
-        { count: dueReviewCount },
-      ] = await Promise.all([
-        supabase.from('writing_prompts').select('*', { count: 'exact', head: true }),
-        supabase.from('reading_texts').select('*', { count: 'exact', head: true }),
-        supabase.from('writing_submissions').select('*', { count: 'exact', head: true }).eq('user_id', user!.id),
-        supabase.from('reading_progress').select('*', { count: 'exact', head: true }).eq('user_id', user!.id).eq('completed', true),
-        supabase.from('personal_vocabulary').select('*', { count: 'exact', head: true }).eq('user_id', user!.id),
-        supabase.from('personal_vocabulary').select('*', { count: 'exact', head: true }).eq('user_id', user!.id).lte('next_review_at', new Date().toISOString()),
-      ]);
 
       const cVocab = countCompleted(vocabIds);
       const cGrammar = countCompleted(grammarIds);
       const cExam = countCompleted(examIds);
       const cIT = countCompleted(itIds);
       const cListening = countCompleted(listeningIds);
+
+      console.log('[Home] completedRows raw:', completedRows?.length, completedRows?.slice(0, 5));
+      console.log('[Home] user id:', user!.id);
+
+      const dueReviewCount = dueData?.length ?? 0;
+      if (dueReviewCount > 0) setHomeDueCards(dueData!);
 
       setData({
         vocabulary: { completed: cVocab, total: vocabIds.length },
@@ -109,7 +114,7 @@ export default function HomePage() {
         totalExercises: cVocab + cGrammar + cExam + cIT + cListening,
         vocabCount: vocabCount ?? 0,
         writingCount: writingSubmissions ?? 0,
-        dueReviewCount: dueReviewCount ?? 0,
+        dueReviewCount,
       });
     } catch (err) {
       console.error('Failed to load progress', err);
@@ -137,35 +142,35 @@ export default function HomePage() {
         <h1 className="text-2xl font-bold text-foreground">
           {t('home_welcome')}{displayName ? `, ${displayName}` : ''}
         </h1>
-        <p className="mt-1 text-muted-foreground">C1 Werkstatt — {t('home_subtitle')}</p>
+        <p className="text-sm text-muted-foreground mt-1">C1 Werkstatt — {t('home_subtitle')}</p>
       </div>
 
       {/* Session Builder */}
-      <Card>
-        <CardContent className="p-6 space-y-4">
+      <Card className="bg-gradient-to-r from-blue-50 via-violet-50 to-fuchsia-50 dark:from-blue-950/20 dark:via-violet-950/20 dark:to-fuchsia-950/20 border-blue-100/50 dark:border-violet-900/30">
+        <CardContent className="px-5 py-4 space-y-2">
           <div className="flex items-center gap-2">
             <Flame className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold text-card-foreground">{t('daily_title')}</h2>
+            <h2 className="font-semibold text-card-foreground">{t('daily_title')}</h2>
           </div>
-          <p className="text-sm text-muted-foreground">{t('daily_how_much_time')}</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-muted-foreground">{t('daily_how_much_time')}</span>
             {TIME_OPTIONS.map((min) => (
               <Button
                 key={min}
                 variant={min === 15 ? 'default' : 'outline'}
                 size="sm"
-                className="min-w-[3.5rem]"
+                className="min-w-[2.5rem] h-7 text-xs"
                 onClick={() => navigate(`/daily-practice?minutes=${min}`)}
               >
                 {min} {t('daily_minutes')}
               </Button>
             ))}
+            {streak > 0 && (
+              <span className="text-sm text-muted-foreground ml-auto">
+                {t('daily_streak')}: {streak} {t('daily_streak_days')}
+              </span>
+            )}
           </div>
-          <p className="text-sm text-muted-foreground">
-            {streak > 0
-              ? `${t('daily_streak')}: ${streak} ${t('daily_streak_days')}`
-              : t('daily_start_streak')}
-          </p>
         </CardContent>
       </Card>
 
@@ -176,9 +181,10 @@ export default function HomePage() {
           {areas.map((area) => {
             const Icon = area.icon;
             const progress = area.data;
-            const pct = progress && progress.total > 0
-              ? Math.round((progress.completed / progress.total) * 100)
+            const rawPct = progress && progress.total > 0
+              ? (progress.completed / progress.total) * 100
               : 0;
+            const pct = rawPct > 0 ? Math.max(1, Math.round(rawPct)) : 0;
 
             return (
               <Link key={area.path} to={area.path}>
@@ -195,7 +201,7 @@ export default function HomePage() {
                     ) : (
                       <>
                         <ProgressBar value={pct} barClassName={area.fuchsia ? 'bg-fuchsia-500' : undefined} />
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           {progress?.completed ?? 0} / {progress?.total ?? 0} {t('home_exercises_completed')}
                         </p>
                       </>
@@ -208,20 +214,35 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Quick Links */}
-      <div className="flex flex-wrap gap-4 text-sm">
-        <Link to="/my-vocabulary" className="text-primary hover:underline flex items-center gap-1">
-          <BookMarked className="h-4 w-4" />
-          {t('home_review_vocabulary')}
-          {data && data.dueReviewCount > 0 && (
-            <Badge variant="secondary" className="ml-1 text-xs">{data.dueReviewCount}</Badge>
-          )}
-        </Link>
-        <Link to="/writing" className="text-primary hover:underline flex items-center gap-1">
-          <FileText className="h-4 w-4" />
-          {t('home_practice_writing')}
-        </Link>
+      {/* Wortschatz wiederholen */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-foreground">{t('home_review_vocabulary')}</h2>
+          <Link to="/my-vocabulary" className="text-sm text-primary hover:underline">
+            Mein Wortschatz →
+          </Link>
+        </div>
+        {!loading && data && (
+          data.dueReviewCount > 0 ? (
+            <ReviewCard dueCards={homeDueCards} compact onCardReviewed={() => setData(prev => prev ? { ...prev, dueReviewCount: Math.max(0, prev.dueReviewCount - 1) } : prev)} />
+          ) : data.vocabCount > 0 ? (
+            <Card>
+              <CardContent className="py-6 text-center space-y-1">
+                <p className="text-foreground font-medium">Alles wiederholt — gut gemacht!</p>
+                <p className="text-sm text-muted-foreground">{data.vocabCount} Wörter & Sätze insgesamt</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent className="py-6 text-center space-y-1">
+                <p className="text-foreground font-medium">Noch leer</p>
+                <p className="text-sm text-muted-foreground">Klicke auf eine Zeile in einer <Link to="/it-deutsch/vokabular" className="text-primary hover:underline">Vokabeltabelle</Link>, um sie zu markieren — markierte Einträge landen automatisch hier.</p>
+              </CardContent>
+            </Card>
+          )
+        )}
       </div>
+
 
       {/* Stats */}
       {!loading && data && (
@@ -231,12 +252,10 @@ export default function HomePage() {
             { label: t('home_words_learned'), value: data.vocabCount },
             { label: t('home_texts_written'), value: data.writingCount },
           ].map((stat) => (
-            <Card key={stat.label}>
-              <CardContent className="p-4 text-center">
-                <p className="text-2xl font-bold text-primary">{stat.value}</p>
-                <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
-              </CardContent>
-            </Card>
+            <div key={stat.label} className="text-center">
+              <p className="text-2xl font-bold text-primary">{stat.value}</p>
+              <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
+            </div>
           ))}
         </div>
       )}

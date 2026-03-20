@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -13,10 +13,10 @@ interface Props {
   onAnswer: (correct: boolean) => void;
 }
 
-export function Match({ content, solution, instructions, explanation, answered, onAnswer }: Props) {
-  const { t } = useTranslation();
+const RIGHT_KEYS = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'];
+const RIGHT_LABELS = ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'];
 
-  // Detect format: pairs [{word, match}] vs {left[], right[]}
+export function Match({ content, solution, instructions, explanation, answered, onAnswer }: Props) {
   const hasPairs = Array.isArray(content?.pairs);
 
   if (hasPairs) {
@@ -44,20 +44,38 @@ function PairsMatch({ content, solution, instructions, explanation, answered, on
     return right;
   }, [pairs]);
 
-  const matchedRight = new Set(matches.values());
+  const matchedRight = useMemo(() => new Set(matches.values()), [matches]);
 
-  const handleLeftClick = (idx: number) => {
+  const handleLeftClick = useCallback((idx: number) => {
     if (answered) return;
     setSelectedLeft(idx === selectedLeft ? null : idx);
-  };
+  }, [answered, selectedLeft]);
 
-  const handleRightClick = (idx: number) => {
-    if (answered || selectedLeft === null) return;
+  const handleRightClick = useCallback((idx: number) => {
+    if (answered || selectedLeft === null || matchedRight.has(idx)) return;
     const next = new Map(matches);
     next.set(selectedLeft, idx);
     setMatches(next);
     setSelectedLeft(null);
-  };
+  }, [answered, selectedLeft, matches, matchedRight]);
+
+  // Keyboard handler
+  useEffect(() => {
+    if (answered) return;
+    const onKey = (e: KeyboardEvent) => {
+      const num = parseInt(e.key, 10);
+      if (num >= 1 && num <= words.length) {
+        handleLeftClick(num - 1);
+        return;
+      }
+      const rIdx = RIGHT_KEYS.indexOf(e.key.toLowerCase());
+      if (rIdx >= 0 && rIdx < shuffledRight.length) {
+        handleRightClick(rIdx);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [answered, words.length, shuffledRight.length, handleLeftClick, handleRightClick]);
 
   const handleCheck = () => {
     if (matches.size !== words.length) return;
@@ -94,7 +112,10 @@ function PairsMatch({ content, solution, instructions, explanation, answered, on
                 answered && matches.get(i) !== undefined && shuffledRight[matches.get(i)!].originalIdx !== i && 'border-destructive bg-destructive/10'
               )}
               onClick={() => handleLeftClick(i)} disabled={answered}
-            >{w}</Button>
+            >
+              <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{i + 1}</kbd>
+              {w}
+            </Button>
           ))}
         </div>
         <div className="space-y-2">
@@ -103,11 +124,15 @@ function PairsMatch({ content, solution, instructions, explanation, answered, on
               className={cn(
                 'w-full justify-start text-left h-auto py-2 whitespace-normal text-xs',
                 matchedRight.has(i) && 'bg-muted',
+                selectedLeft !== null && !matchedRight.has(i) && !answered && 'ring-1 ring-primary/40 bg-primary/5',
                 answered && 'pointer-events-none'
               )}
               onClick={() => handleRightClick(i)}
               disabled={answered || matchedRight.has(i)}
-            >{d.text}</Button>
+            >
+              <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{RIGHT_LABELS[i]}</kbd>
+              {d.text}
+            </Button>
           ))}
         </div>
       </div>
@@ -131,14 +156,37 @@ function ArrayMatch({ content, solution, instructions, explanation, answered, on
   const rightItems: string[] = content?.right ?? [];
   const pairs: number[] = solution?.pairs ?? [];
 
-  const handleLeftClick = (idx: number) => { if (!answered) setSelectedLeft(idx === selectedLeft ? null : idx); };
-  const handleRightClick = (idx: number) => {
-    if (answered || selectedLeft === null) return;
+  const matchedRight = useMemo(() => new Set(matches.values()), [matches]);
+
+  const handleLeftClick = useCallback((idx: number) => {
+    if (!answered) setSelectedLeft(idx === selectedLeft ? null : idx);
+  }, [answered, selectedLeft]);
+
+  const handleRightClick = useCallback((idx: number) => {
+    if (answered || selectedLeft === null || matchedRight.has(idx)) return;
     const next = new Map(matches);
     next.set(selectedLeft, idx);
     setMatches(next);
     setSelectedLeft(null);
-  };
+  }, [answered, selectedLeft, matches, matchedRight]);
+
+  // Keyboard handler
+  useEffect(() => {
+    if (answered) return;
+    const onKey = (e: KeyboardEvent) => {
+      const num = parseInt(e.key, 10);
+      if (num >= 1 && num <= leftItems.length) {
+        handleLeftClick(num - 1);
+        return;
+      }
+      const rIdx = RIGHT_KEYS.indexOf(e.key.toLowerCase());
+      if (rIdx >= 0 && rIdx < rightItems.length) {
+        handleRightClick(rIdx);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [answered, leftItems.length, rightItems.length, handleLeftClick, handleRightClick]);
 
   const handleCheck = () => {
     if (matches.size !== leftItems.length) return;
@@ -148,7 +196,6 @@ function ArrayMatch({ content, solution, instructions, explanation, answered, on
   };
 
   const allCorrect = checked && leftItems.every((_, i) => matches.get(i) === pairs[i]);
-  const matchedRight = new Set(matches.values());
 
   if (leftItems.length === 0) {
     return <ExerciseCard question={instructions} feedback={null}><p className="text-muted-foreground">No data.</p></ExerciseCard>;
@@ -169,17 +216,25 @@ function ArrayMatch({ content, solution, instructions, explanation, answered, on
                 answered && matches.get(i) !== pairs[i] && 'border-destructive bg-destructive/10'
               )}
               onClick={() => handleLeftClick(i)} disabled={answered}
-            >{item}</Button>
+            >
+              <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{i + 1}</kbd>
+              {item}
+            </Button>
           ))}
         </div>
         <div className="space-y-2">
           {rightItems.map((item, i) => (
             <Button key={i} variant="outline" size="sm"
               className={cn('w-full justify-start text-left h-auto py-2 whitespace-normal text-xs',
-                matchedRight.has(i) && 'bg-muted', answered && 'pointer-events-none'
+                matchedRight.has(i) && 'bg-muted',
+                selectedLeft !== null && !matchedRight.has(i) && !answered && 'ring-1 ring-primary/40 bg-primary/5',
+                answered && 'pointer-events-none'
               )}
               onClick={() => handleRightClick(i)} disabled={answered || matchedRight.has(i)}
-            >{item}</Button>
+            >
+              <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{RIGHT_LABELS[i]}</kbd>
+              {item}
+            </Button>
           ))}
         </div>
       </div>

@@ -9,12 +9,15 @@ import { ArrowLeft, RotateCcw } from 'lucide-react';
 import { DefinitionMatch } from './exercises/DefinitionMatch';
 import { FillIn } from './exercises/FillIn';
 import { SynonymMatch } from './exercises/SynonymMatch';
+import { AntonymMatch } from './exercises/AntonymMatch';
+import { ErrorCorrection } from './exercises/ErrorCorrection';
 import { WordFamily } from './exercises/WordFamily';
 import { GrammarFillIn } from '@/components/grammar/exercises/GrammarFillIn';
 import { Transform } from '@/components/grammar/exercises/Transform';
 import { SentenceBuild } from '@/components/grammar/exercises/SentenceBuild';
 import { MultipleChoice } from '@/components/grammar/exercises/MultipleChoice';
 import { Match } from '@/components/grammar/exercises/Match';
+import { Sprachbausteine } from '@/components/grammar/exercises/Sprachbausteine';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -38,46 +41,49 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
   // Invalidate progress cache on unmount so next entry gets fresh data
   useEffect(() => {
     return () => {
-      queryClient.invalidateQueries({ queryKey: ['exercise-progress', area, topic] });
+      queryClient.invalidateQueries({ queryKey: ['exercises-with-progress', area, topic] });
     };
   }, [queryClient, area, topic]);
 
   const dbLevel = level === 'b2' ? 'b2_refresh' : level;
 
-  // Fetch all exercises for this topic
-  const { data: allExercises, isLoading: loadingExercises } = useQuery({
-    queryKey: ['exercises', area, topic, dbLevel],
+  // Fetch exercises AND progress in a single parallel query
+  const { data: queryResult, isLoading: loadingExercises } = useQuery({
+    queryKey: ['exercises-with-progress', area, topic, dbLevel, auth?.user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const exercisePromise = supabase
         .from('exercises')
         .select('*')
         .eq('area', area)
         .eq('topic', topic)
         .eq('level', dbLevel)
         .order('sort_order');
-      return (data ?? []) as Tables<'exercises'>[];
+
+      const progressPromise = auth?.user
+        ? supabase
+            .from('exercise_progress')
+            .select('exercise_id, completed')
+            .eq('user_id', auth.user.id)
+        : Promise.resolve({ data: [] as { exercise_id: string; completed: boolean }[] });
+
+      const [exResult, progResult] = await Promise.all([exercisePromise, progressPromise]);
+      const exercises = (exResult.data ?? []) as Tables<'exercises'>[];
+      const progressData = 'data' in progResult ? (progResult as any).data ?? [] : progResult;
+
+      // Build progress map, filtering to only exercises in this topic
+      const exerciseIds = new Set(exercises.map(e => e.id));
+      const map: Record<string, boolean> = {};
+      for (const row of progressData) {
+        if (exerciseIds.has(row.exercise_id)) {
+          map[row.exercise_id] = row.completed;
+        }
+      }
+      return { exercises, progressMap: map };
     },
   });
 
-  // Fetch user's progress for these exercises
-  const { data: progressMap, isLoading: loadingProgress } = useQuery({
-    queryKey: ['exercise-progress', area, topic, dbLevel, auth?.user?.id],
-    queryFn: async () => {
-      if (!auth?.user || !allExercises?.length) return {};
-      const ids = allExercises.map(e => e.id);
-      const { data } = await supabase
-        .from('exercise_progress')
-        .select('exercise_id, completed')
-        .eq('user_id', auth.user.id)
-        .in('exercise_id', ids);
-      const map: Record<string, boolean> = {};
-      for (const row of data ?? []) {
-        map[row.exercise_id] = row.completed;
-      }
-      return map;
-    },
-    enabled: !!allExercises?.length && !!auth?.user,
-  });
+  const allExercises = queryResult?.exercises;
+  const progressMap = queryResult?.progressMap;
 
   // Build the exercise queue ONCE: failed first → unattempted → skip completed
   // Frozen after initial build so mid-session progress changes don't shift the list
@@ -91,7 +97,7 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
       queueBuilt.current = true;
       return;
     }
-    if (queueBuilt.current || !allExercises?.length || loadingProgress) return;
+    if (queueBuilt.current || !allExercises?.length) return;
     if (progressMap === undefined) return;
 
     // Build queue once
@@ -112,9 +118,9 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
 
     setExercises(allDone ? [] : [...failed, ...unattempted]);
     queueBuilt.current = true;
-  }, [allExercises, progressMap, loadingProgress, restartMode]);
+  }, [allExercises, progressMap, restartMode]);
 
-  const isLoading = loadingExercises || loadingProgress || !queueBuilt.current;
+  const isLoading = loadingExercises || !queueBuilt.current;
 
   const handleAnswer = async (correct: boolean, exerciseId: string) => {
     setAnswered(true);
@@ -208,9 +214,14 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
   }
 
   const exercise = exercises[currentIndex];
-  const content = exercise.content as any;
+  let content = exercise.content as any;
   const solution = exercise.solution as any;
   const instructions = lang === 'de' ? exercise.instructions_de : exercise.instructions_en;
+
+  // Fallback: if definition_match has options but no word, use exercise title
+  if (exercise.exercise_type === 'definition_match' && content?.options && !content.word) {
+    content = { ...content, word: lang === 'de' ? exercise.title_de : exercise.title_en };
+  }
   const explanation = lang === 'de' ? exercise.explanation_de : exercise.explanation_en;
 
   const renderExercise = () => {
@@ -232,8 +243,12 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
         return (content?.sentences || area === 'grammar') ? <GrammarFillIn {...commonProps} /> : <FillIn {...commonProps} />;
       case 'synonym_match':
         return <SynonymMatch {...commonProps} />;
+      case 'antonym_match':
+        return <AntonymMatch {...commonProps} />;
+      case 'error_correction':
+        return <ErrorCorrection key={exercise.id} {...commonProps} />;
       case 'word_family':
-        return <WordFamily {...commonProps} />;
+        return <WordFamily key={exercise.id} {...commonProps} />;
       case 'transform':
         return <Transform key={exercise.id} {...commonProps} />;
       case 'sentence_build':
@@ -242,6 +257,8 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
         return <MultipleChoice {...commonProps} />;
       case 'match':
         return <Match {...commonProps} />;
+      case 'sprachbausteine':
+        return <Sprachbausteine key={exercise.id} {...commonProps} />;
       default:
         return <p className="text-muted-foreground">Unsupported exercise type: {exercise.exercise_type}</p>;
     }

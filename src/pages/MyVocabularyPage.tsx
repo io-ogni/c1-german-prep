@@ -1,16 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useRequiredAuth } from '@/contexts/AuthContext';
+import { useRequiredAuth, useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { BookOpen, Plus, Search, Eye, EyeOff, CheckCircle, XCircle, Trash2 } from 'lucide-react';
+import { BookOpen, Plus, Search, Trash2 } from 'lucide-react';
+import { ReviewCard } from '@/components/shared/ReviewCard';
+import { syncStarredToDb } from '@/lib/syncStarredVocab';
 
 interface VocabWord {
   id: string;
@@ -26,20 +29,41 @@ interface VocabWord {
   created_at: string;
 }
 
-const BOX_INTERVALS = [1, 3, 7, 14, 30]; // days per box level
+
+
+// ─── Source labels for display ───
+
+const SOURCE_LABELS: Record<string, string> = {
+  manual: 'Manuell',
+  'it-nomen': 'IT Nomen',
+  'it-verben': 'IT Verben',
+  'it-kollokationen': 'IT Kollokationen',
+  'it-workshop': 'IT Workshop',
+  'it-refinement': 'IT Refinement',
+  'it-souveränität': 'IT Souveränität',
+  'it-notfallkit': 'IT Notfall-Kit',
+  'it-redewendungen': 'IT Redewendungen',
+  'sprechen-praesentation': 'Präsentation',
+  'sprechen-diskussion': 'Diskussion',
+  'sprechen-zusammenfassung': 'Zusammenfassung',
+  'sprechen-redemittel': 'Redemittel',
+  'sprechen-redewendungen': 'Redewendungen',
+  'schreiben-einleitung': 'Schreiben: Einleitung',
+  'schreiben-hauptteil': 'Schreiben: Hauptteil',
+  'schreiben-schluss': 'Schreiben: Schluss',
+  'schreiben-c1-strukturen': 'Schreiben: C1-Strukturen',
+};
 
 export default function MyVocabularyPage() {
   const { t, lang } = useTranslation();
   const { profile } = useRequiredAuth();
+  const auth = useAuth();
+  const userId = auth?.user?.id ?? 'anon';
   const [dueCards, setDueCards] = useState<VocabWord[]>([]);
   const [allWords, setAllWords] = useState<VocabWord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Review state
-  const [reviewIndex, setReviewIndex] = useState(0);
-  const [showAnswer, setShowAnswer] = useState(false);
-  const [reviewed, setReviewed] = useState(0);
 
   // Add word dialog
   const [addOpen, setAddOpen] = useState(false);
@@ -48,6 +72,10 @@ export default function MyVocabularyPage() {
 
   const fetchData = useCallback(async () => {
     if (!profile) return;
+
+    // Auto-sync starred items from localStorage to DB
+    await syncStarredToDb(profile.user_id);
+
     const now = new Date().toISOString();
     const [dueRes, allRes] = await Promise.all([
       supabase.from('personal_vocabulary').select('*').eq('user_id', profile.user_id).lte('next_review_at', now).order('next_review_at'),
@@ -60,25 +88,6 @@ export default function MyVocabularyPage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handleReview = async (knewIt: boolean) => {
-    const card = dueCards[reviewIndex];
-    if (!card || !profile) return;
-
-    const newBox = knewIt ? Math.min(card.box_number + 1, 5) : 1;
-    const daysUntilNext = BOX_INTERVALS[newBox - 1];
-    const nextReview = new Date();
-    nextReview.setDate(nextReview.getDate() + daysUntilNext);
-
-    await supabase.from('personal_vocabulary').update({
-      box_number: newBox,
-      next_review_at: nextReview.toISOString(),
-      review_count: card.review_count + 1,
-    }).eq('id', card.id);
-
-    setReviewed(r => r + 1);
-    setShowAnswer(false);
-    setReviewIndex(i => i + 1);
-  };
 
   const handleAddWord = async () => {
     if (!profile || !newWord.word_de || !newWord.translation_en) return;
@@ -120,7 +129,12 @@ export default function MyVocabularyPage() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success(lang === 'de' ? 'Alle Wörter gelöscht' : 'All words deleted');
+      // Clear all highlights so auto-sync doesn't re-insert them
+      localStorage.removeItem(`it-vokabular-highlights-${userId}`);
+      localStorage.removeItem('it-redewendungen-highlights');
+      localStorage.removeItem('speaking-highlights');
+      localStorage.removeItem('writing-tips-highlights');
+      toast.success(lang === 'de' ? 'Alle Wörter und Sätze gelöscht' : 'All words and sentences deleted');
       fetchData();
     }
   };
@@ -132,8 +146,6 @@ export default function MyVocabularyPage() {
       )
     : allWords;
 
-  const currentCard = dueCards[reviewIndex];
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -142,22 +154,22 @@ export default function MyVocabularyPage() {
           {lang === 'de' ? 'Mein Wortschatz' : 'My Vocabulary'}
         </h1>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="gap-1"><Plus className="h-4 w-4" />{t('vocab_add_word')}</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>{t('vocab_add_word')}</DialogTitle></DialogHeader>
-            <div className="space-y-3">
-              <div><Label>Word (DE) *</Label><Input value={newWord.word_de} onChange={e => setNewWord({ ...newWord, word_de: e.target.value })} /></div>
-              <div><Label>Translation (EN) *</Label><Input value={newWord.translation_en} onChange={e => setNewWord({ ...newWord, translation_en: e.target.value })} /></div>
-              <div><Label>Custom translation</Label><Input value={newWord.translation_custom} onChange={e => setNewWord({ ...newWord, translation_custom: e.target.value })} /></div>
-              <div><Label>Example sentence</Label><Input value={newWord.example_sentence} onChange={e => setNewWord({ ...newWord, example_sentence: e.target.value })} /></div>
-              <Button onClick={handleAddWord} disabled={saving || !newWord.word_de || !newWord.translation_en} className="w-full">
-                {saving ? t('common_loading') : t('vocab_add_word')}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+            <DialogTrigger asChild>
+              <Button size="sm" className="gap-1"><Plus className="h-4 w-4" />{t('vocab_add_word')}</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>{t('vocab_add_word')}</DialogTitle></DialogHeader>
+              <div className="space-y-3">
+                <div><Label>Word (DE) *</Label><Input value={newWord.word_de} onChange={e => setNewWord({ ...newWord, word_de: e.target.value })} /></div>
+                <div><Label>Translation (EN) *</Label><Input value={newWord.translation_en} onChange={e => setNewWord({ ...newWord, translation_en: e.target.value })} /></div>
+                <div><Label>Custom translation</Label><Input value={newWord.translation_custom} onChange={e => setNewWord({ ...newWord, translation_custom: e.target.value })} /></div>
+                <div><Label>Example sentence</Label><Input value={newWord.example_sentence} onChange={e => setNewWord({ ...newWord, example_sentence: e.target.value })} /></div>
+                <Button onClick={handleAddWord} disabled={saving || !newWord.word_de || !newWord.translation_en} className="w-full">
+                  {saving ? t('common_loading') : t('vocab_add_word')}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
       </div>
 
       <Tabs defaultValue="review">
@@ -169,53 +181,8 @@ export default function MyVocabularyPage() {
         <TabsContent value="review" className="mt-4">
           {loading ? (
             <p className="text-muted-foreground">{t('common_loading')}</p>
-          ) : dueCards.length === 0 || reviewIndex >= dueCards.length ? (
-            <Card>
-              <CardContent className="py-12 text-center space-y-2">
-                <CheckCircle className="h-10 w-10 text-primary mx-auto" />
-                <p className="text-foreground font-medium">
-                  {reviewIndex > 0
-                    ? `${reviewed} ${t('vocab_reviewed')}!`
-                    : t('vocab_no_reviews')
-                  }
-                </p>
-              </CardContent>
-            </Card>
-          ) : currentCard && (
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                {reviewed + 1} / {dueCards.length} · {t('vocab_cards_remaining')}: {dueCards.length - reviewIndex}
-              </p>
-              <Card className="min-h-[200px] flex flex-col items-center justify-center">
-                <CardContent className="py-8 text-center space-y-4 w-full">
-                  <p className="text-xl font-bold text-foreground">{currentCard.word_de}</p>
-                  <p className="text-xs text-muted-foreground">{t('vocab_box')} {currentCard.box_number} / 5</p>
-                  {!showAnswer ? (
-                    <Button onClick={() => setShowAnswer(true)} variant="outline">
-                      <Eye className="h-4 w-4 mr-1" />{t('vocab_show_answer')}
-                    </Button>
-                  ) : (
-                    <div className="space-y-3">
-                      <p className="text-lg text-foreground">→ {currentCard.translation_en}</p>
-                      {currentCard.translation_custom && (
-                        <p className="text-sm text-muted-foreground">→ {currentCard.translation_custom}</p>
-                      )}
-                      {currentCard.example_sentence && (
-                        <p className="text-xs text-muted-foreground italic">"{currentCard.example_sentence}"</p>
-                      )}
-                      <div className="flex gap-3 justify-center pt-2">
-                        <Button onClick={() => handleReview(true)} className="gap-1">
-                          <CheckCircle className="h-4 w-4" />{t('vocab_knew_it')}
-                        </Button>
-                        <Button onClick={() => handleReview(false)} variant="destructive" className="gap-1">
-                          <XCircle className="h-4 w-4" />{t('vocab_didnt_know')}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+          ) : (
+            <ReviewCard dueCards={dueCards} />
           )}
         </TabsContent>
 
@@ -240,11 +207,11 @@ export default function MyVocabularyPage() {
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>{lang === 'de' ? 'Alle Wörter löschen?' : 'Delete all words?'}</AlertDialogTitle>
+                    <AlertDialogTitle>{lang === 'de' ? 'Alle Wörter und Sätze löschen?' : 'Delete all words and sentences?'}</AlertDialogTitle>
                     <AlertDialogDescription>
                       {lang === 'de'
-                        ? `${allWords.length} Wörter werden unwiderruflich gelöscht.`
-                        : `${allWords.length} words will be permanently deleted.`}
+                        ? `${allWords.length} Einträge werden unwiderruflich gelöscht. Alle Markierungen in den Tabellen werden ebenfalls entfernt.`
+                        : `${allWords.length} entries will be permanently deleted. All highlights in the tables will also be removed.`}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -273,7 +240,9 @@ export default function MyVocabularyPage() {
                     <div className="flex items-center gap-3">
                       <div className="text-right text-xs text-muted-foreground">
                         <p>{t('vocab_box')} {w.box_number}/5</p>
-                        <p>{w.source_type}</p>
+                        <Badge variant="secondary" className="text-[10px] font-normal">
+                          {SOURCE_LABELS[w.source_type] ?? w.source_type}
+                        </Badge>
                       </div>
                       <Button
                         variant="ghost"

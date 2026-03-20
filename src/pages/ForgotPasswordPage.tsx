@@ -23,7 +23,7 @@ export default function ForgotPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (TURNSTILE_SITE_KEY && !captchaToken) {
-      toast.error('Bitte warten Sie, bis die CAPTCHA-Überprüfung abgeschlossen ist.');
+      toast.error('Bitte warte, bis die CAPTCHA-Überprüfung abgeschlossen ist.');
       return;
     }
     setLoading(true);

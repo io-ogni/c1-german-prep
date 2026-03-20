@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -24,13 +24,15 @@ function normalizePairs(raw: any[]): [string, string][] {
   return [];
 }
 
+const RIGHT_KEYS = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'];
+const RIGHT_LABELS = ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'];
+
 export function SynonymMatch({ content, solution, instructions, explanation, answered, onAnswer }: Props) {
   const { t } = useTranslation();
   const [selectedLeft, setSelectedLeft] = useState<number | null>(null);
   const [matches, setMatches] = useState<Map<number, number>>(new Map());
   const [checked, setChecked] = useState(false);
 
-  // Reset state when exercise changes
   useEffect(() => {
     setSelectedLeft(null);
     setMatches(new Map());
@@ -39,7 +41,6 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
 
   const pairsData = useMemo(() => normalizePairs(content?.pairs ?? []), [content?.pairs]);
 
-  // Shuffle both sides independently
   const shuffledLeft = useMemo(() => {
     const left = pairsData.map((p, i) => ({ text: p[0], originalIdx: i }));
     for (let i = left.length - 1; i > 0; i--) {
@@ -58,18 +59,20 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
     return right;
   }, [pairsData]);
 
-  const handleLeftClick = (idx: number) => {
+  const handleLeftClick = useCallback((idx: number) => {
     if (answered) return;
     setSelectedLeft(idx === selectedLeft ? null : idx);
-  };
+  }, [answered, selectedLeft]);
 
-  const handleRightClick = (rightIdx: number) => {
-    if (answered || selectedLeft === null) return;
+  const matchedRightIndices = useMemo(() => new Set(matches.values()), [matches]);
+
+  const handleRightClick = useCallback((rightIdx: number) => {
+    if (answered || selectedLeft === null || matchedRightIndices.has(rightIdx)) return;
     const newMatches = new Map(matches);
     newMatches.set(selectedLeft, rightIdx);
     setMatches(newMatches);
     setSelectedLeft(null);
-  };
+  }, [answered, selectedLeft, matches, matchedRightIndices]);
 
   const handleCheck = () => {
     setChecked(true);
@@ -84,14 +87,31 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
     onAnswer(allCorrect);
   };
 
+  // Keyboard handler
+  useEffect(() => {
+    if (answered) return;
+    const onKey = (e: KeyboardEvent) => {
+      const key = e.key;
+      const num = parseInt(key, 10);
+      if (num >= 1 && num <= shuffledLeft.length) {
+        handleLeftClick(num - 1);
+        return;
+      }
+      const rIdx = RIGHT_KEYS.indexOf(key.toLowerCase());
+      if (rIdx >= 0 && rIdx < shuffledRight.length) {
+        handleRightClick(rIdx);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [answered, shuffledLeft.length, shuffledRight.length, handleLeftClick, handleRightClick]);
+
   const isMatchCorrect = (leftIdx: number): boolean | null => {
     if (!checked) return null;
     const rightIdx = matches.get(leftIdx);
     if (rightIdx === undefined) return false;
     return shuffledRight[rightIdx].originalIdx === shuffledLeft[leftIdx].originalIdx;
   };
-
-  const matchedRightIndices = new Set(matches.values());
 
   if (pairsData.length === 0) {
     return <ExerciseCard question={instructions} feedback={null}><p className="text-muted-foreground">No data available.</p></ExerciseCard>;
@@ -114,6 +134,7 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
               onClick={() => handleLeftClick(idx)}
               disabled={answered}
             >
+              <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{idx + 1}</kbd>
               {item.text}
               {matches.has(idx) && (
                 <span className="ml-auto text-xs text-muted-foreground">
@@ -130,11 +151,13 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
               variant="outline"
               className={cn(
                 'w-full justify-start h-auto py-3 text-left whitespace-normal',
-                matchedRightIndices.has(idx) && 'opacity-50'
+                matchedRightIndices.has(idx) && 'opacity-50',
+                selectedLeft !== null && !matchedRightIndices.has(idx) && !answered && 'ring-1 ring-primary/40 bg-primary/5'
               )}
               onClick={() => handleRightClick(idx)}
               disabled={answered || matchedRightIndices.has(idx)}
             >
+              <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{RIGHT_LABELS[idx]}</kbd>
               {item.text}
             </Button>
           ))}
@@ -142,7 +165,7 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
       </div>
 
       {!answered && matches.size === shuffledLeft.length && !checked && (
-        <Button onClick={handleCheck} className="w-full mt-2">
+        <Button onClick={handleCheck} className="self-end mt-2">
           {t('exercise_check')}
         </Button>
       )}

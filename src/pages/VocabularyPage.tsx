@@ -7,6 +7,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Languages } from 'lucide-react';
+import { TelcBadge } from '@/components/shared/TelcBadge';
 
 const TOPIC_NAMES: Record<string, string> = {
   alltag_gesellschaft: 'Alltag & Gesellschaft',
@@ -18,10 +20,17 @@ const TOPIC_NAMES: Record<string, string> = {
   wissenschaft_technik: 'Wissenschaft & Technik',
   nomen_verb_verbindungen: 'Nomen-Verb-Verbindungen',
   konnektoren_redemittel: 'Konnektoren & Redemittel',
+  digitalisierung_ki: 'Digitalisierung & KI',
+  studium_wissenschaft: 'Studium & Wissenschaft',
+  wirtschaft_arbeitswelt: 'Wirtschaft & Arbeitswelt',
+  umwelt_nachhaltigkeit: 'Umwelt & Nachhaltigkeit',
+  gesellschaft_politik: 'Gesellschaft & Politik',
+  psychologie_kommunikation: 'Psychologie & Kommunikation',
+  globalisierung_urbanisierung: 'Globalisierung & Urbanisierung',
 };
 
 export default function VocabularyPage() {
-  const [level, setLevel] = useState<'b2' | 'c1'>('b2');
+  const [level, setLevel] = useState<'b2' | 'c1'>('c1');
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const { t, lang } = useTranslation();
   const auth = useAuth();
@@ -82,7 +91,16 @@ export default function VocabularyPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">{t('page_vocabulary')}</h1>
+      <div>
+        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <Languages className="h-6 w-6" />
+          {t('page_vocabulary')}
+          <TelcBadge className="ml-1" />
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          {lang === 'de' ? 'Erweitere deinen Wortschatz mit themenbasierten Übungen.' : 'Expand your vocabulary with topic-based exercises.'}
+        </p>
+      </div>
       <LevelTabs value={level} onValueChange={setLevel} />
 
       {isLoading ? (

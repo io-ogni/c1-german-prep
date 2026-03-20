@@ -292,7 +292,7 @@ export default function SettingsPage() {
           )}
           <div className="flex items-start gap-2 rounded-md border border-border bg-muted/50 p-3 text-xs text-muted-foreground">
             <ShieldCheck className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
-            <span>Ihr Schlüssel wird mit AES-256-GCM auf dem Server verschlüsselt und nie in Ihrem Browser gespeichert. Er wird nur kurzzeitig in sicheren Backend-Funktionen entschlüsselt.</span>
+            <span>Dein Schlüssel wird mit AES-256-GCM auf dem Server verschlüsselt und nie in deinem Browser gespeichert. Er wird nur kurzzeitig in sicheren Backend-Funktionen entschlüsselt.</span>
           </div>
         </CardContent>
       </Card>
@@ -318,9 +318,9 @@ export default function SettingsPage() {
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Sind Sie sicher?</AlertDialogTitle>
+                <AlertDialogTitle>Bist du sicher?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Diese Aktion kann nicht rückgängig gemacht werden. Ihr Konto und alle Daten — einschließlich Wortschatz, Texte, Übungsfortschritt und Einstellungen — werden dauerhaft gelöscht.
+                  Diese Aktion kann nicht rückgängig gemacht werden. Dein Konto und alle Daten — einschließlich Wortschatz, Texte, Übungsfortschritt und Einstellungen — werden dauerhaft gelöscht.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

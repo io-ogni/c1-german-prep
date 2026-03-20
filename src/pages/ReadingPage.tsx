@@ -2,15 +2,67 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRequiredAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { TelcBadge } from '@/components/shared/TelcBadge';
-import { Timer } from '@/components/shared/Timer';
-import { toast } from 'sonner';
-import { ArrowLeft, BookOpen, CheckCircle, Clock } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { NAV_CONTAINER, TAB_TRIGGER_BLUE } from '@/components/shared/navStyles';
+import { BookOpen, CheckCircle, Clock, Puzzle, ScanSearch, FileSearch } from 'lucide-react';
 import { ReadingInterface } from '@/components/reading/ReadingInterface';
 
-// Types
+const topicImages = import.meta.glob('/src/assets/reading-topics/*.png', { eager: true, import: 'default' }) as Record<string, string>;
+
+// Map image IDs to title keywords for matching DB texts to images
+const IMAGE_TITLE_MAP: Record<number, string> = {
+  1: 'Digitalisierung im Gesundheitswesen',
+  2: 'Nachhaltiger Konsum im Alltag',
+  3: 'Die Zukunft der Arbeit',
+  4: 'Städte der Zukunft',
+  5: 'Digitalisierung in der Bildung',
+  6: 'Vier-Tage-Woche',
+  7: 'Bedingungsloses Grundeinkommen',
+  8: 'individuelles Handeln das Klima',
+  9: 'Fake News — Gefahr',
+  10: 'Massentourismus',
+  11: 'Gendern',
+  12: 'Karrieretipps',
+  13: 'Studieren im Ausland',
+  14: 'Wohnkonzepte',
+  15: 'Weiterbildung — Welcher Weg',
+  16: 'Homeoffice oder Büro',
+  17: 'Frauen in Führungspositionen',
+  18: 'Mobilität der Zukunft',
+  19: 'Studiengebühren',
+  20: 'Künstliche Intelligenz in der Wissenschaft',
+  21: 'Schlaf',
+  22: 'Gehirn Sprachen',
+  23: 'Ernährungsmythen',
+  24: 'Ehrenamt in Deutschland',
+  25: 'Fachkräftemangel',
+  26: 'Globalisierung',
+  27: 'Demografischer Wandel',
+  28: 'Einfluss sozialer Medien',
+  29: 'Lebenslanges Lernen',
+  30: 'Datenschutz im digitalen',
+  31: 'Landflucht',
+  32: 'Ehrenamt 2.0',
+  33: 'Künstliche Intelligenz kreativ',
+  34: 'Einsamkeitsepidemie',
+  35: 'Gentrifizierung',
+  36: 'Fake News erkennen',
+  37: 'Minimalismus',
+  38: 'Bildungssystem',
+  39: 'Integration durch Sprache',
+  40: 'Psychische Gesundheit',
+};
+
+function getTopicImage(titleDe: string): string | undefined {
+  for (const [id, keyword] of Object.entries(IMAGE_TITLE_MAP)) {
+    if (titleDe.includes(keyword)) {
+      return topicImages[`/src/assets/reading-topics/topic-${id}.png`];
+    }
+  }
+  return undefined;
+}
+
 interface ReadingText {
   id: string;
   title_de: string;
@@ -33,11 +85,18 @@ interface ReadingProgress {
 
 const TYPE_ORDER = ['textrekonstruktion', 'selektives_verstehen', 'detailverstehen', 'general'];
 
+const TYPE_ICONS: Record<string, typeof BookOpen> = {
+  textrekonstruktion: Puzzle,
+  selektives_verstehen: ScanSearch,
+  detailverstehen: FileSearch,
+  general: BookOpen,
+};
+
 const TYPE_LABELS: Record<string, { de: string; en: string }> = {
   textrekonstruktion: { de: 'Textrekonstruktion', en: 'Text Reconstruction' },
   selektives_verstehen: { de: 'Selektives Verstehen', en: 'Selective Reading' },
   detailverstehen: { de: 'Detailverstehen', en: 'Detailed Reading' },
-  general: { de: 'Allgemeines C1-Lesen', en: 'General C1 Reading' },
+  general: { de: 'Allgemein', en: 'General' },
 };
 
 export default function ReadingPage() {
@@ -63,12 +122,7 @@ export default function ReadingPage() {
 
   const getProgress = (textId: string) => progress.find(p => p.reading_text_id === textId);
 
-  const grouped = TYPE_ORDER.map(type => ({
-    type,
-    label: TYPE_LABELS[type]?.[language] || type,
-    isTelc: type !== 'general',
-    texts: texts.filter(t => t.text_type === type),
-  })).filter(g => g.texts.length > 0);
+  const availableTypes = TYPE_ORDER.filter(type => texts.some(t => t.text_type === type));
 
   if (selectedText) {
     return (
@@ -80,67 +134,98 @@ export default function ReadingPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <BookOpen className="h-6 w-6" />
           {language === 'de' ? 'Leseverstehen' : 'Reading Comprehension'}
+          <TelcBadge className="ml-1" />
         </h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          {language === 'de' ? 'Lies und verstehe anspruchsvolle Texte auf C1-Niveau.' : 'Read and comprehend demanding texts at C1 level.'}
+        </p>
       </div>
 
       {loading ? (
         <div className="text-muted-foreground">{t('common_loading')}</div>
       ) : texts.length === 0 ? (
-        <Card><CardContent className="py-8 text-center text-muted-foreground">
+        <div className="rounded-xl border border-border bg-card py-8 text-center text-muted-foreground">
           {language === 'de' ? 'Keine Lesetexte verfügbar.' : 'No reading texts available.'}
-        </CardContent></Card>
+        </div>
       ) : (
-        grouped.map(group => (
-          <section key={group.type} className="space-y-3">
-            <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-              {group.label}
-              {group.isTelc && <TelcBadge />}
-            </h2>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {group.texts.map(text => {
-                const prog = getProgress(text.id);
-                return (
-                  <Card
-                    key={text.id}
-                    className="cursor-pointer transition-colors hover:bg-accent/50"
-                    onClick={() => { setSelectedText(text); window.scrollTo(0, 0); }}
-                  >
-                    <CardContent className="p-4 space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-medium text-foreground text-sm">
-                          {language === 'de' ? text.title_de : text.title_en}
-                        </h3>
-                        {text.exam_format === 'telc' && <TelcBadge className="shrink-0" />}
-                      </div>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <Tabs defaultValue={availableTypes[0]}>
+          <TabsList className={`${NAV_CONTAINER} h-auto gap-1`}>
+            {availableTypes.map(type => {
+              const Icon = TYPE_ICONS[type];
+              return (
+                <TabsTrigger
+                  key={type}
+                  value={type}
+                  className={`${TAB_TRIGGER_BLUE} gap-1.5`}
+                >
+                  {Icon && <Icon className="h-4 w-4" />}
+                  {TYPE_LABELS[type]?.[language] || type}
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+
+          {availableTypes.map(type => (
+            <TabsContent key={type} value={type} className="mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {texts.filter(t => t.text_type === type).map(text => {
+                  const prog = getProgress(text.id);
+                  const image = getTopicImage(text.title_de);
+                  return (
+                    <div
+                      key={text.id}
+                      className="cursor-pointer rounded-xl border border-border bg-card p-4 transition-all hover:shadow-md"
+                      onClick={() => { setSelectedText(text); window.scrollTo(0, 0); }}
+                    >
+                      {image ? (
+                        <div className="mb-3 overflow-hidden rounded-lg bg-muted/30">
+                          <img
+                            src={image}
+                            alt={language === 'de' ? text.title_de : text.title_en}
+                            className="w-full h-28 object-cover rounded-lg"
+                            loading="lazy"
+                          />
+                        </div>
+                      ) : (
+                        <div className="mb-3 h-28 rounded-lg bg-muted/30 flex items-center justify-center">
+                          <span className="text-2xl">📖</span>
+                        </div>
+                      )}
+
+                      <p className="font-semibold text-sm text-foreground leading-snug">
+                        {language === 'de' ? text.title_de : text.title_en}
+                      </p>
+                      <div className="flex items-center gap-3 mt-1.5 text-[11px] text-muted-foreground">
                         <span>{text.word_count} {t('reading_words')}</span>
-                        <span className="flex items-center gap-1">
+                        <span className="flex items-center gap-0.5">
                           <Clock className="h-3 w-3" />
                           ~{text.estimated_minutes} {t('reading_minutes')}
                         </span>
                       </div>
-                      <div className="text-xs">
+                      <div className="mt-1.5 text-[10px]">
                         {prog?.completed ? (
-                          <span className="flex items-center gap-1 text-primary">
-                            <CheckCircle className="h-3.5 w-3.5" />
+                          <span className="inline-flex items-center gap-1 font-medium text-primary bg-primary/10 rounded px-1.5 py-0.5">
+                            <CheckCircle className="h-3 w-3" />
                             {t('reading_completed')} {prog.score != null && `(${prog.score}%)`}
                           </span>
                         ) : (
-                          <span className="text-muted-foreground">{t('writing_not_started')}</span>
+                          <span className="font-medium text-muted-foreground bg-muted/50 rounded px-1.5 py-0.5">
+                            {t('writing_not_started')}
+                          </span>
                         )}
                       </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </section>
-        ))
+                    </div>
+                  );
+                })}
+              </div>
+            </TabsContent>
+          ))}
+        </Tabs>
       )}
     </div>
   );

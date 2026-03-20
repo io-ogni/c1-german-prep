@@ -1,14 +1,17 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { BookOpen, Table2, Layers, Dumbbell, Play } from 'lucide-react';
+import { Drama, Table2, Layers, Dumbbell, Play } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
+import { NAV_CONTAINER, navFuchsiaClasses } from '@/components/shared/navStyles';
+import type { LucideIcon } from 'lucide-react';
 
-const NAV_ITEMS = [
-  { path: '/it-deutsch', icon: Play, labelKey: null, label: 'Medien' },
-  { path: '/it-deutsch/uebungen', icon: Dumbbell, labelKey: null, label: 'Übungen' },
-  { path: '/it-deutsch/vokabular', icon: Table2, labelKey: null, label: 'IT-Vokabular' },
+type NavItem = { value: string; icon: LucideIcon; label: string; labelKey?: string };
 
-  { path: '/it-deutsch/redewendungen', icon: BookOpen, labelKey: 'it_redewendungen' as const },
-  { path: '/flashcards', icon: Layers, labelKey: null, label: 'Lernkarten' },
+const NAV_ITEMS: NavItem[] = [
+  { value: '/it-deutsch', icon: Play, label: 'Medien' },
+  { value: '/it-deutsch/vokabular', icon: Table2, label: 'IT-Vokabular' },
+  { value: '/it-deutsch/redewendungen', icon: Drama, labelKey: 'it_redewendungen', label: '' },
+  { value: '/it-deutsch/uebungen', icon: Dumbbell, label: 'Übungen' },
+  { value: '/flashcards', icon: Layers, label: 'Lernkarten' },
 ];
 
 export function ITDeutschNav() {
@@ -16,24 +19,25 @@ export function ITDeutschNav() {
   const location = useLocation();
   const { t } = useTranslation();
 
+  const activePath = NAV_ITEMS.find(item =>
+    item.value === '/it-deutsch'
+      ? location.pathname === '/it-deutsch'
+      : location.pathname.startsWith(item.value)
+  )?.value ?? '/it-deutsch';
+
   return (
-    <div className="inline-flex items-center rounded-lg bg-muted/80 border border-border p-1 gap-0.5 flex-wrap">
-      {NAV_ITEMS.map(({ path, icon: Icon, labelKey, label }) => {
-        const isActive = path === '/it-deutsch'
-          ? location.pathname === '/it-deutsch'
-          : location.pathname.startsWith(path);
+    <div className={NAV_CONTAINER}>
+      {NAV_ITEMS.map((item) => {
+        const Icon = item.icon;
+        const label = item.labelKey ? (t(item.labelKey as any) as string) : item.label;
         return (
           <button
-            key={path}
-            onClick={() => navigate(path)}
-            className={`inline-flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-sm font-medium transition-all ${
-              isActive
-                ? 'bg-fuchsia-500 text-white shadow-sm'
-                : 'text-foreground/70 hover:bg-fuchsia-500 hover:text-white hover:shadow-sm'
-            }`}
+            key={item.value}
+            onClick={() => navigate(item.value)}
+            className={`inline-flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-sm font-medium transition-all ${navFuchsiaClasses(activePath === item.value)}`}
           >
             <Icon className="h-4 w-4" />
-            {labelKey ? t(labelKey) : label}
+            {label}
           </button>
         );
       })}

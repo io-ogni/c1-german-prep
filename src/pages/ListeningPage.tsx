@@ -121,6 +121,7 @@ export default function ListeningPage() {
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <Headphones className="h-6 w-6" />
           {t('listening_title')}
+          <TelcBadge className="ml-1" />
         </h1>
         <p className="text-sm text-muted-foreground mt-1">{t('listening_subtitle')}</p>
       </div>

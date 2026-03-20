@@ -1,10 +1,14 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
-import { Search, Languages, Zap, Link2, Presentation, GitBranch, Shield, AlertTriangle, Star, Volume2 } from 'lucide-react';
+import { Languages, Zap, Link2, Presentation, GitBranch, Shield, AlertTriangle, Star, Volume2, Filter, MousePointerClick, Monitor } from 'lucide-react';
+import { StarredButton } from '@/components/shared/StarredButton';
+import { useTableClickHint } from '@/hooks/useTableClickHint';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ITDeutschNav } from '@/components/layout/ITDeutschNav';
 import { useAuth } from '@/contexts/AuthContext';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { PlayAllButton } from '@/components/PlayAllButton';
+import { usePlayAll } from '@/hooks/usePlayAll';
+import { PILL_CONTAINER, TAB_TRIGGER_FUCHSIA } from '@/components/shared/navStyles';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
@@ -15,8 +19,25 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
+// ─── TTS Audio (Google Cloud Neural2) ───
+const ttsAudio: Record<string, Record<string, string>> = {
+  nouns: import.meta.glob('/src/assets/audio/nouns/*.mp3', { eager: true, import: 'default' }) as Record<string, string>,
+  verbs: import.meta.glob('/src/assets/audio/verbs/*.mp3', { eager: true, import: 'default' }) as Record<string, string>,
+  kollokationen: import.meta.glob('/src/assets/audio/kollokationen/*.mp3', { eager: true, import: 'default' }) as Record<string, string>,
+  workshop: import.meta.glob('/src/assets/audio/workshop/*.mp3', { eager: true, import: 'default' }) as Record<string, string>,
+  refinement: import.meta.glob('/src/assets/audio/refinement/*.mp3', { eager: true, import: 'default' }) as Record<string, string>,
+  souveranitaet: import.meta.glob('/src/assets/audio/souveranitaet/*.mp3', { eager: true, import: 'default' }) as Record<string, string>,
+  notfallkit: import.meta.glob('/src/assets/audio/notfallkit/*.mp3', { eager: true, import: 'default' }) as Record<string, string>,
+};
+function getTtsUrl(section: string, index: number): string | undefined {
+  const map = ttsAudio[section];
+  if (!map) return undefined;
+  const padded = String(index + 1).padStart(2, '0');
+  return map[`/src/assets/audio/${section}/${section}-${padded}.mp3`];
+}
+
 // ─── 50 Power Nouns ───
-const NOUNS = [
+export const NOUNS = [
   { de: 'Die Implementierung', en: 'Implementation', example: 'Die schrittweise Implementierung der Microservices-Architektur hat die Systemkomplexität deutlich reduziert.' },
   { de: 'Die Skalierbarkeit', en: 'Scalability', example: 'Bei der Auswahl des Tech-Stacks stand die horizontale Skalierbarkeit unter Hochlast im Vordergrund.' },
   { de: 'Die Belastbarkeit', en: 'Resilience / Load capacity', example: 'Wir haben die Belastbarkeit der API durch intensive Lasttests unter Extrembedingungen verifiziert.' },
@@ -70,7 +91,7 @@ const NOUNS = [
 ];
 
 // ─── 50 Power Verbs ───
-const VERBS = [
+export const VERBS = [
   { de: 'gewährleisten', en: 'to ensure / guarantee', example: 'Wir müssen die Datensicherheit auch bei hohen Zugriffszahlen gewährleisten.' },
   { de: 'optimieren', en: 'to optimize', example: 'Die neuen Algorithmen helfen uns dabei, die Serverlast signifikant zu optimieren.' },
   { de: 'implementieren', en: 'to implement', example: 'Wir planen, im nächsten Quartal eine automatisierte CI/CD-Pipeline zu implementieren.' },
@@ -124,7 +145,7 @@ const VERBS = [
 ];
 
 // ─── 50 Collocations ───
-const COLLOCATIONS = [
+export const COLLOCATIONS = [
   { noun: 'Die Schnittstelle', verb: 'implementieren', phrase: 'Eine Schnittstelle implementieren', en: 'To implement an interface', example: 'Wir müssen die REST-Schnittstelle implementieren, um den Datenaustausch zu ermöglichen.' },
   { noun: 'Die Skalierbarkeit', verb: 'gewährleisten', phrase: 'Die Skalierbarkeit gewährleisten', en: 'To ensure scalability', example: 'Das System wurde so entworfen, dass wir die horizontale Skalierbarkeit gewährleisten.' },
   { noun: 'Die Sicherheitslücke', verb: 'schließen', phrase: 'Eine Sicherheitslücke schließen', en: 'To patch a vulnerability', example: 'Es ist von höchster Priorität, dass wir diese kritische Sicherheitslücke umgehend schließen.' },
@@ -178,7 +199,7 @@ const COLLOCATIONS = [
 ];
 
 // ─── 50 Workshop Facilitation Phrases ───
-const WORKSHOP_PHRASES = [
+export const WORKSHOP_PHRASES = [
   { phase: 'Opening', category: 'Welcome', de: 'Schön, dass ihr da seid', en: 'Great that you\'re here', example: 'Schön, dass ihr alle da seid zu unserem Workshop zur Cloud-Strategie.' },
   { phase: 'Opening', category: 'Purpose', de: 'Wir wollen heute...', en: 'Today we want to...', example: 'Wir wollen heute gemeinsam einen Fahrplan für das nächste Quartal aufstellen.' },
   { phase: 'Opening', category: 'Agenda', de: 'Die Agenda', en: 'The agenda', example: 'Lass uns kurz die Agenda für den Vormittag durchgehen.' },
@@ -232,7 +253,7 @@ const WORKSHOP_PHRASES = [
 ];
 
 // ─── 50 Refinement Phrases ───
-const REFINEMENT_PHRASES = [
+export const REFINEMENT_PHRASES = [
   { category: 'Opening', de: 'Das Ticket durchgehen', en: 'To go through the ticket', example: 'Lass uns kurz das erste Ticket durchgehen.' },
   { category: 'Opening', de: 'Den Scope abgrenzen', en: 'To define/limit the scope', example: 'Wir müssen zuerst den Scope für dieses Feature sauber abgrenzen.' },
   { category: 'Unclear Story', de: 'Nicht greifbar', en: 'Not tangible/vague', example: 'Die User Story ist für mich aktuell noch nicht greifbar.' },
@@ -286,7 +307,7 @@ const REFINEMENT_PHRASES = [
 ];
 
 // ─── Composure Kit ───
-const COMPOSURE_PHRASES = [
+export const COMPOSURE_PHRASES = [
   { situation: 'Technische Probleme', de: 'Irgendwie streikt meine Technik gerade. Gebt mir bitte eine Sekunde für einen Neustart.', en: 'My tech is on strike. Give me a second for a restart.' },
   { situation: 'Technische Probleme', de: 'Könnt ihr meinen Bildschirm sehen? Bei mir scheint die Übertragung gerade zu hängen.', en: 'Can you see my screen? The transmission seems to be hanging on my end.' },
   { situation: 'Technische Probleme', de: 'Mein Akku verabschiedet sich gerade. Ich muss kurz das Ladekabel holen, bin gleich wieder da!', en: 'My battery is saying goodbye. Need to grab the cable, back in a sec!' },
@@ -309,7 +330,7 @@ const COMPOSURE_PHRASES = [
 ];
 
 // ─── Crisis Simulator ───
-const CRISIS_TRIGGERS = [
+export const CRISIS_TRIGGERS = [
   { trigger: 'Vage Anforderung: "Mach es halt modern."', response: 'Das ist noch etwas schwammig. Können wir das präzisieren, damit es greifbar wird?', strategy: 'Forces clarity without being rude.' },
   { trigger: 'Blame Game: "Dein Code hat den Crash verursacht."', response: 'Lass uns nicht den Teufel an die Wand malen. Wir müssen erst die Logs auswerten.', strategy: 'Deflects panic/blame; moves to data.' },
   { trigger: 'Jemand redet über dich hinweg.', response: 'Darf ich das kurz zu Ende führen? Ich bin gleich fertig, dann gebe ich das Wort weiter.', strategy: 'Reclaims the floor firmly.' },
@@ -337,34 +358,42 @@ const CRISIS_TRIGGERS = [
   { trigger: 'Dein Mikro verschluckt Wörter.', response: 'Ich glaube, dein Mikrofon schluckt ein paar Wörter. Kannst du das nochmal wiederholen?', strategy: 'Blames the hardware, not the person.' },
 ];
 
-const PHASE_COLORS: Record<string, string> = {
-  Opening: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
-  Flow: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-  Interruption: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-  'Change Topic': 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300',
-  Conflict: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
-  Engagement: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300',
-  Action: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
-  Closing: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300',
-  Idioms: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',
-  'Unclear Story': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-  'Value/User': 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300',
-  'Acceptance Criteria': 'bg-lime-100 text-lime-700 dark:bg-lime-900/30 dark:text-lime-300',
-  Implementation: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-  Negotiation: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300',
-  Estimation: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
-  Critique: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
-  'Agile Process': 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300',
-  'Technische Probleme': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
-  'Unterbrochen werden': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-  'Wortsuche': 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300',
-  'Re-Sync': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-  'Aufgabe ablehnen': 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
+const BORDER_COLORS: Record<string, string> = {
+  Opening: 'border-l-emerald-400', Flow: 'border-l-blue-400', Interruption: 'border-l-amber-400',
+  'Change Topic': 'border-l-violet-400', Conflict: 'border-l-rose-400', Engagement: 'border-l-cyan-400',
+  Action: 'border-l-orange-400', Closing: 'border-l-indigo-400', Idioms: 'border-l-pink-400',
+  'Unclear Story': 'border-l-amber-400', 'Value/User': 'border-l-teal-400',
+  'Acceptance Criteria': 'border-l-lime-400', Implementation: 'border-l-blue-400',
+  Negotiation: 'border-l-violet-400', Estimation: 'border-l-orange-400', Critique: 'border-l-rose-400',
+  'Agile Process': 'border-l-cyan-400',
+  'Technische Probleme': 'border-l-red-400', 'Unterbrochen werden': 'border-l-amber-400',
+  'Wortsuche': 'border-l-violet-400', 'Re-Sync': 'border-l-blue-400', 'Aufgabe ablehnen': 'border-l-rose-400',
 };
 
-function matches(text: string, query: string): boolean {
-  return text.toLowerCase().includes(query.toLowerCase());
-}
+const PHASE_COLORS: Record<string, string> = {
+  Opening: 'text-emerald-700 dark:text-emerald-300',
+  Flow: 'text-blue-700 dark:text-blue-300',
+  Interruption: 'text-amber-700 dark:text-amber-300',
+  'Change Topic': 'text-violet-700 dark:text-violet-300',
+  Conflict: 'text-rose-700 dark:text-rose-300',
+  Engagement: 'text-cyan-700 dark:text-cyan-300',
+  Action: 'text-orange-700 dark:text-orange-300',
+  Closing: 'text-indigo-700 dark:text-indigo-300',
+  Idioms: 'text-pink-700 dark:text-pink-300',
+  'Unclear Story': 'text-amber-700 dark:text-amber-300',
+  'Value/User': 'text-teal-700 dark:text-teal-300',
+  'Acceptance Criteria': 'text-lime-700 dark:text-lime-300',
+  Implementation: 'text-blue-700 dark:text-blue-300',
+  Negotiation: 'text-violet-700 dark:text-violet-300',
+  Estimation: 'text-orange-700 dark:text-orange-300',
+  Critique: 'text-rose-700 dark:text-rose-300',
+  'Agile Process': 'text-cyan-700 dark:text-cyan-300',
+  'Technische Probleme': 'text-red-700 dark:text-red-300',
+  'Unterbrochen werden': 'text-amber-700 dark:text-amber-300',
+  'Wortsuche': 'text-violet-700 dark:text-violet-300',
+  'Re-Sync': 'text-blue-700 dark:text-blue-300',
+  'Aufgabe ablehnen': 'text-rose-700 dark:text-rose-300',
+};
 
 const WORKSHOP_PHASES = ['Alle', 'Opening', 'Flow', 'Interruption', 'Change Topic', 'Conflict', 'Engagement', 'Action', 'Closing', 'Idioms'] as const;
 const REFINEMENT_CATEGORIES = ['Alle', 'Opening', 'Unclear Story', 'Value/User', 'Acceptance Criteria', 'Implementation', 'Negotiation', 'Estimation', 'Critique', 'Agile Process', 'Idioms', 'Closing'] as const;
@@ -380,7 +409,6 @@ const LABEL_DE: Record<string, string> = {
   'Agile Process': 'Agiler Prozess',
 };
 
-const FUCHSIA_TAB = 'data-[state=active]:bg-fuchsia-500 data-[state=active]:text-white data-[state=active]:shadow-sm';
 
 const STORAGE_KEY = 'it-vokabular-highlights';
 
@@ -396,28 +424,51 @@ function saveHighlights(userId: string, set: Set<string>) {
 }
 
 export default function ITVokabularPage() {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const auth = useAuth();
   const userId = auth?.user?.id ?? 'anon';
-  const [search, setSearch] = useState('');
   const [workshopPhase, setWorkshopPhase] = useState('Alle');
   const [refinementCategory, setRefinementCategory] = useState('Alle');
   const [composureSituation, setComposureSituation] = useState('Alle');
+  const [starredOnly, setStarredOnly] = useState(false);
+  const player = usePlayAll();
   const speakingRef = useRef(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const speak = useCallback((text: string) => {
-    if (speakingRef.current) { speechSynthesis.cancel(); speakingRef.current = false; return; }
+  const speak = useCallback((text: string, ttsUrl?: string) => {
+    // Stop current playback
+    if (speakingRef.current) {
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+      speechSynthesis.cancel();
+      speakingRef.current = false;
+      return;
+    }
+    // Prefer pre-generated mp3
+    if (ttsUrl) {
+      const audio = new Audio(ttsUrl);
+      audioRef.current = audio;
+      audio.onended = () => { speakingRef.current = false; audioRef.current = null; };
+      speakingRef.current = true;
+      audio.play();
+      return;
+    }
+    // Fallback to browser TTS
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'de-DE';
     u.onend = () => { speakingRef.current = false; };
     speakingRef.current = true;
     speechSynthesis.speak(u);
   }, []);
+  // Stop play-all when filters change
+  useEffect(() => { player.stop(); }, [starredOnly, workshopPhase, refinementCategory, composureSituation]);
+
   const [selectedRows, setSelectedRows] = useState<Set<string>>(() => loadHighlights(userId));
+  const { showClickHint, dismissClickHint } = useTableClickHint();
 
   useEffect(() => { saveHighlights(userId, selectedRows); }, [userId, selectedRows]);
 
   const toggleRow = useCallback((key: string) => {
+    dismissClickHint();
     setSelectedRows(prev => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key); else next.add(key);
@@ -425,81 +476,70 @@ export default function ITVokabularPage() {
     });
   }, []);
 
-  const filteredNouns = useMemo(
-    () => NOUNS.filter(n => !search || matches(n.de, search) || matches(n.en, search) || matches(n.example, search)),
-    [search]
-  );
+  // Indexed wrappers so star keys survive filtering
+  type Indexed<T> = T & { _i: number };
+  const indexAll = <T,>(arr: readonly T[], prefix: string): Indexed<T>[] =>
+    arr.map((item, i) => ({ ...item, _i: i })).filter(item => !starredOnly || selectedRows.has(`${prefix}-${item._i}`));
 
-  const filteredVerbs = useMemo(
-    () => VERBS.filter(v => !search || matches(v.de, search) || matches(v.en, search) || matches(v.example, search)),
-    [search]
-  );
-
-  const filteredCollocations = useMemo(
-    () => COLLOCATIONS.filter(c => !search || matches(c.noun, search) || matches(c.verb, search) || matches(c.phrase, search) || matches(c.en, search) || matches(c.example, search)),
-    [search]
-  );
+  const filteredNouns = useMemo(() => indexAll(NOUNS, 'nomen'), [starredOnly, selectedRows]);
+  const filteredVerbs = useMemo(() => indexAll(VERBS, 'verben'), [starredOnly, selectedRows]);
+  const filteredCollocations = useMemo(() => indexAll(COLLOCATIONS, 'koll'), [starredOnly, selectedRows]);
 
   const filteredWorkshop = useMemo(
-    () => WORKSHOP_PHRASES.filter(p =>
-      (workshopPhase === 'Alle' || p.phase === workshopPhase) &&
-      (!search || matches(p.de, search) || matches(p.en, search) || matches(p.example, search) || matches(p.phase, search) || matches(p.category, search))
-    ),
-    [search, workshopPhase]
+    () => indexAll(WORKSHOP_PHRASES, 'ws').filter(p => workshopPhase === 'Alle' || p.phase === workshopPhase),
+    [workshopPhase, starredOnly, selectedRows]
   );
 
   const filteredRefinement = useMemo(
-    () => REFINEMENT_PHRASES.filter(p =>
-      (refinementCategory === 'Alle' || p.category === refinementCategory) &&
-      (!search || matches(p.de, search) || matches(p.en, search) || matches(p.example, search) || matches(p.category, search))
-    ),
-    [search, refinementCategory]
+    () => indexAll(REFINEMENT_PHRASES, 'ref').filter(p => refinementCategory === 'Alle' || p.category === refinementCategory),
+    [refinementCategory, starredOnly, selectedRows]
   );
 
   const filteredComposure = useMemo(
-    () => COMPOSURE_PHRASES.filter(p =>
-      (composureSituation === 'Alle' || p.situation === composureSituation) &&
-      (!search || matches(p.de, search) || matches(p.en, search) || matches(p.situation, search))
-    ),
-    [search, composureSituation]
+    () => indexAll(COMPOSURE_PHRASES, 'souv').filter(p => composureSituation === 'Alle' || p.situation === composureSituation),
+    [composureSituation, starredOnly, selectedRows]
   );
 
-  const filteredCrisis = useMemo(
-    () => CRISIS_TRIGGERS.filter(c => !search || matches(c.trigger, search) || matches(c.response, search) || matches(c.strategy, search)),
-    [search]
-  );
+  const filteredCrisis = useMemo(() => indexAll(CRISIS_TRIGGERS, 'krise'), [starredOnly, selectedRows]);
+
+  const starredBtn = <StarredButton active={starredOnly} onClick={() => setStarredOnly(prev => !prev)} />;
+
+  const emptyStarred = starredOnly ? (
+    <div className="py-10 text-center text-sm text-muted-foreground">
+      Noch keine Einträge markiert — klicke auf eine Zeile in der Tabelle, um sie zu markieren.
+    </div>
+  ) : null;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <h1 className="text-2xl font-bold text-foreground">{t('nav_it_deutsch')}</h1>
-        <ITDeutschNav />
+      <div>
+        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <Monitor className="h-6 w-6" />
+          {t('nav_it_deutsch')}
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">Berufssprache für die IT-Branche — Vokabular, Redewendungen und Dialoge für den Arbeitsalltag.</p>
       </div>
-      <p className="text-sm text-muted-foreground">Dein komplettes C1-Toolkit: Wortschatz, Kollokationen, Phrasen und Notfall-Kit für den IT-Arbeitsalltag.</p>
-
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Suchen..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
-        />
-      </div>
+      <ITDeutschNav />
+      <p className="text-sm text-muted-foreground">
+        {lang === 'de'
+          ? 'Dein komplettes C1-Toolkit: Wortschatz, Kollokationen, Phrasen und Notfall-Kit für den IT-Arbeitsalltag.'
+          : 'Your complete C1 toolkit: vocabulary, collocations, phrases and emergency kit for daily IT work.'}
+      </p>
 
       <Tabs defaultValue="nomen">
-        <TabsList className="flex flex-wrap h-auto gap-1">
-          <TabsTrigger value="nomen" className={`gap-1.5 ${FUCHSIA_TAB}`}><Languages className="h-4 w-4" /> Nomen</TabsTrigger>
-          <TabsTrigger value="verben" className={`gap-1.5 ${FUCHSIA_TAB}`}><Zap className="h-4 w-4" /> Verben</TabsTrigger>
-          <TabsTrigger value="kollokationen" className={`gap-1.5 ${FUCHSIA_TAB}`}><Link2 className="h-4 w-4" /> Kollokationen</TabsTrigger>
-          <TabsTrigger value="workshop" className={`gap-1.5 ${FUCHSIA_TAB}`}><Presentation className="h-4 w-4" /> Workshop</TabsTrigger>
-          <TabsTrigger value="refinement" className={`gap-1.5 ${FUCHSIA_TAB}`}><GitBranch className="h-4 w-4" /> Refinement</TabsTrigger>
-          <TabsTrigger value="souveraenitaet" className={`gap-1.5 ${FUCHSIA_TAB}`}><Shield className="h-4 w-4" /> Souveränität</TabsTrigger>
-          <TabsTrigger value="krisen" className={`gap-1.5 ${FUCHSIA_TAB}`}><AlertTriangle className="h-4 w-4" /> Notfall-Kit</TabsTrigger>
+        <TabsList className={PILL_CONTAINER}>
+          <TabsTrigger value="nomen" className={TAB_TRIGGER_FUCHSIA}><Languages className="h-3.5 w-3.5" /> Nomen</TabsTrigger>
+          <TabsTrigger value="verben" className={TAB_TRIGGER_FUCHSIA}><Zap className="h-3.5 w-3.5" /> Verben</TabsTrigger>
+          <TabsTrigger value="kollokationen" className={TAB_TRIGGER_FUCHSIA}><Link2 className="h-3.5 w-3.5" /> Kollokationen</TabsTrigger>
+          <TabsTrigger value="workshop" className={TAB_TRIGGER_FUCHSIA}><Presentation className="h-3.5 w-3.5" /> Workshop</TabsTrigger>
+          <TabsTrigger value="refinement" className={TAB_TRIGGER_FUCHSIA}><GitBranch className="h-3.5 w-3.5" /> Refinement</TabsTrigger>
+          <TabsTrigger value="souveraenitaet" className={TAB_TRIGGER_FUCHSIA}><Shield className="h-3.5 w-3.5" /> Souveränität</TabsTrigger>
+          <TabsTrigger value="krisen" className={TAB_TRIGGER_FUCHSIA}><AlertTriangle className="h-3.5 w-3.5" /> Notfall-Kit</TabsTrigger>
         </TabsList>
 
         {/* ── Nomen ── */}
         <TabsContent value="nomen">
+          <div className="mt-2 mb-4 flex items-center justify-end gap-2">{starredBtn}<PlayAllButton player={player} getUrls={() => filteredNouns.map(n => getTtsUrl('nouns', n._i)).filter(Boolean) as string[]} /></div>
           {/* Desktop */}
           <div className="hidden md:block rounded-md border overflow-x-auto">
             <Table>
@@ -513,16 +553,33 @@ export default function ITVokabularPage() {
               </TableHeader>
               <TableBody>
                 {filteredNouns.map((n, i) => {
-                  const key = `nomen-${i}`;
+                  const key = `nomen-${n._i}`;
                   const sel = selectedRows.has(key);
                   return (
                     <TableRow key={i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
                       <TableCell className="text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">{sel && <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-400 shrink-0" />}{i + 1}</span>
+                        <span className="flex items-center gap-1"><Star className={`h-3.5 w-3.5 shrink-0 ${sel ? 'text-yellow-500 fill-yellow-400' : 'text-transparent'}`} />{i + 1}</span>
                       </TableCell>
-                      <TableCell className="text-base font-semibold text-foreground">{n.de}</TableCell>
+                      <TableCell className="text-sm font-medium text-foreground">
+                        <div className="flex items-center gap-2">
+                          {n.de}
+                          {i === 0 && showClickHint && (
+                            <span className="inline-flex items-center gap-1 animate-bounce">
+                              <span className="bg-foreground/90 text-background text-xs font-medium px-2.5 py-1 rounded-full shadow-lg" style={{ fontFamily: '"Comic Sans MS", "Segoe Print", cursive' }}>Klick mich!</span>
+                              <MousePointerClick className="h-5 w-5 text-foreground/80 -rotate-12" />
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{n.en}</TableCell>
-                      <TableCell><span className="text-base font-medium text-foreground bg-muted/50 rounded px-2 py-1.5 inline-block">{n.example}</span></TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <button onClick={(e) => { e.stopPropagation(); speak(n.example, getTtsUrl('nouns', n._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
+                            <Volume2 className="h-4 w-4" />
+                          </button>
+                          <span className="text-sm text-foreground">{n.example}</span>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -532,22 +589,29 @@ export default function ITVokabularPage() {
           {/* Mobile */}
           <div className="md:hidden space-y-3">
             {filteredNouns.map((n, i) => {
-              const key = `nomen-${i}`;
+              const key = `nomen-${n._i}`;
               const sel = selectedRows.has(key);
               return (
                 <div key={i} onClick={() => toggleRow(key)} className={`relative rounded-lg border p-4 space-y-2 cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
                   {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
-                  <p className="text-base font-semibold text-foreground">{n.de}</p>
+                  <p className="text-sm font-medium text-foreground">{n.de}</p>
                   <p className="text-sm text-muted-foreground">{n.en}</p>
-                  <p className="text-sm text-foreground bg-muted/50 rounded px-2 py-1.5">{n.example}</p>
+                  <div className="flex items-center gap-2">
+                    <button onClick={(e) => { e.stopPropagation(); speak(n.example, getTtsUrl('nouns', n._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
+                      <Volume2 className="h-4 w-4" />
+                    </button>
+                    <p className="text-sm text-foreground">{n.example}</p>
+                  </div>
                 </div>
               );
             })}
           </div>
+          {filteredNouns.length === 0 && emptyStarred}
         </TabsContent>
 
         {/* ── Verben ── */}
         <TabsContent value="verben">
+          <div className="mt-2 mb-4 flex items-center justify-end gap-2">{starredBtn}<PlayAllButton player={player} getUrls={() => filteredVerbs.map(v => getTtsUrl('verbs', v._i)).filter(Boolean) as string[]} /></div>
           <div className="hidden md:block rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
@@ -560,16 +624,23 @@ export default function ITVokabularPage() {
               </TableHeader>
               <TableBody>
                 {filteredVerbs.map((v, i) => {
-                  const key = `verben-${i}`;
+                  const key = `verben-${v._i}`;
                   const sel = selectedRows.has(key);
                   return (
                     <TableRow key={i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
                       <TableCell className="text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">{sel && <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-400 shrink-0" />}{i + 1}</span>
+                        <span className="flex items-center gap-1"><Star className={`h-3.5 w-3.5 shrink-0 ${sel ? 'text-yellow-500 fill-yellow-400' : 'text-transparent'}`} />{i + 1}</span>
                       </TableCell>
-                      <TableCell className="text-base font-semibold text-foreground">{v.de}</TableCell>
+                      <TableCell className="text-sm font-medium text-foreground">{v.de}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{v.en}</TableCell>
-                      <TableCell><span className="text-base font-medium text-foreground bg-muted/50 rounded px-2 py-1.5 inline-block">{v.example}</span></TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <button onClick={(e) => { e.stopPropagation(); speak(v.example, getTtsUrl('verbs', v._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
+                            <Volume2 className="h-4 w-4" />
+                          </button>
+                          <span className="text-sm text-foreground">{v.example}</span>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -578,22 +649,29 @@ export default function ITVokabularPage() {
           </div>
           <div className="md:hidden space-y-3">
             {filteredVerbs.map((v, i) => {
-              const key = `verben-${i}`;
+              const key = `verben-${v._i}`;
               const sel = selectedRows.has(key);
               return (
                 <div key={i} onClick={() => toggleRow(key)} className={`relative rounded-lg border p-4 space-y-2 cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
                   {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
-                  <p className="text-base font-semibold text-foreground">{v.de}</p>
+                  <p className="text-sm font-medium text-foreground">{v.de}</p>
                   <p className="text-sm text-muted-foreground">{v.en}</p>
-                  <p className="text-sm text-foreground bg-muted/50 rounded px-2 py-1.5">{v.example}</p>
+                  <div className="flex items-center gap-2">
+                    <button onClick={(e) => { e.stopPropagation(); speak(v.example, getTtsUrl('verbs', v._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
+                      <Volume2 className="h-4 w-4" />
+                    </button>
+                    <p className="text-sm text-foreground">{v.example}</p>
+                  </div>
                 </div>
               );
             })}
           </div>
+          {filteredVerbs.length === 0 && emptyStarred}
         </TabsContent>
 
         {/* ── Kollokationen ── */}
         <TabsContent value="kollokationen">
+          <div className="mt-2 mb-4 flex items-center justify-end gap-2">{starredBtn}<PlayAllButton player={player} getUrls={() => filteredCollocations.map(c => getTtsUrl('kollokationen', c._i)).filter(Boolean) as string[]} /></div>
           <div className="hidden md:block rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
@@ -601,25 +679,30 @@ export default function ITVokabularPage() {
                   <TableHead className="w-[40px] text-xs font-semibold text-muted-foreground">#</TableHead>
                   <TableHead className="min-w-[140px] text-xs font-semibold text-muted-foreground">Nomen</TableHead>
                   <TableHead className="min-w-[120px] text-xs font-semibold text-muted-foreground">Verb</TableHead>
-                  <TableHead className="min-w-[200px] text-xs font-semibold text-muted-foreground">Kollokation</TableHead>
                   <TableHead className="min-w-[160px] text-xs font-semibold text-muted-foreground">English</TableHead>
                   <TableHead className="min-w-[400px] text-xs font-semibold text-muted-foreground">C1 Beispielsatz</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCollocations.map((c, i) => {
-                  const key = `koll-${i}`;
+                  const key = `koll-${c._i}`;
                   const sel = selectedRows.has(key);
                   return (
                     <TableRow key={i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
                       <TableCell className="text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">{sel && <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-400 shrink-0" />}{i + 1}</span>
+                        <span className="flex items-center gap-1"><Star className={`h-3.5 w-3.5 shrink-0 ${sel ? 'text-yellow-500 fill-yellow-400' : 'text-transparent'}`} />{i + 1}</span>
                       </TableCell>
-                      <TableCell className="text-base font-semibold text-foreground">{c.noun}</TableCell>
-                      <TableCell className="text-base font-semibold text-primary">{c.verb}</TableCell>
-                      <TableCell className="text-base font-semibold text-foreground">{c.phrase}</TableCell>
+                      <TableCell className="text-sm font-medium text-foreground">{c.noun}</TableCell>
+                      <TableCell className="text-sm font-medium text-primary">{c.verb}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{c.en}</TableCell>
-                      <TableCell><span className="text-base font-medium text-foreground bg-muted/50 rounded px-2 py-1.5 inline-block">{c.example}</span></TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <button onClick={(e) => { e.stopPropagation(); speak(c.example, getTtsUrl('kollokationen', c._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
+                            <Volume2 className="h-4 w-4" />
+                          </button>
+                          <span className="text-sm text-foreground">{c.example}</span>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -628,50 +711,68 @@ export default function ITVokabularPage() {
           </div>
           <div className="md:hidden space-y-3">
             {filteredCollocations.map((c, i) => {
-              const key = `koll-${i}`;
+              const key = `koll-${c._i}`;
               const sel = selectedRows.has(key);
               return (
                 <div key={i} onClick={() => toggleRow(key)} className={`relative rounded-lg border p-4 space-y-2 cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
                   {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-base font-semibold text-foreground">{c.noun}</span>
-                    <span className="text-base font-semibold text-primary">+ {c.verb}</span>
+                    <span className="text-sm font-medium text-foreground">{c.noun}</span>
+                    <span className="text-sm font-medium text-primary">+ {c.verb}</span>
                   </div>
-                  <p className="text-base font-semibold text-foreground">{c.phrase}</p>
                   <p className="text-sm text-muted-foreground">{c.en}</p>
-                  <p className="text-sm text-foreground bg-muted/50 rounded px-2 py-1.5">{c.example}</p>
+                  <div className="flex items-center gap-2">
+                    <button onClick={(e) => { e.stopPropagation(); speak(c.example, getTtsUrl('kollokationen', c._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
+                      <Volume2 className="h-4 w-4" />
+                    </button>
+                    <p className="text-sm text-foreground">{c.example}</p>
+                  </div>
                 </div>
               );
             })}
           </div>
+          {filteredCollocations.length === 0 && emptyStarred}
         </TabsContent>
 
         {/* ── Workshop ── */}
         <TabsContent value="workshop">
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {WORKSHOP_PHASES.map((phase) => {
-              const isActive = workshopPhase === phase;
-              const colorClass = phase === 'Alle'
-                ? (isActive ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:bg-accent')
-                : (isActive ? (PHASE_COLORS[phase] ?? 'bg-secondary') : 'bg-muted text-muted-foreground hover:bg-accent');
-              return (
-                <button
-                  key={phase}
-                  onClick={() => setWorkshopPhase(phase)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${colorClass}`}
-                >
-                  {LABEL_DE[phase] || phase}
-                </button>
-              );
-            })}
+          <div className="mt-2 mb-4 flex items-center justify-end gap-2">{starredBtn}<PlayAllButton player={player} getUrls={() => filteredWorkshop.map(p => getTtsUrl('workshop', p._i)).filter(Boolean) as string[]} /></div>
+          <div className="md:hidden mb-3">
+            <Select value={workshopPhase} onValueChange={setWorkshopPhase}>
+              <SelectTrigger className="w-full">
+                <Filter className="h-3.5 w-3.5 text-muted-foreground mr-1.5" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {WORKSHOP_PHASES.map((phase) => (
+                  <SelectItem key={phase} value={phase}>{LABEL_DE[phase] || phase}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="hidden md:block rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[40px] text-xs font-semibold text-muted-foreground">#</TableHead>
-                  <TableHead className="min-w-[100px] text-xs font-semibold text-muted-foreground">Phase</TableHead>
-                  <TableHead className="min-w-[120px] text-xs font-semibold text-muted-foreground">Kategorie</TableHead>
+                  <TableHead className="min-w-[180px] p-1">
+                    <Select value={workshopPhase} onValueChange={setWorkshopPhase}>
+                      <SelectTrigger className="h-8 w-full text-xs font-semibold border-0 bg-transparent shadow-none">
+                        <Filter className="h-3.5 w-3.5 text-muted-foreground mr-1" />
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {WORKSHOP_PHASES.map((phase) => (
+                          <SelectItem key={phase} value={phase}>
+                            <span className="flex items-center gap-2">
+                              {phase !== 'Alle' && <span className={`inline-block w-2 h-2 rounded-full ${(BORDER_COLORS[phase] ?? '').replace('border-l-', 'bg-')}`} />}
+                              {LABEL_DE[phase] || phase}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableHead>
                   <TableHead className="min-w-[200px] text-xs font-semibold text-muted-foreground">Deutsch</TableHead>
                   <TableHead className="min-w-[160px] text-xs font-semibold text-muted-foreground">Englisch</TableHead>
                   <TableHead className="min-w-[400px] text-xs font-semibold text-muted-foreground">C1-Beispielsatz</TableHead>
@@ -679,18 +780,26 @@ export default function ITVokabularPage() {
               </TableHeader>
               <TableBody>
                 {filteredWorkshop.map((p, i) => {
-                  const key = `ws-${i}`;
+                  const key = `ws-${p._i}`;
                   const sel = selectedRows.has(key);
+                  const prevPhase = i > 0 ? filteredWorkshop[i - 1].phase : null;
+                  const isNewGroup = prevPhase !== null && prevPhase !== p.phase;
                   return (
-                    <TableRow key={i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
-                      <TableCell className="text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">{sel && <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-400 shrink-0" />}{i + 1}</span>
+                    <TableRow key={p._i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${isNewGroup ? 'border-t-4 border-t-muted' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
+                      <TableCell className={`text-xs text-muted-foreground border-l-4 ${BORDER_COLORS[p.phase] ?? 'border-l-transparent'}`}>
+                        <span className="flex items-center gap-1"><Star className={`h-3.5 w-3.5 shrink-0 ${sel ? 'text-yellow-500 fill-yellow-400' : 'text-transparent'}`} />{p._i + 1}</span>
                       </TableCell>
-                      <TableCell><Badge variant="secondary" className={`text-[10px] font-semibold ${PHASE_COLORS[p.phase] ?? ''}`}>{LABEL_DE[p.phase] || p.phase}</Badge></TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{LABEL_DE[p.category] || p.category}</TableCell>
-                      <TableCell className="text-base font-semibold text-foreground">{p.de}</TableCell>
+                      <TableCell><span className={`text-xs font-normal whitespace-nowrap ${PHASE_COLORS[p.phase] ?? ''}`}>{LABEL_DE[p.phase] || p.phase}</span></TableCell>
+                      <TableCell className="text-sm font-medium text-foreground">{p.de}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{p.en}</TableCell>
-                      <TableCell><span className="text-base font-medium text-foreground bg-muted/50 rounded px-2 py-1.5 inline-block">{p.example}</span></TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <button onClick={(e) => { e.stopPropagation(); speak(p.example, getTtsUrl('workshop', p._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
+                            <Volume2 className="h-4 w-4" />
+                          </button>
+                          <span className="text-sm text-foreground">{p.example}</span>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -699,49 +808,68 @@ export default function ITVokabularPage() {
           </div>
           <div className="md:hidden space-y-3">
             {filteredWorkshop.map((p, i) => {
-              const key = `ws-${i}`;
+              const key = `ws-${p._i}`;
               const sel = selectedRows.has(key);
+              const prevPhase = i > 0 ? filteredWorkshop[i - 1].phase : null;
+              const isNewGroup = prevPhase !== null && prevPhase !== p.phase;
               return (
-                <div key={i} onClick={() => toggleRow(key)} className={`relative rounded-lg border p-4 space-y-2 cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
+                <div key={p._i} onClick={() => toggleRow(key)} className={`relative rounded-lg border border-l-4 ${BORDER_COLORS[p.phase] ?? ''} p-4 space-y-2 cursor-pointer transition-colors ${isNewGroup ? 'mt-6' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
                   {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="secondary" className={`text-[10px] font-semibold ${PHASE_COLORS[p.phase] ?? ''}`}>{LABEL_DE[p.phase] || p.phase}</Badge>
-                    <span className="text-xs text-muted-foreground">{LABEL_DE[p.category] || p.category}</span>
-                  </div>
-                  <p className="text-base font-semibold text-foreground">{p.de}</p>
+                  <span className={`text-xs font-normal whitespace-nowrap ${PHASE_COLORS[p.phase] ?? ''}`}>{LABEL_DE[p.phase] || p.phase}</span>
+                  <p className="text-sm font-medium text-foreground">{p.de}</p>
                   <p className="text-sm text-muted-foreground">{p.en}</p>
-                  <p className="text-sm text-foreground bg-muted/50 rounded px-2 py-1.5">{p.example}</p>
+                  <div className="flex items-center gap-2">
+                    <button onClick={(e) => { e.stopPropagation(); speak(p.example, getTtsUrl('workshop', p._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
+                      <Volume2 className="h-4 w-4" />
+                    </button>
+                    <p className="text-sm text-foreground">{p.example}</p>
+                  </div>
                 </div>
               );
             })}
           </div>
+          {filteredWorkshop.length === 0 && emptyStarred}
         </TabsContent>
 
         {/* ── Refinement ── */}
         <TabsContent value="refinement">
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {REFINEMENT_CATEGORIES.map((cat) => {
-              const isActive = refinementCategory === cat;
-              const colorClass = cat === 'Alle'
-                ? (isActive ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:bg-accent')
-                : (isActive ? (PHASE_COLORS[cat] ?? 'bg-secondary') : 'bg-muted text-muted-foreground hover:bg-accent');
-              return (
-                <button
-                  key={cat}
-                  onClick={() => setRefinementCategory(cat)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${colorClass}`}
-                >
-                  {LABEL_DE[cat] || cat}
-                </button>
-              );
-            })}
+          <div className="mt-2 mb-4 flex items-center justify-end gap-2">{starredBtn}<PlayAllButton player={player} getUrls={() => filteredRefinement.map(p => getTtsUrl('refinement', p._i)).filter(Boolean) as string[]} /></div>
+          <div className="md:hidden mb-3">
+            <Select value={refinementCategory} onValueChange={setRefinementCategory}>
+              <SelectTrigger className="w-full">
+                <Filter className="h-3.5 w-3.5 text-muted-foreground mr-1.5" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {REFINEMENT_CATEGORIES.map((cat) => (
+                  <SelectItem key={cat} value={cat}>{LABEL_DE[cat] || cat}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="hidden md:block rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[40px] text-xs font-semibold text-muted-foreground">#</TableHead>
-                  <TableHead className="min-w-[130px] text-xs font-semibold text-muted-foreground">Kategorie</TableHead>
+                  <TableHead className="min-w-[180px] p-1">
+                    <Select value={refinementCategory} onValueChange={setRefinementCategory}>
+                      <SelectTrigger className="h-8 w-full text-xs font-semibold border-0 bg-transparent shadow-none">
+                        <Filter className="h-3.5 w-3.5 text-muted-foreground mr-1" />
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {REFINEMENT_CATEGORIES.map((cat) => (
+                          <SelectItem key={cat} value={cat}>
+                            <span className="flex items-center gap-2">
+                              {cat !== 'Alle' && <span className={`inline-block w-2 h-2 rounded-full ${(BORDER_COLORS[cat] ?? '').replace('border-l-', 'bg-')}`} />}
+                              {LABEL_DE[cat] || cat}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableHead>
                   <TableHead className="min-w-[200px] text-xs font-semibold text-muted-foreground">Deutsch</TableHead>
                   <TableHead className="min-w-[180px] text-xs font-semibold text-muted-foreground">Englisch</TableHead>
                   <TableHead className="min-w-[400px] text-xs font-semibold text-muted-foreground">C1-Beispielsatz</TableHead>
@@ -749,17 +877,26 @@ export default function ITVokabularPage() {
               </TableHeader>
               <TableBody>
                 {filteredRefinement.map((p, i) => {
-                  const key = `ref-${i}`;
+                  const key = `ref-${p._i}`;
                   const sel = selectedRows.has(key);
+                  const prevCat = i > 0 ? filteredRefinement[i - 1].category : null;
+                  const isNewGroup = prevCat !== null && prevCat !== p.category;
                   return (
-                    <TableRow key={i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
-                      <TableCell className="text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">{sel && <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-400 shrink-0" />}{i + 1}</span>
+                    <TableRow key={p._i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${isNewGroup ? 'border-t-4 border-t-muted' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
+                      <TableCell className={`text-xs text-muted-foreground border-l-4 ${BORDER_COLORS[p.category] ?? 'border-l-transparent'}`}>
+                        <span className="flex items-center gap-1"><Star className={`h-3.5 w-3.5 shrink-0 ${sel ? 'text-yellow-500 fill-yellow-400' : 'text-transparent'}`} />{p._i + 1}</span>
                       </TableCell>
-                      <TableCell><Badge variant="secondary" className={`text-[10px] font-semibold ${PHASE_COLORS[p.category] ?? 'bg-secondary'}`}>{LABEL_DE[p.category] || p.category}</Badge></TableCell>
-                      <TableCell className="text-base font-semibold text-foreground">{p.de}</TableCell>
+                      <TableCell><span className={`text-xs font-normal whitespace-nowrap ${PHASE_COLORS[p.category] ?? ''}`}>{LABEL_DE[p.category] || p.category}</span></TableCell>
+                      <TableCell className="text-sm font-medium text-foreground">{p.de}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{p.en}</TableCell>
-                      <TableCell><span className="text-base font-medium text-foreground bg-muted/50 rounded px-2 py-1.5 inline-block">{p.example}</span></TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <button onClick={(e) => { e.stopPropagation(); speak(p.example, getTtsUrl('refinement', p._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
+                            <Volume2 className="h-4 w-4" />
+                          </button>
+                          <span className="text-sm text-foreground">{p.example}</span>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -768,69 +905,93 @@ export default function ITVokabularPage() {
           </div>
           <div className="md:hidden space-y-3">
             {filteredRefinement.map((p, i) => {
-              const key = `ref-${i}`;
+              const key = `ref-${p._i}`;
               const sel = selectedRows.has(key);
+              const prevCat = i > 0 ? filteredRefinement[i - 1].category : null;
+              const isNewGroup = prevCat !== null && prevCat !== p.category;
               return (
-                <div key={i} onClick={() => toggleRow(key)} className={`relative rounded-lg border p-4 space-y-2 cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
+                <div key={p._i} onClick={() => toggleRow(key)} className={`relative rounded-lg border border-l-4 ${BORDER_COLORS[p.category] ?? ''} p-4 space-y-2 cursor-pointer transition-colors ${isNewGroup ? 'mt-6' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
                   {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
-                  <Badge variant="secondary" className={`text-[10px] font-semibold ${PHASE_COLORS[p.category] ?? 'bg-secondary'}`}>{LABEL_DE[p.category] || p.category}</Badge>
-                  <p className="text-base font-semibold text-foreground">{p.de}</p>
+                  <span className={`text-xs font-normal whitespace-nowrap ${PHASE_COLORS[p.category] ?? ''}`}>{LABEL_DE[p.category] || p.category}</span>
+                  <p className="text-sm font-medium text-foreground">{p.de}</p>
                   <p className="text-sm text-muted-foreground">{p.en}</p>
-                  <p className="text-sm text-foreground bg-muted/50 rounded px-2 py-1.5">{p.example}</p>
+                  <div className="flex items-center gap-2">
+                    <button onClick={(e) => { e.stopPropagation(); speak(p.example, getTtsUrl('refinement', p._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
+                      <Volume2 className="h-4 w-4" />
+                    </button>
+                    <p className="text-sm text-foreground">{p.example}</p>
+                  </div>
                 </div>
               );
             })}
           </div>
+          {filteredRefinement.length === 0 && emptyStarred}
         </TabsContent>
 
         {/* ── Souveränität ── */}
         <TabsContent value="souveraenitaet">
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {COMPOSURE_SITUATIONS.map((s) => {
-              const isActive = composureSituation === s;
-              const colorClass = s === 'Alle'
-                ? (isActive ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:bg-accent')
-                : (isActive ? (PHASE_COLORS[s] ?? 'bg-secondary') : 'bg-muted text-muted-foreground hover:bg-accent');
-              return (
-                <button
-                  key={s}
-                  onClick={() => setComposureSituation(s)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${colorClass}`}
-                >
-                  {s}
-                </button>
-              );
-            })}
+          <div className="mt-2 mb-4 flex items-center justify-end gap-2">{starredBtn}<PlayAllButton player={player} getUrls={() => filteredComposure.map(p => getTtsUrl('souveranitaet', p._i)).filter(Boolean) as string[]} /></div>
+          <div className="md:hidden mb-3">
+            <Select value={composureSituation} onValueChange={setComposureSituation}>
+              <SelectTrigger className="w-full">
+                <Filter className="h-3.5 w-3.5 text-muted-foreground mr-1.5" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {COMPOSURE_SITUATIONS.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="hidden md:block rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[40px] text-xs font-semibold text-muted-foreground">#</TableHead>
-                  <TableHead className="min-w-[120px] text-xs font-semibold text-muted-foreground">Situation</TableHead>
-                  <TableHead className="min-w-[300px] text-xs font-semibold text-muted-foreground">English</TableHead>
+                  <TableHead className="min-w-[180px] p-1">
+                    <Select value={composureSituation} onValueChange={setComposureSituation}>
+                      <SelectTrigger className="h-8 w-full text-xs font-semibold border-0 bg-transparent shadow-none">
+                        <Filter className="h-3.5 w-3.5 text-muted-foreground mr-1" />
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COMPOSURE_SITUATIONS.map((s) => (
+                          <SelectItem key={s} value={s}>
+                            <span className="flex items-center gap-2">
+                              {s !== 'Alle' && <span className={`inline-block w-2 h-2 rounded-full ${(BORDER_COLORS[s] ?? '').replace('border-l-', 'bg-')}`} />}
+                              {s}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableHead>
                   <TableHead className="min-w-[400px] text-xs font-semibold text-muted-foreground">Deutsch</TableHead>
+                  <TableHead className="min-w-[300px] text-xs font-semibold text-muted-foreground">English</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredComposure.map((p, i) => {
-                  const key = `souv-${i}`;
+                  const key = `souv-${p._i}`;
                   const sel = selectedRows.has(key);
+                  const prevSit = i > 0 ? filteredComposure[i - 1].situation : null;
+                  const isNewGroup = prevSit !== null && prevSit !== p.situation;
                   return (
-                    <TableRow key={i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
-                      <TableCell className="text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">{sel && <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-400 shrink-0" />}{i + 1}</span>
+                    <TableRow key={p._i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${isNewGroup ? 'border-t-4 border-t-muted' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
+                      <TableCell className={`text-xs text-muted-foreground border-l-4 ${BORDER_COLORS[p.situation] ?? 'border-l-transparent'}`}>
+                        <span className="flex items-center gap-1"><Star className={`h-3.5 w-3.5 shrink-0 ${sel ? 'text-yellow-500 fill-yellow-400' : 'text-transparent'}`} />{p._i + 1}</span>
                       </TableCell>
-                      <TableCell><Badge variant="secondary" className={`text-[10px] font-semibold ${PHASE_COLORS[p.situation] ?? ''}`}>{p.situation}</Badge></TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{p.en}</TableCell>
+                      <TableCell><span className={`text-xs font-normal whitespace-nowrap ${PHASE_COLORS[p.situation] ?? ''}`}>{p.situation}</span></TableCell>
                       <TableCell>
-                        <div className="flex items-start gap-2">
-                          <span className="text-base font-semibold text-foreground">{p.de}</span>
-                          <button onClick={(e) => { e.stopPropagation(); speak(p.de); }} className="shrink-0 mt-0.5 text-muted-foreground hover:text-fuchsia-500 transition-colors">
+                        <div className="flex items-center gap-2">
+                          <button onClick={(e) => { e.stopPropagation(); speak(p.de, getTtsUrl('souveranitaet', p._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
                             <Volume2 className="h-4 w-4" />
                           </button>
+                          <span className="text-sm font-medium text-foreground">{p.de}</span>
                         </div>
                       </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{p.en}</TableCell>
                     </TableRow>
                   );
                 })}
@@ -839,56 +1000,60 @@ export default function ITVokabularPage() {
           </div>
           <div className="md:hidden space-y-3">
             {filteredComposure.map((p, i) => {
-              const key = `souv-${i}`;
+              const key = `souv-${p._i}`;
               const sel = selectedRows.has(key);
+              const prevSit = i > 0 ? filteredComposure[i - 1].situation : null;
+              const isNewGroup = prevSit !== null && prevSit !== p.situation;
               return (
-                <div key={i} onClick={() => toggleRow(key)} className={`relative rounded-lg border p-4 space-y-2 cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
+                <div key={p._i} onClick={() => toggleRow(key)} className={`relative rounded-lg border border-l-4 ${BORDER_COLORS[p.situation] ?? ''} p-4 space-y-2 cursor-pointer transition-colors ${isNewGroup ? 'mt-6' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
                   {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
-                  <Badge variant="secondary" className={`text-[10px] font-semibold ${PHASE_COLORS[p.situation] ?? ''}`}>{p.situation}</Badge>
-                  <div className="flex items-start gap-2">
-                    <p className="text-base font-semibold text-foreground">{p.de}</p>
-                    <button onClick={(e) => { e.stopPropagation(); speak(p.de); }} className="shrink-0 mt-0.5 text-muted-foreground hover:text-fuchsia-500 transition-colors">
+                  <span className={`text-xs font-normal whitespace-nowrap ${PHASE_COLORS[p.situation] ?? ''}`}>{p.situation}</span>
+                  <div className="flex items-center gap-2">
+                    <button onClick={(e) => { e.stopPropagation(); speak(p.de, getTtsUrl('souveranitaet', p._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
                       <Volume2 className="h-4 w-4" />
                     </button>
+                    <p className="text-sm font-medium text-foreground">{p.de}</p>
                   </div>
                   <p className="text-sm text-muted-foreground">{p.en}</p>
                 </div>
               );
             })}
           </div>
+          {filteredComposure.length === 0 && emptyStarred}
         </TabsContent>
 
         {/* ── Notfall-Kit ── */}
         <TabsContent value="krisen">
+          <div className="mt-2 mb-4 flex items-center justify-end gap-2">{starredBtn}<PlayAllButton player={player} getUrls={() => filteredCrisis.map(c => getTtsUrl('notfallkit', c._i)).filter(Boolean) as string[]} /></div>
           <div className="hidden md:block rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[40px] text-xs font-semibold text-muted-foreground">#</TableHead>
                   <TableHead className="min-w-[250px] text-xs font-semibold text-muted-foreground">Krise / Trigger</TableHead>
-                  <TableHead className="min-w-[200px] text-xs font-semibold text-muted-foreground">Strategie</TableHead>
                   <TableHead className="min-w-[350px] text-xs font-semibold text-muted-foreground">C1 Kill-Phrase</TableHead>
+                  <TableHead className="min-w-[200px] text-xs font-semibold text-muted-foreground">Strategie</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCrisis.map((c, i) => {
-                  const key = `krise-${i}`;
+                  const key = `krise-${c._i}`;
                   const sel = selectedRows.has(key);
                   return (
                     <TableRow key={i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
                       <TableCell className="text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">{sel && <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-400 shrink-0" />}{i + 1}</span>
+                        <span className="flex items-center gap-1"><Star className={`h-3.5 w-3.5 shrink-0 ${sel ? 'text-yellow-500 fill-yellow-400' : 'text-transparent'}`} />{i + 1}</span>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{c.trigger}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{c.strategy}</TableCell>
                       <TableCell>
-                        <div className="flex items-start gap-2">
-                          <span className="text-base font-semibold text-fuchsia-600 dark:text-fuchsia-400">{c.response}</span>
-                          <button onClick={(e) => { e.stopPropagation(); speak(c.response); }} className="shrink-0 mt-0.5 text-muted-foreground hover:text-fuchsia-500 transition-colors">
+                        <div className="flex items-center gap-2">
+                          <button onClick={(e) => { e.stopPropagation(); speak(c.response, getTtsUrl('notfallkit', c._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
                             <Volume2 className="h-4 w-4" />
                           </button>
+                          <span className="text-sm font-medium text-fuchsia-600 dark:text-fuchsia-400">{c.response}</span>
                         </div>
                       </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{c.strategy}</TableCell>
                     </TableRow>
                   );
                 })}
@@ -897,24 +1062,26 @@ export default function ITVokabularPage() {
           </div>
           <div className="md:hidden space-y-3">
             {filteredCrisis.map((c, i) => {
-              const key = `krise-${i}`;
+              const key = `krise-${c._i}`;
               const sel = selectedRows.has(key);
               return (
                 <div key={i} onClick={() => toggleRow(key)} className={`relative rounded-lg border p-4 space-y-2 cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
                   {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
                   <p className="text-sm text-muted-foreground">{c.trigger}</p>
-                  <div className="flex items-start gap-2">
-                    <p className="text-base font-semibold text-fuchsia-600 dark:text-fuchsia-400">{c.response}</p>
-                    <button onClick={(e) => { e.stopPropagation(); speak(c.response); }} className="shrink-0 mt-0.5 text-muted-foreground hover:text-fuchsia-500 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <button onClick={(e) => { e.stopPropagation(); speak(c.response, getTtsUrl('notfallkit', c._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
                       <Volume2 className="h-4 w-4" />
                     </button>
+                    <p className="text-sm font-medium text-fuchsia-600 dark:text-fuchsia-400">{c.response}</p>
                   </div>
                   <p className="text-xs text-muted-foreground">{c.strategy}</p>
                 </div>
               );
             })}
           </div>
+          {filteredCrisis.length === 0 && emptyStarred}
         </TabsContent>
+
       </Tabs>
     </div>
   );

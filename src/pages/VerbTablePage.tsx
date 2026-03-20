@@ -98,7 +98,7 @@ export default function VerbTablePage() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Klicken Sie auf eine Zeile, um sie zu markieren. Erneut klicken zum Abwählen.
+        Klicke auf eine Zeile, um sie zu markieren. Erneut klicken zum Abwählen.
       </p>
 
       {isLoading ? (
@@ -109,8 +109,6 @@ export default function VerbTablePage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Infinitiv</TableHead>
-                <TableHead>ich</TableHead>
-                <TableHead>du</TableHead>
                 <TableHead>er/sie/es</TableHead>
                 <TableHead>Präteritum</TableHead>
                 <TableHead>Perfekt</TableHead>
@@ -129,8 +127,6 @@ export default function VerbTablePage() {
                     {v.infinitiv}
                     {v.is_separable && <span className="ml-1 text-xs text-muted-foreground">(trb.)</span>}
                   </TableCell>
-                  <TableCell className="text-sm">{v.praesens_ich}</TableCell>
-                  <TableCell className="text-sm">{v.praesens_du}</TableCell>
                   <TableCell className="text-sm">{v.praesens_er}</TableCell>
                   <TableCell className="text-sm">{v.praeteritum_ich}</TableCell>
                   <TableCell className="text-sm">{v.perfekt}</TableCell>
@@ -140,7 +136,7 @@ export default function VerbTablePage() {
               ))}
               {!filtered.length && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                     {t('page_coming_soon')}
                   </TableCell>
                 </TableRow>

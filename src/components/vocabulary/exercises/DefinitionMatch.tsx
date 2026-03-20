@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
 import { SelectableText } from '@/components/shared/SelectableText';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useNumberKeys } from '@/hooks/useNumberKeys';
 
 interface Props {
   content: { word?: string; options?: string[]; pairs?: { word: string; definition: string }[] };
@@ -46,11 +47,13 @@ export function DefinitionMatch({ content, solution, instructions, explanation, 
   const isCorrect = selected === shuffled.correctIdx;
 
   // Single word + options format
-  const handleSelect = (idx: number) => {
+  const handleSelect = useCallback((idx: number) => {
     if (answered) return;
     setSelected(idx);
     onAnswer(idx === shuffled.correctIdx);
-  };
+  }, [answered, shuffled.correctIdx, onAnswer]);
+
+  useNumberKeys(handleSelect, shuffled.options.length, answered);
 
   return (
     <ExerciseCard
@@ -82,7 +85,7 @@ export function DefinitionMatch({ content, solution, instructions, explanation, 
             onClick={() => handleSelect(idx)}
             disabled={answered}
           >
-            {opt.text}
+            <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{idx + 1}</kbd> {opt.text}
           </Button>
         ))}
       </div>

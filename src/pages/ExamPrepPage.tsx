@@ -26,6 +26,8 @@ import {
   FileText,
   ArrowRight,
   Link as LinkIcon,
+  Check,
+  X,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -89,6 +91,24 @@ export default function ExamPrepPage() {
         { label: '', tip: de ? 'Struktur: Einleitung → Hauptteil mit Argumenten → Schluss mit eigener Meinung.' : 'Structure: Introduction → Main body with arguments → Conclusion with own opinion.' },
         { label: '', tip: de ? 'Bewertungskriterien: Aufgabengerechtheit, Korrektheit, Repertoire, Kommunikative Gestaltung — alle vier zählen gleich.' : 'Scoring criteria: Task fulfillment, Accuracy, Range, Communicative design — all four count equally.' },
         { label: '', tip: de ? '10 Minuten am Ende zum Korrekturlesen einplanen.' : 'Plan 10 minutes at the end for proofreading.' },
+      ],
+      textstruktur: {
+        einleitung: de ? 'Thema einführen, Aktualität herstellen, zum Hauptteil überleiten' : 'Introduce the topic, establish relevance, transition to main body',
+        hauptteil: de ? 'Pro/Kontra abwägen, Argumente mit Beispielen stützen, Konnektoren verwenden' : 'Weigh pros/cons, support arguments with examples, use connectors',
+        schluss: de ? 'Fazit, eigene Position, Ausblick' : 'Conclusion, own position, outlook',
+        laenge: de ? 'Gesamtlänge: 250–350 Wörter' : 'Total length: 250–350 words',
+        zeit: de ? 'Zeit: 70 Minuten' : 'Time: 70 minutes',
+      },
+      checklist: [
+        { good: true, text: de ? 'Aufgabenstellung ZWEIMAL lesen' : 'Read the task TWICE' },
+        { good: true, text: de ? '5–10 Minuten planen (Stichworte)' : '5–10 minutes planning (keywords)' },
+        { good: true, text: de ? 'ALLE Punkte der Aufgabenstellung behandeln' : 'Address ALL points of the task' },
+        { good: true, text: de ? 'Satzbau variieren' : 'Vary sentence structure' },
+        { good: true, text: de ? 'Konjunktiv II für Höflichkeit und Distanz' : 'Konjunktiv II for politeness and distance' },
+        { good: true, text: de ? '10 Minuten für Korrekturlesen' : '10 minutes for proofreading' },
+        { good: false, text: de ? 'Nur Pro ODER nur Kontra (C1 verlangt Abwägung)' : 'Only pro OR only contra (C1 requires balanced arguments)' },
+        { good: false, text: de ? 'Argumente ohne Beispiele' : 'Arguments without examples' },
+        { good: false, text: de ? 'Fehlende Übergänge zwischen Absätzen' : 'Missing transitions between paragraphs' },
       ],
     },
     {
@@ -207,6 +227,48 @@ export default function ExamPrepPage() {
                     </li>
                   ))}
                 </ul>
+                {'textstruktur' in section && section.textstruktur && (
+                  <div className="mt-4 pt-3 border-t border-border">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                      {de ? 'Textstruktur' : 'Text Structure'}
+                    </p>
+                    <div className="rounded-lg border border-border p-3 space-y-2 bg-muted/30">
+                      <div>
+                        <p className="font-bold text-xs text-foreground">{de ? '1. EINLEITUNG (2–3 Sätze)' : '1. INTRODUCTION (2–3 sentences)'}</p>
+                        <p className="text-xs text-muted-foreground">{(section.textstruktur as any).einleitung}</p>
+                      </div>
+                      <div>
+                        <p className="font-bold text-xs text-foreground">{de ? '2. HAUPTTEIL (150–200 Wörter)' : '2. MAIN BODY (150–200 words)'}</p>
+                        <p className="text-xs text-muted-foreground">{(section.textstruktur as any).hauptteil}</p>
+                      </div>
+                      <div>
+                        <p className="font-bold text-xs text-foreground">{de ? '3. SCHLUSS (2–3 Sätze)' : '3. CONCLUSION (2–3 sentences)'}</p>
+                        <p className="text-xs text-muted-foreground">{(section.textstruktur as any).schluss}</p>
+                      </div>
+                      <div className="border-t border-border pt-2 text-[11px] text-muted-foreground space-y-0.5">
+                        <p>{(section.textstruktur as any).laenge}</p>
+                        <p>{(section.textstruktur as any).zeit}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {'checklist' in section && section.checklist && (
+                  <div className="mt-4 pt-3 border-t border-border space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                      {de ? 'Checkliste' : 'Checklist'}
+                    </p>
+                    {section.checklist.map((item: { good: boolean; text: string }, k: number) => (
+                      <div key={k} className="flex items-start gap-2 text-sm">
+                        {item.good ? (
+                          <Check className="h-4 w-4 shrink-0 mt-0.5 text-primary" />
+                        ) : (
+                          <X className="h-4 w-4 shrink-0 mt-0.5 text-destructive" />
+                        )}
+                        <span className="text-foreground">{item.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </AccordionContent>
             </AccordionItem>
           ))}

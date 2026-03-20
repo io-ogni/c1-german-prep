@@ -29,6 +29,7 @@ export function useHighlightedPhrases(storageKey: string) {
   }, [storageKey]);
 
   const isHighlighted = useCallback((phrase: string) => highlighted.has(phrase), [highlighted]);
+  const isEmpty = highlighted.size === 0;
 
-  return { isHighlighted, toggle };
+  return { isHighlighted, toggle, isEmpty };
 }

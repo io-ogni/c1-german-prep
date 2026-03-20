@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { BookOpen } from 'lucide-react';
+import { TelcBadge } from '@/components/shared/TelcBadge';
 import { useNavigate } from 'react-router-dom';
 
 const TOPIC_NAMES: Record<string, { de: string; en: string; telc?: boolean }> = {
@@ -36,7 +37,7 @@ const TOPIC_NAMES: Record<string, { de: string; en: string; telc?: boolean }> = 
 };
 
 export default function GrammarPage() {
-  const [level, setLevel] = useState<'b2' | 'c1'>('b2');
+  const [level, setLevel] = useState<'b2' | 'c1'>('c1');
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const { t, lang } = useTranslation();
   const auth = useAuth();
@@ -49,8 +50,8 @@ export default function GrammarPage() {
     queryFn: async () => {
       const { data: exercises } = await supabase
         .from('exercises')
-        .select('id, topic, sort_order')
-        .eq('area', 'grammar')
+        .select('id, topic, sort_order, area')
+        .in('area', ['grammar', 'sprachbausteine'])
         .eq('level', dbLevel);
 
       if (!exercises?.length) return [];
@@ -64,9 +65,9 @@ export default function GrammarPage() {
         (progress ?? []).filter((p) => p.completed).map((p) => p.exercise_id)
       );
 
-      const topicMap = new Map<string, { total: number; completed: number; minSort: number }>();
+      const topicMap = new Map<string, { total: number; completed: number; minSort: number; area: string }>();
       for (const ex of exercises) {
-        const entry = topicMap.get(ex.topic) ?? { total: 0, completed: 0, minSort: ex.sort_order };
+        const entry = topicMap.get(ex.topic) ?? { total: 0, completed: 0, minSort: ex.sort_order, area: ex.area };
         entry.total++;
         if (completedSet.has(ex.id)) entry.completed++;
         if (ex.sort_order < entry.minSort) entry.minSort = ex.sort_order;
@@ -77,6 +78,7 @@ export default function GrammarPage() {
         .sort((a, b) => a[1].minSort - b[1].minSort)
         .map(([slug, data]) => ({
           slug,
+          area: data.area,
           title: TOPIC_NAMES[slug]?.[lang] ?? slug,
           telc: TOPIC_NAMES[slug]?.telc ?? false,
           total: data.total,
@@ -89,7 +91,7 @@ export default function GrammarPage() {
   if (selectedTopic) {
     return (
       <ExerciseFlow
-        area="grammar"
+        area={topics?.find(t => t.slug === selectedTopic)?.area ?? 'grammar'}
         topic={selectedTopic}
         level={level}
         topicTitle={TOPIC_NAMES[selectedTopic]?.[lang] ?? selectedTopic}
@@ -101,8 +103,17 @@ export default function GrammarPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">{t('page_grammar')}</h1>
-        <Button variant="outline" size="sm" onClick={() => navigate('/grammar/verbs')}>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <BookOpen className="h-6 w-6" />
+            {t('page_grammar')}
+            <TelcBadge className="ml-1" />
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {lang === 'de' ? 'Trainiere Grammatikstrukturen für die C1-Prüfung.' : 'Practice grammar structures for the C1 exam.'}
+          </p>
+        </div>
+        <Button size="sm" onClick={() => navigate('/grammar/verbs')}>
           <BookOpen className="mr-2 h-4 w-4" />
           {t('grammar_verb_table')}
         </Button>
