@@ -92,7 +92,7 @@ export default function WelcomePage() {
             transition={{ duration: 0.6, delay: 0.15 }}
             className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-primary via-blue-400 to-violet-500 bg-clip-text text-transparent mb-6"
           >
-            Einmal mit Profis arbeiten.
+            Einmal mit Profis arbeiten ;)
           </motion.p>
 
           <motion.p
