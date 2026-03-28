@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
-import { Languages, Zap, Link2, Presentation, GitBranch, Shield, AlertTriangle, Star, Volume2, Filter, MousePointerClick, Monitor } from 'lucide-react';
+import { Languages, Zap, Link2, Presentation, GitBranch, Shield, AlertTriangle, Volume2, Filter, MousePointerClick, Monitor } from 'lucide-react';
 import { StarredButton } from '@/components/shared/StarredButton';
 import { useTableClickHint } from '@/hooks/useTableClickHint';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { PlayAllButton } from '@/components/PlayAllButton';
 import { usePlayAll } from '@/hooks/usePlayAll';
 import { PILL_CONTAINER, TAB_TRIGGER_FUCHSIA } from '@/components/shared/navStyles';
+import { ScrollNav } from '@/components/shared/ScrollNav';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
@@ -46,7 +47,7 @@ export const NOUNS = [
   { de: 'Die Wartbarkeit', en: 'Maintainability', example: 'Durch konsequentes Refactoring wurde die langfristige Wartbarkeit des Legacy-Codes sichergestellt.' },
   { de: 'Die Zukunftsfähigkeit', en: 'Future-proofing', example: 'Diese technologische Entscheidung sichert die Zukunftsfähigkeit unserer gesamten Plattform.' },
   { de: 'Die Durchgängigkeit', en: 'Consistency / Continuity', example: 'Wir müssen die Durchgängigkeit des Datenflusses vom Frontend bis zum Data Warehouse gewährleisten.' },
-  { de: 'Das Alleinstellungsmerkmal', en: 'USP (Unique Selling Point)', example: 'Die KI-gestützte Fehlerprognose ist das technologische Alleinstellungsmerkmal unseres Produkts.' },
+  { de: 'Das Alleinstellungsmerkmal', en: 'USP (Unique Selling Point)', example: 'Die auf künstlicher Intelligenz gestützte Fehlerprognose ist das technologische Alleinstellungsmerkmal unseres Produkts.' },
   { de: 'Die Machbarkeitsstudie', en: 'Feasibility study', example: 'Vor dem Projektstart führen wir eine umfassende Machbarkeitsstudie bezüglich der Cloud-Migration durch.' },
   { de: 'Die Vorgehensweise', en: 'Approach / Methodology', example: 'Unsere agile Vorgehensweise erlaubt es uns, flexibel auf sich ändernde Marktanforderungen zu reagieren.' },
   { de: 'Die Zielsetzung', en: 'Goal setting / Objectives', example: 'Eine klare Zielsetzung ist die Grundvoraussetzung für ein effizientes Sprint-Backlog.' },
@@ -156,7 +157,7 @@ export const COLLOCATIONS = [
   { noun: 'Das Konzept', verb: 'erarbeiten', phrase: 'Ein Konzept erarbeiten', en: 'To develop a concept', example: 'Das Team hat ein innovatives Konzept zur Migration der Legacy-Daten erarbeitet.' },
   { noun: 'Die Redundanz', verb: 'schaffen', phrase: 'Eine Redundanz schaffen', en: 'To create redundancy', example: 'Durch die Spiegelung der Server konnten wir die notwendige Redundanz schaffen.' },
   { noun: 'Die Anforderung', verb: 'umsetzen', phrase: 'Anforderungen umsetzen', en: 'To implement requirements', example: 'Wir haben alle technischen Anforderungen des Kunden fristgerecht umgesetzt.' },
-  { noun: 'Den Prozess', verb: 'optimieren', phrase: 'Prozesse optimieren', en: 'To optimize processes', example: 'Durch den Einsatz von KI konnten wir die internen Freigabeprozesse deutlich optimieren.' },
+  { noun: 'Den Prozess', verb: 'optimieren', phrase: 'Prozesse optimieren', en: 'To optimize processes', example: 'Durch den Einsatz von künstlicher Intelligenz konnten wir die internen Freigabeprozesse deutlich optimieren.' },
   { noun: 'Die Kapazität', verb: 'auslasten', phrase: 'Kapazitäten auslasten', en: 'To utilize capacity', example: 'In der aktuellen Projektphase sind unsere personellen Kapazitäten vollständig ausgelastet.' },
   { noun: 'Die Entscheidung', verb: 'herbeiführen', phrase: 'Eine Entscheidung herbeiführen', en: 'To bring about a decision', example: 'Wir müssen heute eine Entscheidung bezüglich der Cloud-Strategie herbeiführen.' },
   { noun: 'Den Fehler', verb: 'beheben', phrase: 'Einen Fehler beheben', en: 'To fix a bug/error', example: 'Das Entwicklungsteam konnte den kritischen Fehler im Produktivsystem bereits beheben.' },
@@ -432,35 +433,47 @@ export default function ITVokabularPage() {
   const [composureSituation, setComposureSituation] = useState('Alle');
   const [starredOnly, setStarredOnly] = useState(false);
   const player = usePlayAll();
-  const speakingRef = useRef(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const currentTextRef = useRef<string | null>(null);
+  const playerRef = useRef(player);
+  playerRef.current = player;
+
+  const stopAudio = useCallback(() => {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    speechSynthesis.cancel();
+    currentTextRef.current = null;
+    playerRef.current.stop();
+  }, []);
 
   const speak = useCallback((text: string, ttsUrl?: string) => {
-    // Stop current playback
-    if (speakingRef.current) {
-      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
-      speechSynthesis.cancel();
-      speakingRef.current = false;
-      return;
-    }
-    // Prefer pre-generated mp3
+    const wasSame = currentTextRef.current === text;
+    stopAudio();
+    if (wasSame) return; // toggle off
+    currentTextRef.current = text;
     if (ttsUrl) {
       const audio = new Audio(ttsUrl);
       audioRef.current = audio;
-      audio.onended = () => { speakingRef.current = false; audioRef.current = null; };
-      speakingRef.current = true;
+      audio.onended = () => { audioRef.current = null; currentTextRef.current = null; };
       audio.play();
       return;
     }
-    // Fallback to browser TTS
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'de-DE';
-    u.onend = () => { speakingRef.current = false; };
-    speakingRef.current = true;
+    u.onend = () => { currentTextRef.current = null; };
     speechSynthesis.speak(u);
-  }, []);
-  // Stop play-all when filters change
-  useEffect(() => { player.stop(); }, [starredOnly, workshopPhase, refinementCategory, composureSituation]);
+  }, [stopAudio]);
+
+  // Stop on filter change
+  const prevFilters = useRef({ starredOnly, workshopPhase, refinementCategory, composureSituation });
+  useEffect(() => {
+    const prev = prevFilters.current;
+    if (prev.starredOnly !== starredOnly || prev.workshopPhase !== workshopPhase || prev.refinementCategory !== refinementCategory || prev.composureSituation !== composureSituation) {
+      stopAudio();
+    }
+    prevFilters.current = { starredOnly, workshopPhase, refinementCategory, composureSituation };
+  }, [starredOnly, workshopPhase, refinementCategory, composureSituation, stopAudio]);
+  // Stop on unmount
+  useEffect(() => () => stopAudio(), []);
 
   const [selectedRows, setSelectedRows] = useState<Set<string>>(() => loadHighlights(userId));
   const { showClickHint, dismissClickHint } = useTableClickHint();
@@ -481,9 +494,12 @@ export default function ITVokabularPage() {
   const indexAll = <T,>(arr: readonly T[], prefix: string): Indexed<T>[] =>
     arr.map((item, i) => ({ ...item, _i: i })).filter(item => !starredOnly || selectedRows.has(`${prefix}-${item._i}`));
 
-  const filteredNouns = useMemo(() => indexAll(NOUNS, 'nomen'), [starredOnly, selectedRows]);
-  const filteredVerbs = useMemo(() => indexAll(VERBS, 'verben'), [starredOnly, selectedRows]);
-  const filteredCollocations = useMemo(() => indexAll(COLLOCATIONS, 'koll'), [starredOnly, selectedRows]);
+  const sortByDe = <T extends { de: string }>(arr: T[]) =>
+    arr.sort((a, b) => (a.de ?? '').replace(/^(Der|Die|Das)\s+/i, '').localeCompare((b.de ?? '').replace(/^(Der|Die|Das)\s+/i, ''), 'de'));
+
+  const filteredNouns = useMemo(() => sortByDe(indexAll(NOUNS, 'nomen')), [starredOnly, selectedRows]);
+  const filteredVerbs = useMemo(() => sortByDe(indexAll(VERBS, 'verben')), [starredOnly, selectedRows]);
+  const filteredCollocations = useMemo(() => sortByDe(indexAll(COLLOCATIONS, 'koll')), [starredOnly, selectedRows]);
 
   const filteredWorkshop = useMemo(
     () => indexAll(WORKSHOP_PHRASES, 'ws').filter(p => workshopPhase === 'Alle' || p.phase === workshopPhase),
@@ -505,8 +521,9 @@ export default function ITVokabularPage() {
   const starredBtn = <StarredButton active={starredOnly} onClick={() => setStarredOnly(prev => !prev)} />;
 
   const emptyStarred = starredOnly ? (
-    <div className="py-10 text-center text-sm text-muted-foreground">
-      Noch keine Einträge markiert — klicke auf eine Zeile in der Tabelle, um sie zu markieren.
+    <div className="py-10 text-center text-sm space-y-2">
+      <p className="text-muted-foreground">Noch keine Einträge markiert — klicke auf eine Zeile, um sie zu markieren.</p>
+      <button className="text-primary text-sm font-medium hover:underline" onClick={() => setStarredOnly(false)}>Alle anzeigen</button>
     </div>
   ) : null;
 
@@ -526,16 +543,18 @@ export default function ITVokabularPage() {
           : 'Your complete C1 toolkit: vocabulary, collocations, phrases and emergency kit for daily IT work.'}
       </p>
 
-      <Tabs defaultValue="nomen">
-        <TabsList className={PILL_CONTAINER}>
-          <TabsTrigger value="nomen" className={TAB_TRIGGER_FUCHSIA}><Languages className="h-3.5 w-3.5" /> Nomen</TabsTrigger>
-          <TabsTrigger value="verben" className={TAB_TRIGGER_FUCHSIA}><Zap className="h-3.5 w-3.5" /> Verben</TabsTrigger>
-          <TabsTrigger value="kollokationen" className={TAB_TRIGGER_FUCHSIA}><Link2 className="h-3.5 w-3.5" /> Kollokationen</TabsTrigger>
-          <TabsTrigger value="workshop" className={TAB_TRIGGER_FUCHSIA}><Presentation className="h-3.5 w-3.5" /> Workshop</TabsTrigger>
-          <TabsTrigger value="refinement" className={TAB_TRIGGER_FUCHSIA}><GitBranch className="h-3.5 w-3.5" /> Refinement</TabsTrigger>
-          <TabsTrigger value="souveraenitaet" className={TAB_TRIGGER_FUCHSIA}><Shield className="h-3.5 w-3.5" /> Souveränität</TabsTrigger>
-          <TabsTrigger value="krisen" className={TAB_TRIGGER_FUCHSIA}><AlertTriangle className="h-3.5 w-3.5" /> Notfall-Kit</TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="nomen" onValueChange={() => stopAudio()}>
+        <ScrollNav>
+          <TabsList className={PILL_CONTAINER}>
+            <TabsTrigger value="nomen" className={TAB_TRIGGER_FUCHSIA}><Languages className="h-3.5 w-3.5" /> Nomen</TabsTrigger>
+            <TabsTrigger value="verben" className={TAB_TRIGGER_FUCHSIA}><Zap className="h-3.5 w-3.5" /> Verben</TabsTrigger>
+            <TabsTrigger value="kollokationen" className={TAB_TRIGGER_FUCHSIA}><Link2 className="h-3.5 w-3.5" /> Kollokationen</TabsTrigger>
+            <TabsTrigger value="workshop" className={TAB_TRIGGER_FUCHSIA}><Presentation className="h-3.5 w-3.5" /> Workshop</TabsTrigger>
+            <TabsTrigger value="refinement" className={TAB_TRIGGER_FUCHSIA}><GitBranch className="h-3.5 w-3.5" /> Refinement</TabsTrigger>
+            <TabsTrigger value="souveraenitaet" className={TAB_TRIGGER_FUCHSIA}><Shield className="h-3.5 w-3.5" /> Souveränität</TabsTrigger>
+            <TabsTrigger value="krisen" className={TAB_TRIGGER_FUCHSIA}><AlertTriangle className="h-3.5 w-3.5" /> Notfall-Kit</TabsTrigger>
+          </TabsList>
+        </ScrollNav>
 
         {/* ── Nomen ── */}
         <TabsContent value="nomen">
@@ -545,7 +564,6 @@ export default function ITVokabularPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[40px] text-xs font-semibold text-muted-foreground">#</TableHead>
                   <TableHead className="min-w-[200px] text-xs font-semibold text-muted-foreground">Deutsch</TableHead>
                   <TableHead className="min-w-[180px] text-xs font-semibold text-muted-foreground">English</TableHead>
                   <TableHead className="min-w-[400px] text-xs font-semibold text-muted-foreground">C1 Beispielsatz</TableHead>
@@ -557,9 +575,6 @@ export default function ITVokabularPage() {
                   const sel = selectedRows.has(key);
                   return (
                     <TableRow key={i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
-                      <TableCell className="text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1"><Star className={`h-3.5 w-3.5 shrink-0 ${sel ? 'text-yellow-500 fill-yellow-400' : 'text-transparent'}`} />{i + 1}</span>
-                      </TableCell>
                       <TableCell className="text-sm font-medium text-foreground">
                         <div className="flex items-center gap-2">
                           {n.de}
@@ -593,7 +608,6 @@ export default function ITVokabularPage() {
               const sel = selectedRows.has(key);
               return (
                 <div key={i} onClick={() => toggleRow(key)} className={`relative rounded-lg border p-4 space-y-2 cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
-                  {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
                   <p className="text-sm font-medium text-foreground">{n.de}</p>
                   <p className="text-sm text-muted-foreground">{n.en}</p>
                   <div className="flex items-center gap-2">
@@ -616,7 +630,6 @@ export default function ITVokabularPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[40px] text-xs font-semibold text-muted-foreground">#</TableHead>
                   <TableHead className="min-w-[180px] text-xs font-semibold text-muted-foreground">Deutsch</TableHead>
                   <TableHead className="min-w-[180px] text-xs font-semibold text-muted-foreground">English</TableHead>
                   <TableHead className="min-w-[400px] text-xs font-semibold text-muted-foreground">C1 Beispielsatz</TableHead>
@@ -628,9 +641,6 @@ export default function ITVokabularPage() {
                   const sel = selectedRows.has(key);
                   return (
                     <TableRow key={i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
-                      <TableCell className="text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1"><Star className={`h-3.5 w-3.5 shrink-0 ${sel ? 'text-yellow-500 fill-yellow-400' : 'text-transparent'}`} />{i + 1}</span>
-                      </TableCell>
                       <TableCell className="text-sm font-medium text-foreground">{v.de}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{v.en}</TableCell>
                       <TableCell>
@@ -653,7 +663,6 @@ export default function ITVokabularPage() {
               const sel = selectedRows.has(key);
               return (
                 <div key={i} onClick={() => toggleRow(key)} className={`relative rounded-lg border p-4 space-y-2 cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
-                  {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
                   <p className="text-sm font-medium text-foreground">{v.de}</p>
                   <p className="text-sm text-muted-foreground">{v.en}</p>
                   <div className="flex items-center gap-2">
@@ -676,7 +685,6 @@ export default function ITVokabularPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[40px] text-xs font-semibold text-muted-foreground">#</TableHead>
                   <TableHead className="min-w-[140px] text-xs font-semibold text-muted-foreground">Nomen</TableHead>
                   <TableHead className="min-w-[120px] text-xs font-semibold text-muted-foreground">Verb</TableHead>
                   <TableHead className="min-w-[160px] text-xs font-semibold text-muted-foreground">English</TableHead>
@@ -689,9 +697,6 @@ export default function ITVokabularPage() {
                   const sel = selectedRows.has(key);
                   return (
                     <TableRow key={i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
-                      <TableCell className="text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1"><Star className={`h-3.5 w-3.5 shrink-0 ${sel ? 'text-yellow-500 fill-yellow-400' : 'text-transparent'}`} />{i + 1}</span>
-                      </TableCell>
                       <TableCell className="text-sm font-medium text-foreground">{c.noun}</TableCell>
                       <TableCell className="text-sm font-medium text-primary">{c.verb}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{c.en}</TableCell>
@@ -715,7 +720,6 @@ export default function ITVokabularPage() {
               const sel = selectedRows.has(key);
               return (
                 <div key={i} onClick={() => toggleRow(key)} className={`relative rounded-lg border p-4 space-y-2 cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
-                  {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-medium text-foreground">{c.noun}</span>
                     <span className="text-sm font-medium text-primary">+ {c.verb}</span>
@@ -754,7 +758,6 @@ export default function ITVokabularPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[40px] text-xs font-semibold text-muted-foreground">#</TableHead>
                   <TableHead className="min-w-[180px] p-1">
                     <Select value={workshopPhase} onValueChange={setWorkshopPhase}>
                       <SelectTrigger className="h-8 w-full text-xs font-semibold border-0 bg-transparent shadow-none">
@@ -786,10 +789,7 @@ export default function ITVokabularPage() {
                   const isNewGroup = prevPhase !== null && prevPhase !== p.phase;
                   return (
                     <TableRow key={p._i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${isNewGroup ? 'border-t-4 border-t-muted' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
-                      <TableCell className={`text-xs text-muted-foreground border-l-4 ${BORDER_COLORS[p.phase] ?? 'border-l-transparent'}`}>
-                        <span className="flex items-center gap-1"><Star className={`h-3.5 w-3.5 shrink-0 ${sel ? 'text-yellow-500 fill-yellow-400' : 'text-transparent'}`} />{p._i + 1}</span>
-                      </TableCell>
-                      <TableCell><span className={`text-xs font-normal whitespace-nowrap ${PHASE_COLORS[p.phase] ?? ''}`}>{LABEL_DE[p.phase] || p.phase}</span></TableCell>
+                      <TableCell className={`border-l-4 ${BORDER_COLORS[p.phase] ?? 'border-l-transparent'}`}><span className={`text-xs font-normal whitespace-nowrap ${PHASE_COLORS[p.phase] ?? ''}`}>{LABEL_DE[p.phase] || p.phase}</span></TableCell>
                       <TableCell className="text-sm font-medium text-foreground">{p.de}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{p.en}</TableCell>
                       <TableCell>
@@ -814,7 +814,6 @@ export default function ITVokabularPage() {
               const isNewGroup = prevPhase !== null && prevPhase !== p.phase;
               return (
                 <div key={p._i} onClick={() => toggleRow(key)} className={`relative rounded-lg border border-l-4 ${BORDER_COLORS[p.phase] ?? ''} p-4 space-y-2 cursor-pointer transition-colors ${isNewGroup ? 'mt-6' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
-                  {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
                   <span className={`text-xs font-normal whitespace-nowrap ${PHASE_COLORS[p.phase] ?? ''}`}>{LABEL_DE[p.phase] || p.phase}</span>
                   <p className="text-sm font-medium text-foreground">{p.de}</p>
                   <p className="text-sm text-muted-foreground">{p.en}</p>
@@ -851,7 +850,7 @@ export default function ITVokabularPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[40px] text-xs font-semibold text-muted-foreground">#</TableHead>
+                  <TableHead className="w-8" />
                   <TableHead className="min-w-[180px] p-1">
                     <Select value={refinementCategory} onValueChange={setRefinementCategory}>
                       <SelectTrigger className="h-8 w-full text-xs font-semibold border-0 bg-transparent shadow-none">
@@ -883,9 +882,7 @@ export default function ITVokabularPage() {
                   const isNewGroup = prevCat !== null && prevCat !== p.category;
                   return (
                     <TableRow key={p._i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${isNewGroup ? 'border-t-4 border-t-muted' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
-                      <TableCell className={`text-xs text-muted-foreground border-l-4 ${BORDER_COLORS[p.category] ?? 'border-l-transparent'}`}>
-                        <span className="flex items-center gap-1"><Star className={`h-3.5 w-3.5 shrink-0 ${sel ? 'text-yellow-500 fill-yellow-400' : 'text-transparent'}`} />{p._i + 1}</span>
-                      </TableCell>
+                      <TableCell className={`text-xs text-muted-foreground border-l-4 ${BORDER_COLORS[p.category] ?? 'border-l-transparent'}`}>{p._i + 1}</TableCell>
                       <TableCell><span className={`text-xs font-normal whitespace-nowrap ${PHASE_COLORS[p.category] ?? ''}`}>{LABEL_DE[p.category] || p.category}</span></TableCell>
                       <TableCell className="text-sm font-medium text-foreground">{p.de}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{p.en}</TableCell>
@@ -911,7 +908,6 @@ export default function ITVokabularPage() {
               const isNewGroup = prevCat !== null && prevCat !== p.category;
               return (
                 <div key={p._i} onClick={() => toggleRow(key)} className={`relative rounded-lg border border-l-4 ${BORDER_COLORS[p.category] ?? ''} p-4 space-y-2 cursor-pointer transition-colors ${isNewGroup ? 'mt-6' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
-                  {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
                   <span className={`text-xs font-normal whitespace-nowrap ${PHASE_COLORS[p.category] ?? ''}`}>{LABEL_DE[p.category] || p.category}</span>
                   <p className="text-sm font-medium text-foreground">{p.de}</p>
                   <p className="text-sm text-muted-foreground">{p.en}</p>
@@ -948,7 +944,7 @@ export default function ITVokabularPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[40px] text-xs font-semibold text-muted-foreground">#</TableHead>
+                  <TableHead className="w-8" />
                   <TableHead className="min-w-[180px] p-1">
                     <Select value={composureSituation} onValueChange={setComposureSituation}>
                       <SelectTrigger className="h-8 w-full text-xs font-semibold border-0 bg-transparent shadow-none">
@@ -979,9 +975,7 @@ export default function ITVokabularPage() {
                   const isNewGroup = prevSit !== null && prevSit !== p.situation;
                   return (
                     <TableRow key={p._i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${isNewGroup ? 'border-t-4 border-t-muted' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
-                      <TableCell className={`text-xs text-muted-foreground border-l-4 ${BORDER_COLORS[p.situation] ?? 'border-l-transparent'}`}>
-                        <span className="flex items-center gap-1"><Star className={`h-3.5 w-3.5 shrink-0 ${sel ? 'text-yellow-500 fill-yellow-400' : 'text-transparent'}`} />{p._i + 1}</span>
-                      </TableCell>
+                      <TableCell className={`text-xs text-muted-foreground border-l-4 ${BORDER_COLORS[p.situation] ?? 'border-l-transparent'}`}>{p._i + 1}</TableCell>
                       <TableCell><span className={`text-xs font-normal whitespace-nowrap ${PHASE_COLORS[p.situation] ?? ''}`}>{p.situation}</span></TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -1006,7 +1000,6 @@ export default function ITVokabularPage() {
               const isNewGroup = prevSit !== null && prevSit !== p.situation;
               return (
                 <div key={p._i} onClick={() => toggleRow(key)} className={`relative rounded-lg border border-l-4 ${BORDER_COLORS[p.situation] ?? ''} p-4 space-y-2 cursor-pointer transition-colors ${isNewGroup ? 'mt-6' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
-                  {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
                   <span className={`text-xs font-normal whitespace-nowrap ${PHASE_COLORS[p.situation] ?? ''}`}>{p.situation}</span>
                   <div className="flex items-center gap-2">
                     <button onClick={(e) => { e.stopPropagation(); speak(p.de, getTtsUrl('souveranitaet', p._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
@@ -1029,7 +1022,6 @@ export default function ITVokabularPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[40px] text-xs font-semibold text-muted-foreground">#</TableHead>
                   <TableHead className="min-w-[250px] text-xs font-semibold text-muted-foreground">Krise / Trigger</TableHead>
                   <TableHead className="min-w-[350px] text-xs font-semibold text-muted-foreground">C1 Kill-Phrase</TableHead>
                   <TableHead className="min-w-[200px] text-xs font-semibold text-muted-foreground">Strategie</TableHead>
@@ -1041,16 +1033,13 @@ export default function ITVokabularPage() {
                   const sel = selectedRows.has(key);
                   return (
                     <TableRow key={i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
-                      <TableCell className="text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1"><Star className={`h-3.5 w-3.5 shrink-0 ${sel ? 'text-yellow-500 fill-yellow-400' : 'text-transparent'}`} />{i + 1}</span>
-                      </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{c.trigger}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <button onClick={(e) => { e.stopPropagation(); speak(c.response, getTtsUrl('notfallkit', c._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
                             <Volume2 className="h-4 w-4" />
                           </button>
-                          <span className="text-sm font-medium text-fuchsia-600 dark:text-fuchsia-400">{c.response}</span>
+                          <span className="text-sm font-medium text-foreground">{c.response}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{c.strategy}</TableCell>
@@ -1066,13 +1055,12 @@ export default function ITVokabularPage() {
               const sel = selectedRows.has(key);
               return (
                 <div key={i} onClick={() => toggleRow(key)} className={`relative rounded-lg border p-4 space-y-2 cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
-                  {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
                   <p className="text-sm text-muted-foreground">{c.trigger}</p>
                   <div className="flex items-center gap-2">
                     <button onClick={(e) => { e.stopPropagation(); speak(c.response, getTtsUrl('notfallkit', c._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
                       <Volume2 className="h-4 w-4" />
                     </button>
-                    <p className="text-sm font-medium text-fuchsia-600 dark:text-fuchsia-400">{c.response}</p>
+                    <p className="text-sm font-medium text-foreground">{c.response}</p>
                   </div>
                   <p className="text-xs text-muted-foreground">{c.strategy}</p>
                 </div>

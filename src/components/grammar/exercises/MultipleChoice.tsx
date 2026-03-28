@@ -18,9 +18,9 @@ interface Props {
 const LABELS = ['a', 'b', 'c', 'd'];
 
 export function MultipleChoice({ content, solution, instructions, explanation, answered, onAnswer }: Props) {
-  // Detect multi-question format (qüstions array)
-  const questions: { qüstion?: string; question?: string; correct: string; options: string[] }[] | null =
-    content?.qüstions ?? content?.questions ?? null;
+  // Detect multi-question format
+  const questions: { question?: string; correct: string; options: string[] }[] | null =
+    content?.questions ?? null;
 
   if (questions && questions.length > 0) {
     return (
@@ -120,7 +120,7 @@ function MultiStepMC({
   answered: parentAnswered,
   onAnswer,
 }: {
-  questions: { qüstion?: string; question?: string; correct: string; options: string[] }[];
+  questions: { question?: string; correct: string; options: string[] }[];
   answers: string[];
   instructions: string;
   explanation?: string;
@@ -135,7 +135,7 @@ function MultiStepMC({
   const { t } = useTranslation();
 
   const current = questions[subIndex] ?? { question: '', options: [], correct: '' };
-  const questionText = current?.qüstion ?? current?.question ?? '';
+  const questionText = current?.question ?? '';
   const correctAnswer = current?.correct ?? answers[subIndex] ?? '';
   const isLast = subIndex === questions.length - 1;
 

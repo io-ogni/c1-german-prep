@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown, BookOpen, FileText, ClipboardCheck } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -32,6 +32,19 @@ export function Navbar() {
   const { user, profile, logout } = useRequiredAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (y > lastScrollY.current && y > 56) setHidden(true);
+      else setHidden(false);
+      lastScrollY.current = y;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const isActive = (path: string) => {
     if (path === '/home') return location.pathname === '/home';
@@ -39,7 +52,10 @@ export function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
+    <nav className={cn(
+      "sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 transition-transform duration-200",
+      hidden && !mobileOpen && "lg:translate-y-0 -translate-y-full"
+    )}>
       <div className="container mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link to="/home" className="flex items-center gap-2 font-bold text-lg text-foreground">
           <img src="/logo.png" alt="C1" className="h-7 w-7 rounded-md" />

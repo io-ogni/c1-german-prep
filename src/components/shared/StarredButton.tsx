@@ -1,5 +1,3 @@
-import { Star } from 'lucide-react';
-
 interface StarredButtonProps {
   active: boolean;
   onClick: () => void;
@@ -15,7 +13,7 @@ export function StarredButton({ active, onClick }: StarredButtonProps) {
           : 'text-muted-foreground hover:text-foreground hover:bg-muted'
       }`}
     >
-      <Star className="h-3 w-3 fill-yellow-400 text-yellow-500" />
+      <span className="text-sm leading-none">⭐</span>
       Markierte
     </button>
   );

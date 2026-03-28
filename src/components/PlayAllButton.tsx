@@ -37,9 +37,9 @@ export function PlayAllButton({ getUrls, player, color = 'fuchsia' }: PlayAllBut
       {active && (
         <button
           onClick={stop}
-          className="inline-flex items-center rounded-full p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          className={`inline-flex items-center rounded-full p-1 transition-colors ${activeBg}`}
         >
-          <Square className="h-3 w-3" />
+          <Square className={`h-3 w-3 ${iconColor}`} />
         </button>
       )}
     </div>

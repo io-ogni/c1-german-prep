@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { Component, useState, useEffect, useCallback, useRef } from 'react';
+import type { ReactNode, ErrorInfo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useRequiredAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -8,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import {
-  ArrowLeft, CheckCircle, XCircle, Eye, Flame, SkipForward, StopCircle, Loader2,
+  ArrowLeft, CheckCircle, XCircle, Eye, Flame, StopCircle, Loader2,
 } from 'lucide-react';
 import type { Json } from '@/integrations/supabase/types';
 import { DefinitionMatch } from '@/components/vocabulary/exercises/DefinitionMatch';
@@ -23,6 +24,33 @@ import { Match } from '@/components/grammar/exercises/Match';
 import { ErrorCorrection } from '@/components/vocabulary/exercises/ErrorCorrection';
 import { AntonymMatch } from '@/components/vocabulary/exercises/AntonymMatch';
 import { Sprachbausteine } from '@/components/grammar/exercises/Sprachbausteine';
+
+// ----- Safety net: catches render errors in exercise components -----
+class ExerciseSafetyNet extends Component<{ children: ReactNode; onSkip: () => void }, { hasError: boolean }> {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('Exercise render error:', error, info);
+  }
+  componentDidUpdate(prevProps: { children: ReactNode }) {
+    if (prevProps.children !== this.props.children && this.state.hasError) {
+      this.setState({ hasError: false });
+    }
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="rounded-lg border p-6 text-center space-y-3">
+          <p className="text-sm text-muted-foreground">Diese Übung kann nicht angezeigt werden.</p>
+          <button onClick={this.props.onSkip} className="text-sm font-medium text-primary hover:underline">
+            Überspringen →
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 // ----- Types -----
 interface VocabCard {
@@ -60,7 +88,7 @@ const TIME_ESTIMATES: Record<string, number> = {
   transform: 0.6, sentence_build: 0.6,
 };
 
-const BOX_INTERVALS = [1, 3, 7, 14, 30];
+const BOX_INTERVALS = [1, 3, 7, 14, 30, 90];
 const VALID_MINUTES = [5, 10, 15, 20, 30];
 
 export default function DailyPracticePage() {
@@ -157,10 +185,21 @@ export default function DailyPracticePage() {
     const progressMap = new Map((progressRes.data || []).map(p => [p.exercise_id, p]));
     const allExercises = (exercisesRes.data || []).filter(e => {
       const c = e.content as Record<string, unknown> | null;
-      if (!c) return false;
-      // match exercises need pairs or left/right arrays
-      if (e.exercise_type === 'match') return Array.isArray(c.pairs) && c.pairs.length > 0 || Array.isArray(c.left) && (c.left as unknown[]).length > 0;
-      return true;
+      if (!c || Object.keys(c).length === 0) return false;
+      switch (e.exercise_type) {
+        case 'match': return (Array.isArray(c.pairs) && c.pairs.length > 0) || (Array.isArray(c.left) && (c.left as unknown[]).length > 0);
+        case 'definition_match': return !!c.word || !!c.options;
+        case 'fill_in': return !!c.sentence || !!c.original || (Array.isArray(c.sentences) && c.sentences.length > 0);
+        case 'synonym_match': return Array.isArray(c.pairs) && c.pairs.length > 0;
+        case 'word_family': return !!c.word || !!c.base_word || !!c.given;
+        case 'transform': return !!c.original || (Array.isArray(c.sentences) && c.sentences.length > 0);
+        case 'sentence_build': return !!(c.sentence_a || (Array.isArray(c.sentences) && c.sentences.length > 0));
+        case 'multiple_choice': return Array.isArray(c.options) && c.options.length > 0;
+        case 'error_correction': return !!(c.sentence || c.wrong_word || (Array.isArray(c.sentences) && c.sentences.length > 0));
+        case 'antonym_match': return Array.isArray(c.pairs) && c.pairs.length > 0;
+        case 'sprachbausteine': return !!c.text;
+        default: return false;
+      }
     });
 
     // Flashcards — cap at 30% of time
@@ -248,7 +287,7 @@ export default function DailyPracticePage() {
   const handleFlashcard = async (knewIt: boolean) => {
     const card = currentFlashcard;
     if (!card) return;
-    const newBox = knewIt ? Math.min(card.box_number + 1, 5) : 1;
+    const newBox = knewIt ? Math.min(card.box_number + 1, 6) : 1;
     const nextReview = new Date();
     nextReview.setDate(nextReview.getDate() + BOX_INTERVALS[newBox - 1]);
 
@@ -291,7 +330,9 @@ export default function DailyPracticePage() {
       });
     }
 
-    setTimeout(advance, 1500);
+    if (correct) {
+      setTimeout(advance, 1500);
+    }
   };
 
   const renderDailyExercise = (ex: ExerciseItem) => {
@@ -319,10 +360,12 @@ export default function DailyPracticePage() {
       case 'definition_match':
         return <DefinitionMatch {...commonProps} />;
       case 'fill_in':
-        // Both grammar and vocabulary fill_in can use sentences[] format
-        return (content?.sentences || content?.sentence) 
-          ? (content?.sentences ? <GrammarFillIn {...commonProps} /> : <FillIn {...commonProps} />)
-          : <GrammarFillIn {...commonProps} />;
+        // sentences[] → multi-step GrammarFillIn; sentence+options → vocab FillIn; original/fallback → GrammarFillIn
+        return content?.sentences
+          ? <GrammarFillIn {...commonProps} />
+          : (content?.sentence && content?.options)
+            ? <FillIn {...commonProps} />
+            : <GrammarFillIn {...commonProps} />;
       case 'synonym_match':
         return <SynonymMatch {...commonProps} />;
       case 'word_family':
@@ -536,16 +579,22 @@ export default function DailyPracticePage() {
       )}
 
       {/* Exercise */}
-      {status === 'exercises' && currentExercise && renderDailyExercise(currentExercise)}
+      {status === 'exercises' && currentExercise && (
+        <ExerciseSafetyNet onSkip={advance}>
+          {renderDailyExercise(currentExercise)}
+        </ExerciseSafetyNet>
+      )}
 
       {/* Bottom buttons */}
-      <div className="flex justify-between">
+      <div className="flex justify-between items-center">
         <Button variant="ghost" size="sm" onClick={() => endSession()}>
           <StopCircle className="h-4 w-4 mr-1" />{lang === 'de' ? 'Sitzung beenden' : 'End Session'}
         </Button>
-        <Button variant="ghost" size="sm" onClick={advance}>
-          <SkipForward className="h-4 w-4 mr-1" />{lang === 'de' ? 'Überspringen' : 'Skip'}
-        </Button>
+        {exerciseFeedback && !exerciseFeedback.correct && (
+          <Button onClick={advance} size="sm">
+            {lang === 'de' ? 'Weiter' : 'Next'}
+          </Button>
+        )}
       </div>
     </div>
   );

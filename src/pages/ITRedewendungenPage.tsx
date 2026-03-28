@@ -1,11 +1,11 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
-import { Input } from '@/components/ui/input';
-import { Search, Star, MousePointerClick, Monitor, Volume2 } from 'lucide-react';
+import { Monitor, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { techIdioms } from '@/data/techIdioms';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useHighlightedPhrases } from '@/hooks/useHighlightedPhrases';
 import { ITDeutschNav } from '@/components/layout/ITDeutschNav';
+import { StarredButton } from '@/components/shared/StarredButton';
 import { PlayAllButton } from '@/components/PlayAllButton';
 import { usePlayAll } from '@/hooks/usePlayAll';
 
@@ -23,7 +23,6 @@ function getIdiomAudioUrl(id: number): string | undefined {
 
 export default function ITRedewendungenPage() {
   const { t, lang } = useTranslation();
-  const [search, setSearch] = useState('');
   const [starredOnly, setStarredOnly] = useState(false);
   const { isHighlighted, toggle: toggleHighlight } = useHighlightedPhrases('it-redewendungen-highlights');
   const [playingId, setPlayingId] = useState<number | null>(null);
@@ -59,18 +58,8 @@ export default function ITRedewendungenPage() {
   const filtered = useMemo(() => {
     let list = techIdioms;
     if (starredOnly) list = list.filter(p => isHighlighted(p.german));
-    if (search) {
-      const q = search.toLowerCase();
-      list = list.filter(
-        (p) =>
-          p.german.toLowerCase().includes(q) ||
-          p.english.toLowerCase().includes(q) ||
-          p.example.toLowerCase().includes(q) ||
-          p.context.toLowerCase().includes(q)
-      );
-    }
     return list;
-  }, [search, starredOnly, isHighlighted]);
+  }, [starredOnly, isHighlighted]);
 
   const getUrls = useCallback(() => filtered.map(i => getIdiomAudioUrl(i.id)).filter(Boolean) as string[], [filtered]);
 
@@ -85,27 +74,8 @@ export default function ITRedewendungenPage() {
       </div>
       <ITDeutschNav />
 
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Redewendung suchen..."
-            className="pl-9"
-          />
-        </div>
-        <button
-          onClick={() => setStarredOnly(prev => !prev)}
-          className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors shrink-0 ${
-            starredOnly
-              ? 'border-yellow-300 bg-yellow-50 text-yellow-800 dark:border-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
-              : 'border-border text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <Star className={`h-3.5 w-3.5 ${starredOnly ? 'fill-yellow-400 text-yellow-500' : ''}`} />
-          Markierte
-        </button>
+      <div className="flex items-center justify-end gap-2">
+        <StarredButton active={starredOnly} onClick={() => setStarredOnly(prev => !prev)} />
         <PlayAllButton player={player} getUrls={getUrls} />
       </div>
 
@@ -118,17 +88,12 @@ export default function ITRedewendungenPage() {
           return (
             <div
               key={idiom.id}
+              onClick={() => toggleHighlight(idiom.german)}
               className={cn(
-                'relative rounded-xl border border-border bg-card p-4 transition-all hover:shadow-md',
+                'relative rounded-xl border border-border bg-card p-4 transition-all hover:shadow-md cursor-pointer',
                 starred && 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
               )}
             >
-              <button
-                onClick={() => toggleHighlight(idiom.german)}
-                className="absolute top-3 left-3 z-10"
-              >
-                <Star className={cn('h-4 w-4 transition-colors', starred ? 'fill-yellow-400 text-yellow-500' : 'text-muted-foreground/40 hover:text-yellow-400')} />
-              </button>
               <div>
                 {image && (
                   <div className="relative mb-3 overflow-hidden rounded-lg bg-muted/30 flex items-center justify-center">
@@ -154,7 +119,7 @@ export default function ITRedewendungenPage() {
                 <div className="flex items-start gap-2 mt-3">
                   {hasAudio ? (
                     <button
-                      onClick={() => toggleAudio(idiom.id)}
+                      onClick={(e) => { e.stopPropagation(); toggleAudio(idiom.id); }}
                       className="shrink-0 mt-0.5 text-muted-foreground hover:text-fuchsia-500 transition-colors"
                     >
                       <Volume2 className={cn('h-4 w-4', isPlaying && 'text-fuchsia-500')} />
@@ -173,8 +138,15 @@ export default function ITRedewendungenPage() {
       </div>
 
       {filtered.length === 0 && (
-        <div className="py-12 text-center text-muted-foreground text-sm">
-          Keine Redewendung gefunden.
+        <div className="py-12 text-center text-sm space-y-2">
+          {starredOnly ? (
+            <>
+              <p className="text-muted-foreground">Noch keine Redewendungen markiert — klicke auf eine Karte, um sie zu markieren.</p>
+              <button className="text-primary text-sm font-medium hover:underline" onClick={() => setStarredOnly(false)}>Alle anzeigen</button>
+            </>
+          ) : (
+            <p className="text-muted-foreground">Keine Redewendung gefunden.</p>
+          )}
         </div>
       )}
     </div>

@@ -98,19 +98,7 @@ export default function ITDeutschPage() {
   const [selectedDialogue, setSelectedDialogue] = useState<ITDialogue | null>(null);
 
   if (selectedDialogue) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <Monitor className="h-6 w-6" />
-            {t('nav_it_deutsch')}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">Berufssprache für die IT-Branche — Vokabular, Redewendungen und Dialoge für den Arbeitsalltag.</p>
-        </div>
-        <ITDeutschNav />
-        <DialogueView dialogue={selectedDialogue} onBack={() => setSelectedDialogue(null)} />
-      </div>
-    );
+    return <DialogueView dialogue={selectedDialogue} onBack={() => setSelectedDialogue(null)} />;
   }
 
   return (
@@ -139,7 +127,7 @@ export default function ITDeutschPage() {
           <Video className="h-4 w-4 text-fuchsia-500" />
           <h2 className="font-semibold text-foreground">Video</h2>
         </div>
-        <Card className="max-w-2xl">
+        <Card className="sm:max-w-[calc(50%-0.375rem)]">
           <CardContent className="p-0 overflow-hidden rounded-lg">
             <video
               src={`${MEDIA_BASE}/${VIDEO.file}`}

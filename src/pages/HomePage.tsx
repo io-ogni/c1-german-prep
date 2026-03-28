@@ -151,9 +151,14 @@ export default function HomePage() {
           <div className="flex items-center gap-2">
             <Flame className="h-5 w-5 text-primary" />
             <h2 className="font-semibold text-card-foreground">{t('daily_title')}</h2>
+            {streak > 0 && (
+              <span className="text-xs text-muted-foreground ml-auto sm:hidden">
+                {t('daily_streak')}: {streak} {t('daily_streak_days')}
+              </span>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-muted-foreground">{t('daily_how_much_time')}</span>
+            <span className="text-sm text-muted-foreground sm:inline block w-full sm:w-auto">{t('daily_how_much_time')}</span>
             {TIME_OPTIONS.map((min) => (
               <Button
                 key={min}
@@ -166,7 +171,7 @@ export default function HomePage() {
               </Button>
             ))}
             {streak > 0 && (
-              <span className="text-sm text-muted-foreground ml-auto">
+              <span className="text-sm text-muted-foreground ml-auto hidden sm:inline">
                 {t('daily_streak')}: {streak} {t('daily_streak_days')}
               </span>
             )}
@@ -218,9 +223,11 @@ export default function HomePage() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-foreground">{t('home_review_vocabulary')}</h2>
-          <Link to="/my-vocabulary" className="text-sm text-primary hover:underline">
-            Mein Wortschatz →
-          </Link>
+          {!loading && data && data.vocabCount > 0 && (
+            <Link to="/my-vocabulary" className="text-sm text-primary hover:underline">
+              Mein Wortschatz →
+            </Link>
+          )}
         </div>
         {!loading && data && (
           data.dueReviewCount > 0 ? (

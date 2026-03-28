@@ -4,6 +4,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
 import { Plus, X, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -60,7 +61,22 @@ function InlineGap({
   onClear: () => void;
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const ref = useRef<HTMLSpanElement>(null);
+  const dropdownRef = useRef<HTMLSpanElement>(null);
+
+  // Position dropdown within viewport
+  useEffect(() => {
+    if (!dropdownOpen || !ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const vw = window.innerWidth;
+    // On mobile, anchor to left edge of screen with some padding
+    if (vw < 640) {
+      setDropdownStyle({ position: 'fixed', left: 8, right: 8, top: rect.bottom + 4 });
+    } else {
+      setDropdownStyle({});
+    }
+  }, [dropdownOpen]);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -130,11 +146,18 @@ function InlineGap({
 
       {/* Dropdown */}
       {dropdownOpen && !checked && (
-        <span className="absolute left-0 top-full mt-1 z-50 w-[min(28rem,85vw)] rounded-lg border bg-popover p-1 shadow-xl">
+        <span
+          ref={dropdownRef}
+          className={cn(
+            'z-50 rounded-lg border bg-gray-100 dark:bg-gray-800 p-1 shadow-xl',
+            dropdownStyle.position === 'fixed' ? 'fixed' : 'absolute left-0 top-full mt-1 w-[min(28rem,85vw)]'
+          )}
+          style={dropdownStyle.position === 'fixed' ? dropdownStyle : undefined}
+        >
           {options.map(opt => (
             <button
               key={opt.id}
-              className="w-full text-left rounded-md px-3 py-2 text-xs text-popover-foreground hover:bg-accent transition-colors"
+              className="w-full text-left rounded-md px-3 py-2 text-xs text-popover-foreground bg-white dark:bg-card hover:bg-accent transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
                 onSelect(opt.id);
@@ -157,6 +180,87 @@ function InlineGap({
         </span>
       )}
     </span>
+  );
+}
+
+function VocabPopupContent({
+  selectedTexts,
+  combinedExpression,
+  dictEntry,
+  hasDictTranslation,
+  needsTranslation,
+  customTranslation,
+  setCustomTranslation,
+  canAdd,
+  onAdd,
+  onClose,
+  addLabel,
+}: {
+  selectedTexts: string[];
+  combinedExpression: string;
+  dictEntry: { word_de: string; article: string | null; translation_en: string } | null | undefined;
+  hasDictTranslation: boolean;
+  needsTranslation: boolean;
+  customTranslation: string;
+  setCustomTranslation: (v: string) => void;
+  canAdd: boolean;
+  onAdd: () => void;
+  onClose: () => void;
+  addLabel: string;
+}) {
+  return (
+    <>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+            {selectedTexts.length > 1 ? 'Ausdruck' : 'Wort'}
+          </p>
+          <p className="font-semibold text-sm text-foreground break-words">
+            {hasDictTranslation && dictEntry?.article
+              ? `${dictEntry.article} ${dictEntry.word_de}`
+              : combinedExpression}
+          </p>
+        </div>
+        <Button variant="ghost" size="sm" className="h-6 w-6 p-0 shrink-0" onClick={onClose}>
+          <X className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+
+      {hasDictTranslation && (
+        <p className="text-xs text-muted-foreground">EN: {dictEntry!.translation_en}</p>
+      )}
+
+      {needsTranslation && (
+        <div className="space-y-1">
+          <Input
+            value={customTranslation}
+            onChange={e => setCustomTranslation(e.target.value)}
+            placeholder="Übersetzung eingeben..."
+            className="h-8 text-sm"
+            autoFocus
+            onKeyDown={e => {
+              if (e.key === 'Enter' && canAdd) onAdd();
+            }}
+          />
+          {!customTranslation.trim() && (
+            <p className="text-xs text-muted-foreground">
+              Übersetzung erforderlich
+            </p>
+          )}
+        </div>
+      )}
+
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full gap-1 text-xs h-7"
+        disabled={!canAdd}
+        onClick={onAdd}
+      >
+        <Plus className="h-3 w-3" />
+        {addLabel}
+      </Button>
+    </>
   );
 }
 
@@ -404,63 +508,51 @@ export function ClickableText({
         })}
       </div>
 
-      {/* Floating translation popup */}
+      {/* Vocabulary popup — drawer on mobile, sticky card on desktop */}
       {hasSelection && (
-        <div
-          ref={popupRef}
-          className="sticky bottom-4 mt-4 mx-auto max-w-md rounded-xl border-2 border-primary/30 bg-card p-4 shadow-xl space-y-2"
-        >
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-                {selectedTexts.length > 1 ? 'Ausdruck' : 'Wort'}
-              </p>
-              <p className="font-semibold text-sm text-foreground break-words">
-                {hasDictTranslation && dictEntry?.article
-                  ? `${dictEntry.article} ${dictEntry.word_de}`
-                  : combinedExpression}
-              </p>
-            </div>
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 shrink-0" onClick={clearSelection}>
-              <X className="h-3.5 w-3.5" />
-            </Button>
+        <>
+          {/* Desktop: sticky card */}
+          <div
+            ref={popupRef}
+            className="hidden sm:block sticky bottom-4 mt-4 mx-auto max-w-md rounded-xl border-2 border-primary/30 bg-card p-4 shadow-xl space-y-2"
+          >
+            <VocabPopupContent
+              selectedTexts={selectedTexts}
+              combinedExpression={combinedExpression}
+              dictEntry={dictEntry}
+              hasDictTranslation={hasDictTranslation}
+              needsTranslation={needsTranslation}
+              customTranslation={customTranslation}
+              setCustomTranslation={setCustomTranslation}
+              canAdd={canAdd}
+              onAdd={addToVocabulary}
+              onClose={clearSelection}
+              addLabel={t('word_add_to_vocabulary')}
+            />
           </div>
 
-          {hasDictTranslation && (
-            <p className="text-xs text-muted-foreground">EN: {dictEntry!.translation_en}</p>
-          )}
-
-          {needsTranslation && (
-            <div className="space-y-1">
-              <Input
-                value={customTranslation}
-                onChange={e => setCustomTranslation(e.target.value)}
-                placeholder="Übersetzung eingeben..."
-                className="h-8 text-sm"
-                autoFocus
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && canAdd) addToVocabulary();
-                }}
-              />
-              {!customTranslation.trim() && (
-                <p className="text-xs text-muted-foreground">
-                  Übersetzung erforderlich
-                </p>
-              )}
-            </div>
-          )}
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full gap-1 text-xs h-7"
-            disabled={!canAdd}
-            onClick={addToVocabulary}
-          >
-            <Plus className="h-3 w-3" />
-            {t('word_add_to_vocabulary')}
-          </Button>
-        </div>
+          {/* Mobile: bottom drawer */}
+          <Drawer open={true} onOpenChange={(open) => { if (!open) clearSelection(); }}>
+            <DrawerContent className="sm:hidden">
+              <DrawerTitle className="sr-only">Wort hinzufügen</DrawerTitle>
+              <div className="p-4 pb-8 space-y-2">
+                <VocabPopupContent
+                  selectedTexts={selectedTexts}
+                  combinedExpression={combinedExpression}
+                  dictEntry={dictEntry}
+                  hasDictTranslation={hasDictTranslation}
+                  needsTranslation={needsTranslation}
+                  customTranslation={customTranslation}
+                  setCustomTranslation={setCustomTranslation}
+                  canAdd={canAdd}
+                  onAdd={addToVocabulary}
+                  onClose={clearSelection}
+                  addLabel={t('word_add_to_vocabulary')}
+                />
+              </div>
+            </DrawerContent>
+          </Drawer>
+        </>
       )}
     </div>
   );

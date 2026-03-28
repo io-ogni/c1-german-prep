@@ -14,7 +14,7 @@ export function ExerciseCard({ question, children, feedback, className }: Exerci
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-medium leading-relaxed">{question}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="flex flex-col space-y-3">
         {children}
         {feedback && (
           <div

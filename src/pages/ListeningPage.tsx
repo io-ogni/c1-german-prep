@@ -76,7 +76,7 @@ export default function ListeningPage() {
       {
         user_id: user.id,
         exercise_id: exerciseId,
-        completed: true,
+        completed: score === total,
         score: Math.round((score / total) * 100),
         last_attempt_at: new Date().toISOString(),
         attempts: 1,

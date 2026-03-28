@@ -68,7 +68,7 @@ export function ListeningDetailverstehen({ content, solution, instructions, expl
         </Card>
 
         <div className="space-y-3">
-          {questions.map(q => {
+          {questions.map((q, idx) => {
             const userAnswer = answers[q.number];
             const correctAnswer = solution[String(q.number)];
             const isCorrect = userAnswer === correctAnswer;
@@ -78,7 +78,7 @@ export function ListeningDetailverstehen({ content, solution, instructions, expl
                 <CardContent className="py-3 space-y-1">
                   <div className="flex items-center gap-2">
                     {isCorrect ? <Check className="h-4 w-4 text-primary" /> : <X className="h-4 w-4 text-destructive" />}
-                    <span className="text-sm font-medium text-foreground">{t('listening_question')} {q.number}</span>
+                    <span className="text-sm font-medium text-foreground">{t('listening_question')} {idx + 1}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">{q.stem}</p>
                   {!isCorrect && (
@@ -106,7 +106,7 @@ export function ListeningDetailverstehen({ content, solution, instructions, expl
         )}
 
 
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-col sm:flex-row justify-end gap-2">
           <Button variant="outline" onClick={handleRetry}>{t('listening_try_again')}</Button>
           <Button onClick={onBack}>{t('listening_back')}</Button>
         </div>
@@ -121,10 +121,7 @@ export function ListeningDetailverstehen({ content, solution, instructions, expl
           <ArrowLeft className="mr-2 h-4 w-4" />
           {t('listening_back')}
         </Button>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground tabular-nums">{answeredCount} / {total}</span>
-          <TelcBadge />
-        </div>
+        <TelcBadge />
       </div>
 
       <div>
@@ -135,11 +132,11 @@ export function ListeningDetailverstehen({ content, solution, instructions, expl
       <ListeningAudioPlayer audioFile={content.audio_file} />
 
       <div className="space-y-3">
-        {questions.map(q => (
+        {questions.map((q, idx) => (
           <Card key={q.number}>
             <CardHeader className="pb-2">
               <CardTitle className="text-base">
-                {t('listening_question')} {q.number}
+                {t('listening_question')} {idx + 1}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">

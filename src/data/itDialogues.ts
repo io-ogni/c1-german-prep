@@ -98,11 +98,11 @@ export const IT_DIALOGUES: ITDialogue[] = [
     description_de: 'Troubleshooting eines kritischen Bugs im Payment-Gateway zwei Stunden vor dem Release',
     description_en: 'Troubleshooting a critical bug in the payment gateway two hours before release',
     category: 'slack',
-    context_de: 'Lukas (Senior) und Marco (Mid) sind in einer privaten DM. Sie haben einen kritischen Bug im Payment-Gateway zwei Stunden vor einem Major Release.',
-    context_en: 'Lukas (Senior) and Marco (Mid) are in a private DM. They are dealing with a critical bug in the payment gateway two hours before a major release.',
+    context_de: 'Lukas (Senior) und Marco (Junior) sind in einer privaten DM. Sie haben einen kritischen Bug im Payment-Gateway zwei Stunden vor einem Major Release.',
+    context_en: 'Lukas (Senior) and Marco (Junior) are in a private DM. They are dealing with a critical bug in the payment gateway two hours before a major release.',
     speakers: [
       { name: 'Lukas', role: 'Senior Dev' },
-      { name: 'Marco', role: 'Mid Dev' },
+      { name: 'Marco', role: 'Junior Dev' },
     ],
     lines: [
       { speaker: 'Lukas', de: 'Hey Marco, hast du eine Minute? Ich schaue mir gerade den Trace vom Payment-Gateway an und kriege echt Bauchschmerzen. Die Fehlerrate bei den Kreditkarten-Transaktionen ist seit dem letzten Merge um 15 % gestiegen. Hast du da irgendwas an der Schnittstelle geschraubt?', en: 'Hey Marco, do you have a minute? I\'m looking at the trace from the payment gateway and I\'m getting a really bad feeling. The error rate on credit card transactions has gone up by 15% since the last merge. Did you make any changes to the interface?' },

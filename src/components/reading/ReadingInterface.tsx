@@ -225,19 +225,23 @@ export function ReadingInterface({ text, onBack }: Props) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={onBack}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
-            {title}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            <span className="capitalize">{text.text_type.replace(/_/g, ' ')}</span> | ~{text.word_count} {t('reading_words')}
-          </p>
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={onBack} className="shrink-0">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-base sm:text-xl font-bold text-foreground">
+              {title}
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              <span className="capitalize">{text.text_type.replace(/_/g, ' ')}</span> | ~{text.word_count} {t('reading_words')}
+            </p>
+          </div>
         </div>
-        <Timer className="shrink-0" />
+        <div className="flex justify-end">
+          <Timer />
+        </div>
       </div>
 
       {/* Text content */}

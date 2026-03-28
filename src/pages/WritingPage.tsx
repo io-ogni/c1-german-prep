@@ -9,12 +9,13 @@ import { Badge } from '@/components/ui/badge';
 import { TelcBadge } from '@/components/shared/TelcBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { NAV_CONTAINER, TAB_TRIGGER_BLUE } from '@/components/shared/navStyles';
+import { ScrollNav } from '@/components/shared/ScrollNav';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, PenLine, AlertCircle, Copy, CheckCheck, Trash2, Star, Filter, MessagesSquare, PlayCircle, AlignLeft, CheckCircle, Braces, Link2, Volume2, MousePointerClick } from 'lucide-react';
+import { Loader2, PenLine, AlertCircle, Copy, CheckCheck, Trash2, Filter, MessagesSquare, PlayCircle, AlignLeft, CheckCircle, Braces, Link2, Volume2, MousePointerClick } from 'lucide-react';
 import { usePlayAll } from '@/hooks/usePlayAll';
 import { PlayAllButton } from '@/components/PlayAllButton';
 import { toast } from '@/hooks/use-toast';
@@ -150,12 +151,19 @@ Bitte gib mir:
 function ApiKeyBanner() {
   const { t } = useTranslation();
   return (
-    <div className="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 px-4 py-3">
-      <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
-      <p className="text-sm flex-1">{t('writing_no_api_alternative')}</p>
-      <Link to="/settings" className="shrink-0">
-        <Button variant="outline" size="sm">{t('nav_settings')}</Button>
-      </Link>
+    <div className="rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 px-4 py-3">
+      <div className="flex items-start gap-3">
+        <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+        <p className="text-xs sm:text-sm flex-1">{t('writing_no_api_alternative')}</p>
+        <Link to="/settings" className="shrink-0 hidden sm:block">
+          <Button variant="outline" size="sm">{t('nav_settings')}</Button>
+        </Link>
+      </div>
+      <div className="flex justify-end mt-2 sm:hidden">
+        <Link to="/settings">
+          <Button variant="outline" size="sm">{t('nav_settings')}</Button>
+        </Link>
+      </div>
     </div>
   );
 }
@@ -453,10 +461,9 @@ function RedemittelContent() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[50px] text-xs font-semibold text-muted-foreground">#</TableHead>
-                  <TableHead className="w-[220px] p-1 text-xs font-semibold text-muted-foreground">
+                  <TableHead className="p-1 text-xs font-semibold text-muted-foreground">
                     <Select value={categoryFilter[activeSection.tab] ?? 'Alle'} onValueChange={(v) => setCategoryFilter(prev => ({ ...prev, [activeSection.tab]: v }))}>
-                      <SelectTrigger className="h-8 w-full text-xs font-semibold border-0 bg-transparent shadow-none">
+                      <SelectTrigger className="h-auto w-auto justify-start text-left text-xs font-semibold border-0 bg-transparent shadow-none px-1">
                         <Filter className="h-3.5 w-3.5 text-muted-foreground mr-1" />
                         <SelectValue />
                       </SelectTrigger>
@@ -488,13 +495,7 @@ function RedemittelContent() {
                       onClick={() => { dismissClickHint(); toggleHighlight(row.de); }}
                       className={`cursor-pointer transition-colors ${isNewGroup ? 'border-t-4 border-t-muted' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}
                     >
-                      <TableCell className={`text-xs text-muted-foreground border-l-4 ${REDEMITTEL_BORDER_COLORS[row.subsectionKey] ?? 'border-l-transparent'}`}>
-                        <span className="flex items-center gap-1">
-                          <Star className={`h-3.5 w-3.5 shrink-0 ${sel ? 'text-yellow-500 fill-yellow-400' : 'text-transparent'}`} />
-                          {row.idx + 1}
-                        </span>
-                      </TableCell>
-                      <TableCell>
+                      <TableCell className={`border-l-4 ${REDEMITTEL_BORDER_COLORS[row.subsectionKey] ?? 'border-l-transparent'}`}>
                         <span className={`text-xs font-normal whitespace-nowrap ${REDEMITTEL_BADGE_COLORS[row.subsectionKey] ?? ''}`}>
                           {row.subsectionLabel}
                         </span>
@@ -552,7 +553,6 @@ function RedemittelContent() {
                   onClick={() => { dismissClickHint(); toggleHighlight(row.de); }}
                   className={`relative rounded-lg border border-l-4 ${REDEMITTEL_BORDER_COLORS[row.subsectionKey] ?? ''} p-4 space-y-2 cursor-pointer transition-colors ${isNewGroup ? 'mt-6' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}
                 >
-                  {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
                   <span className={`text-xs font-normal whitespace-nowrap ${REDEMITTEL_BADGE_COLORS[row.subsectionKey] ?? ''}`}>
                     {row.subsectionLabel}
                   </span>
@@ -569,8 +569,9 @@ function RedemittelContent() {
           </div>
 
           {starredOnly && (flatSections[activeSection.tab]?.length ?? 0) === 0 && (
-            <div className="py-10 text-center text-sm text-muted-foreground">
-              Noch keine Einträge markiert — klicke auf eine Zeile in der Tabelle, um sie zu markieren.
+            <div className="py-10 text-center text-sm space-y-2">
+              <p className="text-muted-foreground">Noch keine Einträge markiert — klicke auf eine Zeile, um sie zu markieren.</p>
+              <button className="text-primary text-sm font-medium hover:underline" onClick={() => setStarredOnly(false)}>Alle anzeigen</button>
             </div>
           )}
         </div>
@@ -867,13 +868,14 @@ function WritingInterface({
             className="min-h-[200px] resize-y text-base"
           />
 
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <span className="text-sm text-muted-foreground">
               {t('writing_word_count')}: {wordCount}/{prompt.target_word_count}
             </span>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
+                className="text-xs sm:text-sm"
                 onClick={() => {
                   navigator.clipboard.writeText(buildCopyPrompt(prompt, text));
                   setCopied(true);
@@ -885,13 +887,14 @@ function WritingInterface({
                 {copied ? (
                   <><CheckCheck className="mr-2 h-4 w-4" />{t('writing_copied')}</>
                 ) : (
-                  <><Copy className="mr-2 h-4 w-4" />{t('writing_copy_prompt')}</>
+                  <><Copy className="mr-2 h-4 w-4 shrink-0" /><span className="truncate">{t('writing_copy_prompt')}</span></>
                 )}
               </Button>
               {hasApiKey && (
                 <Button
                   onClick={handleSubmit}
                   disabled={submitting || wordCount < 10}
+                  className="shrink-0"
                 >
                   {submitting ? (
                     <>
@@ -979,29 +982,27 @@ function LevelPromptList({
               className="cursor-pointer transition-colors hover:bg-accent/50"
               onClick={() => onSelectPrompt(p)}
             >
-              <CardContent className="flex items-center justify-between p-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-foreground">
-                      {lang === 'de' ? p.title_de : p.title_en}
-                    </span>
-                    {p.exam_format === 'telc' && <TelcBadge />}
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Badge variant="secondary" className="text-xs capitalize">
-                      {p.text_type.replace(/_/g, ' ')}
-                    </Badge>
-                    <span>~{p.target_word_count} {t('writing_word_count')}</span>
+              <CardContent className="p-4 space-y-1.5">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="font-medium text-foreground">
+                    {lang === 'de' ? p.title_de : p.title_en}
+                  </span>
+                  <div className="text-sm shrink-0">
+                    {sub ? (
+                      <Badge variant="default" className="text-[10px] sm:text-xs">
+                        {t('writing_submitted')} ({sub.total_points ?? '?'} {t('eval_points')})
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-[10px] sm:text-xs">{t('writing_not_started')}</Badge>
+                    )}
                   </div>
                 </div>
-                <div className="text-sm">
-                  {sub ? (
-                    <Badge variant="default">
-                      {t('writing_submitted')} ({sub.total_points ?? '?'} {t('eval_points')})
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline">{t('writing_not_started')}</Badge>
-                  )}
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                  <Badge variant="secondary" className="text-[10px] sm:text-xs capitalize">
+                    {p.text_type.replace(/_/g, ' ')}
+                  </Badge>
+                  {p.exam_format === 'telc' && <TelcBadge />}
+                  <span>~{p.target_word_count} {t('writing_word_count')}</span>
                 </div>
               </CardContent>
             </Card>
@@ -1053,23 +1054,25 @@ export default function WritingPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className={`${NAV_CONTAINER} h-auto gap-1`}>
-          {LEVEL_TABS.map((tab) => (
+        <ScrollNav>
+          <TabsList className={`${NAV_CONTAINER} h-auto gap-1`}>
+            {LEVEL_TABS.map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className={`${TAB_TRIGGER_BLUE} gap-1.5`}
+              >
+                {lang === 'de' ? tab.label_de : tab.label_en}
+              </TabsTrigger>
+            ))}
             <TabsTrigger
-              key={tab.value}
-              value={tab.value}
+              value="redemittel"
               className={`${TAB_TRIGGER_BLUE} gap-1.5`}
             >
-              {lang === 'de' ? tab.label_de : tab.label_en}
+              <MessagesSquare className="h-4 w-4" />Redemittel
             </TabsTrigger>
-          ))}
-          <TabsTrigger
-            value="redemittel"
-            className={`${TAB_TRIGGER_BLUE} gap-1.5`}
-          >
-            <MessagesSquare className="h-4 w-4" />Redemittel
-          </TabsTrigger>
-        </TabsList>
+          </TabsList>
+        </ScrollNav>
 
         {LEVEL_TABS.map((tab) => (
           <TabsContent key={tab.value} value={tab.value} className="mt-4">

@@ -162,7 +162,7 @@ export function ListeningInformationstransfer({ content, solution, instructions,
       )}
 
 
-      <div className="flex justify-end gap-2">
+      <div className="flex flex-col sm:flex-row justify-end gap-2">
         {!checked ? (
           <Button onClick={handleCheck} disabled={!anyFilled}>
             {t('listening_check_answers')}

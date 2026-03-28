@@ -12,7 +12,7 @@ export const c1Expressions: C1Expression[] = [
   { id: 4, german: 'Ein verzerrtes Bild abgeben', english: 'To give a distorted picture', example: 'Statistiken ohne Kontext können ein verzerrtes Bild der tatsächlichen wirtschaftlichen Lage abgeben.' },
   { id: 5, german: 'Das Augenmerk auf etwas richten', english: 'To direct attention to', example: 'Wir sollten unser Augenmerk verstärkt auf die Umschulung von Arbeitskräften richten.' },
   { id: 6, german: 'Außer Zweifel stehen', english: 'To be beyond doubt', example: 'Dass der Klimawandel menschengemacht ist, steht mittlerweile außer Zweifel.' },
-  { id: 7, german: 'In Abrede stellen', english: 'To deny / dispute (formal)', example: 'Man kann die Vorteile der KI nicht einfach in Abrede stellen, nur weil Risiken existieren.' },
+  { id: 7, german: 'In Abrede stellen', english: 'To deny / dispute (formal)', example: 'Man kann die Vorteile der künstlichen Intelligenz nicht einfach in Abrede stellen, nur weil Risiken existieren.' },
   { id: 8, german: 'Einen hohen Stellenwert einnehmen', english: 'To have a high priority', example: 'In der deutschen Unternehmenskultur nimmt Pünktlichkeit nach wie vor einen hohen Stellenwert ein.' },
   { id: 9, german: 'An seine Grenzen stoßen', english: "To reach one's limits", example: 'Das aktuelle Rentensystem stößt aufgrund des demografischen Wandels an seine Grenzen.' },
   { id: 10, german: 'Zur Disposition stehen', english: 'To be up for discussion', example: 'Durch die Sparmaßnahmen stehen viele soziale Projekte zur Disposition.' },

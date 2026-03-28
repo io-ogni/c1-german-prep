@@ -1,26 +1,38 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowLeft, Search } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useHighlightedPhrases } from '@/hooks/useHighlightedPhrases';
+import { TertiaryNav } from '@/components/shared/TertiaryNav';
+import { StarredButton } from '@/components/shared/StarredButton';
+import type { TertiaryNavItem } from '@/components/shared/TertiaryNav';
 import type { Tables } from '@/integrations/supabase/types';
 
-type Filter = 'all' | 'irregular' | 'separable' | 'highlighted';
+type Filter = 'all' | 'irregular' | 'separable';
 
-export default function VerbTablePage() {
+const FILTER_ITEMS: TertiaryNavItem[] = [
+  { value: 'all', label: 'Alle' },
+  { value: 'irregular', label: 'Unregelmäßig' },
+  { value: 'separable', label: 'Trennbar' },
+];
+
+export function VerbTableContent() {
   const [search, setSearch] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
   const [filter, setFilter] = useState<Filter>('all');
-  const [sortBy, setSortBy] = useState<'frequency' | 'alpha'>('frequency');
+  const [starredOnly, setStarredOnly] = useState(false);
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { isHighlighted, toggle } = useHighlightedPhrases('verb-table-highlights');
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (searchOpen) searchRef.current?.focus();
+  }, [searchOpen]);
 
   const { data: verbs, isLoading } = useQuery({
     queryKey: ['verb-conjugations'],
@@ -35,71 +47,29 @@ export default function VerbTablePage() {
 
   const filtered = useMemo(() => {
     if (!verbs) return [];
-    let result = verbs;
+    let result = [...verbs].sort((a, b) => a.infinitiv.localeCompare(b.infinitiv, 'de'));
     if (search) {
       const q = search.toLowerCase();
       result = result.filter((v) => v.infinitiv.toLowerCase().includes(q));
     }
     if (filter === 'irregular') result = result.filter((v) => v.is_irregular);
     if (filter === 'separable') result = result.filter((v) => v.is_separable);
-    if (filter === 'highlighted') result = result.filter((v) => isHighlighted(v.infinitiv));
-    if (sortBy === 'alpha') {
-      result = [...result].sort((a, b) => a.infinitiv.localeCompare(b.infinitiv));
-    }
+    if (starredOnly) result = result.filter((v) => isHighlighted(v.infinitiv));
     return result;
-  }, [verbs, search, filter, sortBy, isHighlighted]);
+  }, [verbs, search, filter, starredOnly, isHighlighted]);
 
-  const filters: { key: Filter; label: string }[] = [
-    { key: 'all', label: t('grammar_filter_all') },
-    { key: 'irregular', label: t('grammar_filter_irregular') },
-    { key: 'separable', label: t('grammar_filter_separable') },
-    { key: 'highlighted', label: 'Markiert' },
-  ];
+  const noResults = !filtered.length && !isLoading;
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/grammar')}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          {t('page_grammar')}
-        </Button>
-        <h1 className="text-xl font-bold text-foreground">{t('grammar_verb_table')}</h1>
+      <div className="flex items-center justify-between gap-2">
+        <TertiaryNav
+          items={FILTER_ITEMS}
+          activeValue={filter}
+          onChange={(v) => setFilter(v as Filter)}
+        />
+        <StarredButton active={starredOnly} onClick={() => setStarredOnly(prev => !prev)} />
       </div>
-
-      <div className="flex flex-col sm:flex-row gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t('grammar_search_verb')}
-            className="pl-9"
-          />
-        </div>
-        <div className="flex gap-1">
-          {filters.map((f) => (
-            <Button
-              key={f.key}
-              variant={filter === f.key ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilter(f.key)}
-            >
-              {f.label}
-            </Button>
-          ))}
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setSortBy(sortBy === 'frequency' ? 'alpha' : 'frequency')}
-        >
-          {sortBy === 'frequency' ? 'A→Z' : '#'}
-        </Button>
-      </div>
-
-      <p className="text-xs text-muted-foreground">
-        Klicke auf eine Zeile, um sie zu markieren. Erneut klicken zum Abwählen.
-      </p>
 
       {isLoading ? (
         <Skeleton className="h-96 w-full rounded-lg" />
@@ -108,7 +78,34 @@ export default function VerbTablePage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Infinitiv</TableHead>
+                <TableHead>
+                  {searchOpen ? (
+                    <div className="flex items-center gap-1">
+                      <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <Input
+                        ref={searchRef}
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder={t('grammar_search_verb')}
+                        className="h-7 text-xs border-0 bg-transparent shadow-none focus-visible:ring-0 px-1"
+                      />
+                      <button
+                        onClick={() => { setSearch(''); setSearchOpen(false); }}
+                        className="shrink-0 text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setSearchOpen(true)}
+                      className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Search className="h-3.5 w-3.5" />
+                      Infinitiv
+                    </button>
+                  )}
+                </TableHead>
                 <TableHead>er/sie/es</TableHead>
                 <TableHead>Präteritum</TableHead>
                 <TableHead>Perfekt</TableHead>
@@ -120,7 +117,7 @@ export default function VerbTablePage() {
               {filtered.map((v) => (
                 <TableRow
                   key={v.id}
-                  className={cn('cursor-pointer', isHighlighted(v.infinitiv) && 'bg-primary/10')}
+                  className={cn('cursor-pointer', isHighlighted(v.infinitiv) && 'bg-yellow-50 dark:bg-yellow-900/20')}
                   onClick={() => toggle(v.infinitiv)}
                 >
                   <TableCell className={cn('font-medium', v.is_irregular && 'text-primary')}>
@@ -134,10 +131,17 @@ export default function VerbTablePage() {
                   <TableCell className="text-sm text-muted-foreground">{v.bedeutung_en}</TableCell>
                 </TableRow>
               ))}
-              {!filtered.length && (
+              {noResults && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                    {t('page_coming_soon')}
+                  <TableCell colSpan={6} className="text-center py-8">
+                    {starredOnly ? (
+                      <div className="space-y-2">
+                        <p className="text-muted-foreground">Noch keine Verben markiert — klicke auf eine Zeile, um sie zu markieren.</p>
+                        <button className="text-primary text-sm font-medium hover:underline" onClick={() => setStarredOnly(false)}>Alle anzeigen</button>
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground">{search ? 'Keine Ergebnisse.' : t('page_coming_soon')}</p>
+                    )}
                   </TableCell>
                 </TableRow>
               )}
@@ -147,4 +151,8 @@ export default function VerbTablePage() {
       )}
     </div>
   );
+}
+
+export default function VerbTablePage() {
+  return <VerbTableContent />;
 }

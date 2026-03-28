@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { LevelTabs } from '@/components/shared/LevelTabs';
 import { TopicCard } from '@/components/shared/TopicCard';
 import { ExerciseFlow } from '@/components/vocabulary/ExerciseFlow';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -7,10 +6,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { BookOpen } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BookOpen, Table2 } from 'lucide-react';
 import { TelcBadge } from '@/components/shared/TelcBadge';
-import { useNavigate } from 'react-router-dom';
+import { NAV_CONTAINER, TAB_TRIGGER_BLUE } from '@/components/shared/navStyles';
+import { ScrollNav } from '@/components/shared/ScrollNav';
+import { VerbTableContent } from '@/pages/VerbTablePage';
 
 const TOPIC_NAMES: Record<string, { de: string; en: string; telc?: boolean }> = {
   // B2
@@ -37,11 +38,10 @@ const TOPIC_NAMES: Record<string, { de: string; en: string; telc?: boolean }> = 
 };
 
 export default function GrammarPage() {
-  const [level, setLevel] = useState<'b2' | 'c1'>('c1');
+  const [level, setLevel] = useState<'b2' | 'c1' | 'verbtabelle'>('c1');
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const { t, lang } = useTranslation();
   const auth = useAuth();
-  const navigate = useNavigate();
 
   const dbLevel = level === 'b2' ? 'b2_refresh' : level;
 
@@ -102,47 +102,62 @@ export default function GrammarPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <BookOpen className="h-6 w-6" />
-            {t('page_grammar')}
-            <TelcBadge className="ml-1" />
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {lang === 'de' ? 'Trainiere Grammatikstrukturen für die C1-Prüfung.' : 'Practice grammar structures for the C1 exam.'}
-          </p>
-        </div>
-        <Button size="sm" onClick={() => navigate('/grammar/verbs')}>
-          <BookOpen className="mr-2 h-4 w-4" />
-          {t('grammar_verb_table')}
-        </Button>
+      <div>
+        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <BookOpen className="h-6 w-6" />
+          {t('page_grammar')}
+          <TelcBadge className="ml-1" />
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          {lang === 'de' ? 'Trainiere Grammatikstrukturen für die C1-Prüfung.' : 'Practice grammar structures for the C1 exam.'}
+        </p>
       </div>
 
-      <LevelTabs value={level} onValueChange={setLevel} />
+      <Tabs value={level} onValueChange={(v) => setLevel(v as 'b2' | 'c1' | 'verbtabelle')}>
+        <ScrollNav>
+          <TabsList className={`${NAV_CONTAINER} h-auto gap-1`}>
+            <TabsTrigger value="b2" className={TAB_TRIGGER_BLUE}>{t('level_b2_refresh')}</TabsTrigger>
+            <TabsTrigger value="c1" className={TAB_TRIGGER_BLUE}>{t('level_c1')}</TabsTrigger>
+            <TabsTrigger value="verbtabelle" className={`${TAB_TRIGGER_BLUE} gap-1.5`}>
+              <Table2 className="h-4 w-4" />
+              {t('grammar_verb_table')}
+            </TabsTrigger>
+          </TabsList>
+        </ScrollNav>
 
-      {isLoading ? (
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-28 rounded-lg" />
-          ))}
-        </div>
-      ) : topics?.length ? (
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {topics.map((topic) => (
-            <TopicCard
-              key={topic.slug}
-              title={topic.title}
-              exerciseCount={topic.total}
-              progress={topic.total > 0 ? (topic.completed / topic.total) * 100 : 0}
-              onClick={() => setSelectedTopic(topic.slug)}
-              showTelcBadge={topic.telc}
-            />
-          ))}
-        </div>
-      ) : (
-        <p className="text-muted-foreground text-sm">{t('page_coming_soon')}</p>
-      )}
+        {(level === 'c1' || level === 'b2') && (
+          <div className="mt-4">
+            {isLoading ? (
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-28 rounded-lg" />
+                ))}
+              </div>
+            ) : topics?.length ? (
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                {topics.map((topic) => (
+                  <TopicCard
+                    key={topic.slug}
+                    title={topic.title}
+                    exerciseCount={topic.total}
+                    progress={topic.total > 0 ? (topic.completed / topic.total) * 100 : 0}
+                    onClick={() => setSelectedTopic(topic.slug)}
+                    showTelcBadge={topic.telc}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-sm">{t('page_coming_soon')}</p>
+            )}
+          </div>
+        )}
+
+        {level === 'verbtabelle' && (
+          <div className="mt-4">
+            <VerbTableContent />
+          </div>
+        )}
+      </Tabs>
     </div>
   );
 }

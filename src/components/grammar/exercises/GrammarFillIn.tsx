@@ -102,7 +102,10 @@ function SingleSentenceFillIn({ content, solution, instructions, explanation, an
           : null
       }
     >
-      <SelectableText text={content?.sentence ?? ''} className="py-2" />
+      <SelectableText text={content?.sentence ?? content?.original ?? ''} className="py-2" />
+      {content?.instruction && (
+        <p className="text-sm font-medium text-primary">{content.instruction}</p>
+      )}
       {content?.hint && (
         <p className="text-xs text-muted-foreground italic">{content.hint}</p>
       )}

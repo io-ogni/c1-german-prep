@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { TelcBadge } from '@/components/shared/TelcBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { NAV_CONTAINER, TAB_TRIGGER_BLUE } from '@/components/shared/navStyles';
+import { ScrollNav } from '@/components/shared/ScrollNav';
 import { BookOpen, CheckCircle, Clock, Puzzle, ScanSearch, FileSearch } from 'lucide-react';
 import { ReadingInterface } from '@/components/reading/ReadingInterface';
 
@@ -154,21 +155,23 @@ export default function ReadingPage() {
         </div>
       ) : (
         <Tabs defaultValue={availableTypes[0]}>
-          <TabsList className={`${NAV_CONTAINER} h-auto gap-1`}>
-            {availableTypes.map(type => {
-              const Icon = TYPE_ICONS[type];
-              return (
-                <TabsTrigger
-                  key={type}
-                  value={type}
-                  className={`${TAB_TRIGGER_BLUE} gap-1.5`}
-                >
-                  {Icon && <Icon className="h-4 w-4" />}
-                  {TYPE_LABELS[type]?.[language] || type}
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
+          <ScrollNav>
+            <TabsList className={`${NAV_CONTAINER} h-auto gap-1`}>
+              {availableTypes.map(type => {
+                const Icon = TYPE_ICONS[type];
+                return (
+                  <TabsTrigger
+                    key={type}
+                    value={type}
+                    className={`${TAB_TRIGGER_BLUE} gap-1.5`}
+                  >
+                    {Icon && <Icon className="h-4 w-4" />}
+                    {TYPE_LABELS[type]?.[language] || type}
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </ScrollNav>
 
           {availableTypes.map(type => (
             <TabsContent key={type} value={type} className="mt-4">

@@ -99,6 +99,13 @@
   .animate-slide-out-left {
     animation: slideOutLeft 0.35s ease-in forwards;
   }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @keyframes slideOutRight {

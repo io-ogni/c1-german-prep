@@ -13,7 +13,7 @@ import type { ITDialogue } from '@/data/itDialogues';
 const SPEAKER_COLORS: Record<string, { text: string; bg: string; border: string }> = {
   Sarah: { text: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-950/30', border: 'border-l-blue-400' },
   Jan: { text: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-950/30', border: 'border-l-emerald-400' },
-  Lukas: { text: 'text-teal-700 dark:text-teal-300', bg: 'bg-teal-50 dark:bg-teal-950/30', border: 'border-l-teal-400' },
+  Lukas: { text: 'text-orange-700 dark:text-orange-300', bg: 'bg-orange-50 dark:bg-orange-950/30', border: 'border-l-orange-400' },
   Katja: { text: 'text-violet-700 dark:text-violet-300', bg: 'bg-violet-50 dark:bg-violet-950/30', border: 'border-l-violet-400' },
   Marco: { text: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-950/30', border: 'border-l-rose-400' },
 };
@@ -154,26 +154,10 @@ export function DialogueView({ dialogue, onBack }: DialogueViewProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <Button variant="ghost" size="sm" onClick={() => { stopSingle(); player.stop(); onBack(); }}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          {lang === 'de' ? 'Zurück' : 'Back'}
-        </Button>
-        <div className="flex items-center gap-2">
-          <PlayAllButton getUrls={getUrls} player={player} />
-          <button
-            onClick={() => setShowTranslations(!showTranslations)}
-            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
-              showTranslations
-                ? 'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/40 dark:text-fuchsia-300'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-            }`}
-          >
-            {showTranslations ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-            {showTranslations ? 'EN aus' : 'EN ein'}
-          </button>
-        </div>
-      </div>
+      <Button variant="ghost" size="sm" onClick={() => { stopSingle(); player.stop(); onBack(); }}>
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        {lang === 'de' ? 'Zurück' : 'Back'}
+      </Button>
 
       <div>
         <h2 className="text-lg font-bold text-foreground">{lang === 'de' ? dialogue.title_de : dialogue.title_en}</h2>
@@ -187,6 +171,21 @@ export function DialogueView({ dialogue, onBack }: DialogueViewProps) {
         </div>
       </div>
 
+      <div className="flex items-center justify-end gap-2">
+        <button
+          onClick={() => setShowTranslations(!showTranslations)}
+          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+            showTranslations
+              ? 'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/40 dark:text-fuchsia-300'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+          }`}
+        >
+          {showTranslations ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+          {showTranslations ? 'EN aus' : 'EN ein'}
+        </button>
+        <PlayAllButton getUrls={getUrls} player={player} />
+      </div>
+
       <div className="space-y-2">
         {dialogue.lines.map((line, idx) => {
           const color = getSpeakerColor(line.speaker);
@@ -197,8 +196,9 @@ export function DialogueView({ dialogue, onBack }: DialogueViewProps) {
           return (
             <Card
               key={idx}
+              onClick={() => toggleLine(idx)}
               className={cn(
-                'group border-l-3 transition-colors',
+                'group border-l-3 transition-colors cursor-pointer',
                 color.border,
                 isPlaying && 'ring-1 ring-fuchsia-300 dark:ring-fuchsia-700',
               )}
@@ -215,7 +215,7 @@ export function DialogueView({ dialogue, onBack }: DialogueViewProps) {
                     </button>
                   )}
                 </div>
-                <p className="text-sm text-foreground leading-relaxed cursor-pointer" onClick={() => toggleLine(idx)}>{line.de}</p>
+                <p className="text-sm text-foreground leading-relaxed">{line.de}</p>
                 {translationVisible && (
                   <p className="text-xs text-muted-foreground mt-1.5 italic leading-relaxed">{line.en}</p>
                 )}

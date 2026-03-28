@@ -20,8 +20,8 @@ export function SelektivesVerstehenQuestions({ questions, answers, setAnswers, c
         const key = String(i);
         const userAnswer = answers[key];
         const questionText = language === 'de'
-          ? (q.qüstion_de || q.question_de || q.text || '')
-          : (q.qüstion_en || q.question_en || q.text || '');
+          ? (q.question_de || q.text || '')
+          : (q.question_en || q.text || '');
         const options: string[] = q.options || ['a', 'b', 'c', 'd', 'e'];
         const correct = q.correct;
         const isCorrect = checked && userAnswer === correct;

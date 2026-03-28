@@ -18,7 +18,7 @@ interface VocabWord {
   source_type: string;
 }
 
-const BOX_INTERVALS = [1, 3, 7, 14, 30];
+const BOX_INTERVALS = [1, 3, 7, 14, 30, 90];
 
 const SOURCE_LABELS: Record<string, string> = {
   manual: 'Manuell',
@@ -53,7 +53,7 @@ export function ReviewCard({ dueCards, onCardReviewed, compact }: ReviewCardProp
     const card = dueCards[reviewIndex];
     if (!card) return;
 
-    const newBox = knewIt ? Math.min(card.box_number + 1, 5) : 1;
+    const newBox = knewIt ? Math.min(card.box_number + 1, 6) : 1;
     const daysUntilNext = BOX_INTERVALS[newBox - 1];
     const nextReview = new Date();
     nextReview.setDate(nextReview.getDate() + daysUntilNext);
@@ -97,7 +97,7 @@ export function ReviewCard({ dueCards, onCardReviewed, compact }: ReviewCardProp
         <CardContent className={`${compact ? 'py-5' : 'py-8'} text-center space-y-4 w-full`}>
           <p className={`${compact ? 'text-lg' : 'text-xl'} font-bold text-foreground`}>{currentCard.word_de}</p>
           <div className="flex items-center justify-center gap-2">
-            <p className="text-xs text-muted-foreground">{t('vocab_box')} {currentCard.box_number} / 5</p>
+            <p className="text-xs text-muted-foreground">{t('vocab_box')} {currentCard.box_number} / 6</p>
             {currentCard.source_type !== 'manual' && (
               <Badge variant="secondary" className="text-[10px] font-normal">
                 {SOURCE_LABELS[currentCard.source_type] ?? currentCard.source_type}

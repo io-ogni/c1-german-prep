@@ -271,7 +271,7 @@ export default function FlashcardsPage() {
             <Button variant="outline" size="sm" onClick={() => goNext('skipped')}>
               <SkipForward className="w-4 h-4" /> Überspringen
             </Button>
-            <Button onClick={() => setIsFlipped(true)}>
+            <Button size="sm" onClick={() => setIsFlipped(true)}>
               <Eye className="w-4 h-4" /> Antwort zeigen
             </Button>
           </div>
@@ -279,6 +279,7 @@ export default function FlashcardsPage() {
           <div className="flex justify-center gap-3">
             <Button
               variant="outline"
+              size="sm"
               className="border-destructive/50 text-destructive hover:bg-destructive hover:text-destructive-foreground"
               onClick={() => goNext('wrong')}
             >
@@ -288,6 +289,7 @@ export default function FlashcardsPage() {
               <SkipForward className="w-4 h-4" /> Überspringen
             </Button>
             <Button
+              size="sm"
               className="bg-success text-success-foreground hover:bg-success/90"
               onClick={() => goNext('correct')}
             >
@@ -302,7 +304,7 @@ export default function FlashcardsPage() {
         {feedbackMessage && (
           <div
             className={cn(
-              "px-6 py-2 rounded-xl text-lg font-bold",
+              "px-4 py-1.5 rounded-xl text-sm sm:text-lg font-bold",
               feedbackType === 'correct'
                 ? "bg-success text-success-foreground"
                 : "bg-destructive text-destructive-foreground"
@@ -314,8 +316,8 @@ export default function FlashcardsPage() {
         )}
       </div>
 
-      {/* Keyboard hints */}
-      <p className="text-xs text-muted-foreground">
+      {/* Keyboard hints — desktop only */}
+      <p className="hidden sm:block text-xs text-muted-foreground">
         Tastatur: <kbd className="px-1.5 py-0.5 rounded border bg-secondary text-xs">Leertaste</kbd> aufdecken ·
         <kbd className="px-1.5 py-0.5 rounded border bg-secondary text-xs ml-1">→</kbd> richtig ·
         <kbd className="px-1.5 py-0.5 rounded border bg-secondary text-xs ml-1">←</kbd> falsch ·

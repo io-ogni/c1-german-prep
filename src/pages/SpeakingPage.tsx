@@ -1,19 +1,19 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
-import { Star, Trash2, MousePointerClick, Volume2, Mic } from 'lucide-react';
+import { Trash2, MousePointerClick, Volume2, Mic } from 'lucide-react';
 import { TelcBadge } from '@/components/shared/TelcBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Filter, Search, Presentation, MessageSquare, FileText, MessagesSquare, Zap, Drama } from 'lucide-react';
+import { Filter, Presentation, MessageSquare, FileText, MessagesSquare, Zap, Drama } from 'lucide-react';
 import { useCustomPhrases } from '@/hooks/useCustomPhrases';
 import { useHighlightedPhrases } from '@/hooks/useHighlightedPhrases';
 import { AddConnectorInput } from '@/components/writing-tips/AddConnectorInput';
-import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { NAV_CONTAINER, TAB_TRIGGER_BLUE } from '@/components/shared/navStyles';
+import { ScrollNav } from '@/components/shared/ScrollNav';
 import { StarredButton } from '@/components/shared/StarredButton';
 import { useTableClickHint } from '@/hooks/useTableClickHint';
 import { c1Expressions } from '@/data/c1Expressions';
@@ -320,7 +320,6 @@ export default function SpeakingPage() {
   const { showClickHint: showTableHint, dismissClickHint } = useTableClickHint();
   const [starredOnly, setStarredOnly] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<Record<string, string>>({});
-  const [exprSearch, setExprSearch] = useState('');
   const player = usePlayAll();
 
   const speakingRef = useRef(false);
@@ -359,17 +358,13 @@ export default function SpeakingPage() {
   }, [speakingUrl, player]);
 
   // Stop play-all when filters change
-  useEffect(() => { player.stop(); }, [starredOnly, categoryFilter, exprSearch]);
+  useEffect(() => { player.stop(); }, [starredOnly, categoryFilter]);
 
   const filteredExpressions = useMemo(() => {
     let list = c1Expressions;
     if (starredOnly) list = list.filter(p => isHighlighted(p.german));
-    if (exprSearch) {
-      const q = exprSearch.toLowerCase();
-      list = list.filter(p => p.german.toLowerCase().includes(q) || p.english.toLowerCase().includes(q) || p.example.toLowerCase().includes(q));
-    }
     return list;
-  }, [exprSearch, starredOnly, isHighlighted]);
+  }, [starredOnly, isHighlighted]);
 
   const flatSections = useMemo(() => {
     const map: Record<string, FlatRow[]> = {};
@@ -407,14 +402,16 @@ export default function SpeakingPage() {
       </div>
 
       <Tabs defaultValue="redewendungen">
-        <TabsList className={`${NAV_CONTAINER} h-auto gap-1`}>
-          <TabsTrigger value="redewendungen" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><Drama className="h-4 w-4" />Redewendungen</TabsTrigger>
-          <TabsTrigger value="praesentation" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><Presentation className="h-4 w-4" />Präsentation</TabsTrigger>
-          <TabsTrigger value="diskussion" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><MessageSquare className="h-4 w-4" />Diskussion</TabsTrigger>
-          <TabsTrigger value="zusammenfassung" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><FileText className="h-4 w-4" />Zusammenfassung</TabsTrigger>
-          <TabsTrigger value="redemittel" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><MessagesSquare className="h-4 w-4" />Redemittel</TabsTrigger>
-          <TabsTrigger value="schnellreferenz" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><Zap className="h-4 w-4" />Schnellreferenz</TabsTrigger>
-        </TabsList>
+        <ScrollNav>
+          <TabsList className={`${NAV_CONTAINER} h-auto gap-1`}>
+            <TabsTrigger value="redewendungen" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><Drama className="h-4 w-4" />Redewendungen</TabsTrigger>
+            <TabsTrigger value="praesentation" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><Presentation className="h-4 w-4" />Präsentation</TabsTrigger>
+            <TabsTrigger value="diskussion" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><MessageSquare className="h-4 w-4" />Diskussion</TabsTrigger>
+            <TabsTrigger value="zusammenfassung" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><FileText className="h-4 w-4" />Zusammenfassung</TabsTrigger>
+            <TabsTrigger value="redemittel" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><MessagesSquare className="h-4 w-4" />Redemittel</TabsTrigger>
+            <TabsTrigger value="schnellreferenz" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><Zap className="h-4 w-4" />Schnellreferenz</TabsTrigger>
+          </TabsList>
+        </ScrollNav>
 
         {/* Phrase tabs */}
         {SECTIONS.map(section => (
@@ -426,11 +423,10 @@ export default function SpeakingPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[50px] text-xs font-semibold text-muted-foreground">#</TableHead>
-                    <TableHead className="w-[220px] p-1 text-xs font-semibold text-muted-foreground">
+                    <TableHead className="p-1 text-xs font-semibold text-muted-foreground whitespace-nowrap">
                       <Select value={categoryFilter[section.tab] ?? 'Alle'} onValueChange={(v) => setCategoryFilter(prev => ({ ...prev, [section.tab]: v }))}>
-                        <SelectTrigger className="h-8 w-full text-xs font-semibold border-0 bg-transparent shadow-none">
-                          <Filter className="h-3.5 w-3.5 text-muted-foreground mr-1" />
+                        <SelectTrigger className="h-auto w-auto text-xs text-left font-semibold border-0 bg-transparent shadow-none gap-1 px-1 justify-start">
+                          <Filter className="h-3 w-3 text-muted-foreground" />
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -462,14 +458,8 @@ export default function SpeakingPage() {
                         onClick={() => handleToggle(row.de)}
                         className={`cursor-pointer transition-colors ${isNewGroup ? 'border-t-4 border-t-muted' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}
                       >
-                        <TableCell className={`text-xs text-muted-foreground border-l-4 ${BORDER_COLORS[row.subsectionKey] ?? 'border-l-transparent'}`}>
-                          <span className="flex items-center gap-1">
-                            <Star className={`h-3.5 w-3.5 shrink-0 ${sel ? 'text-yellow-500 fill-yellow-400' : 'text-transparent'}`} />
-                            {row.idx + 1}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className={`text-xs font-normal whitespace-nowrap ${BADGE_COLORS[row.subsectionKey] ?? ''}`}>
+                        <TableCell className={`px-1 py-2 border-l-4 ${BORDER_COLORS[row.subsectionKey] ?? 'border-l-transparent'}`}>
+                          <span className={`text-xs font-normal ${BADGE_COLORS[row.subsectionKey] ?? ''}`}>
                             {row.subsectionLabel}
                           </span>
                         </TableCell>
@@ -527,7 +517,6 @@ export default function SpeakingPage() {
                     onClick={() => handleToggle(row.de)}
                     className={`relative rounded-lg border border-l-4 ${BORDER_COLORS[row.subsectionKey] ?? ''} p-4 space-y-2 cursor-pointer transition-colors ${isNewGroup ? 'mt-6' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}
                   >
-                    {sel && <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 absolute top-2 right-2" />}
                     <span className={`text-xs font-normal whitespace-nowrap ${BADGE_COLORS[row.subsectionKey] ?? ''}`}>
                       {row.subsectionLabel}
                     </span>
@@ -544,8 +533,9 @@ export default function SpeakingPage() {
             </div>
 
             {starredOnly && (flatSections[section.tab]?.length ?? 0) === 0 && (
-              <div className="py-10 text-center text-sm text-muted-foreground">
-                Noch keine Einträge markiert — klicke auf eine Zeile in der Tabelle, um sie zu markieren.
+              <div className="py-10 text-center text-sm space-y-2">
+                <p className="text-muted-foreground">Noch keine Einträge markiert — klicke auf eine Zeile, um sie zu markieren.</p>
+                <button className="text-primary text-sm font-medium hover:underline" onClick={() => setStarredOnly(false)}>Alle anzeigen</button>
               </div>
             )}
           </TabsContent>
@@ -592,11 +582,7 @@ export default function SpeakingPage() {
 
         {/* Redewendungen */}
         <TabsContent value="redewendungen" className="mt-4 space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input value={exprSearch} onChange={(e) => setExprSearch(e.target.value)} placeholder="Redewendung suchen..." className="pl-9" />
-            </div>
+          <div className="flex items-center justify-end gap-2">
             {starredBtn}
             <PlayAllButton color="blue" player={player} getUrls={() => filteredExpressions.map(e => getTtsUrl('expressions', e.id - 1)).filter(Boolean) as string[]} />
           </div>
@@ -608,13 +594,8 @@ export default function SpeakingPage() {
               const isPlaying = speakingRef.current && speakingUrl === ttsUrl;
               return (
                 <div key={expr.id}
-                  className={cn('relative rounded-xl border border-border bg-card p-4 transition-all hover:shadow-md', starred && 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800')}>
-                  <button
-                    onClick={() => toggleHighlight(expr.german)}
-                    className="absolute top-3 left-3 z-10"
-                  >
-                    <Star className={cn('h-4 w-4 transition-colors', starred ? 'fill-yellow-400 text-yellow-500' : 'text-muted-foreground/40 hover:text-yellow-400')} />
-                  </button>
+                  onClick={() => toggleHighlight(expr.german)}
+                  className={cn('relative rounded-xl border border-border bg-card p-4 transition-all hover:shadow-md cursor-pointer', starred && 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800')}>
                   <div>
                     {image && (
                       <div className="relative mb-3 overflow-hidden rounded-lg bg-muted/30 flex items-center justify-center">
@@ -629,7 +610,7 @@ export default function SpeakingPage() {
                     <div className="flex items-start gap-2 mt-3">
                       {ttsUrl ? (
                         <button
-                          onClick={() => speak(expr.example, ttsUrl)}
+                          onClick={(e) => { e.stopPropagation(); speak(expr.example, ttsUrl); }}
                           className="shrink-0 mt-0.5 text-muted-foreground hover:text-primary transition-colors"
                         >
                           <Volume2 className={cn('h-4 w-4', isPlaying && 'text-primary')} />
@@ -645,10 +626,15 @@ export default function SpeakingPage() {
             })}
           </div>
           {filteredExpressions.length === 0 && (
-            <div className="py-10 text-center text-muted-foreground text-sm">
-              {starredOnly
-                ? 'Noch keine Redewendungen markiert — klicke auf den Stern, um eine zu markieren.'
-                : 'Keine Redewendung gefunden.'}
+            <div className="py-10 text-center text-sm space-y-2">
+              {starredOnly ? (
+                <>
+                  <p className="text-muted-foreground">Noch keine Redewendungen markiert — klicke auf eine Karte, um sie zu markieren.</p>
+                  <button className="text-primary text-sm font-medium hover:underline" onClick={() => setStarredOnly(false)}>Alle anzeigen</button>
+                </>
+              ) : (
+                <p className="text-muted-foreground">Keine Redewendung gefunden.</p>
+              )}
             </div>
           )}
         </TabsContent>

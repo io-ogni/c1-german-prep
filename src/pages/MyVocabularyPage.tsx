@@ -237,13 +237,10 @@ export default function MyVocabularyPage() {
                       <p className="text-sm font-medium text-foreground">{w.word_de}</p>
                       <p className="text-xs text-muted-foreground">{w.translation_en}{w.translation_custom ? ` · ${w.translation_custom}` : ''}</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right text-xs text-muted-foreground">
-                        <p>{t('vocab_box')} {w.box_number}/5</p>
-                        <Badge variant="secondary" className="text-[10px] font-normal">
-                          {SOURCE_LABELS[w.source_type] ?? w.source_type}
-                        </Badge>
-                      </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge variant="secondary" className="text-[10px] font-normal whitespace-nowrap">
+                        {SOURCE_LABELS[w.source_type] ?? w.source_type}
+                      </Badge>
                       <Button
                         variant="ghost"
                         size="icon"

@@ -39,7 +39,7 @@ echo ""
 for i in "${!PHRASES[@]}"; do
   idx=$((i + 1))
   padded=$(printf "%02d" $idx)
-  outfile="$OUTPUT_DIR/souv-${padded}.mp3"
+  outfile="$OUTPUT_DIR/souveranitaet-${padded}.mp3"
 
   if [ -f "$outfile" ]; then
     echo "  [$padded] Already exists, skipping"

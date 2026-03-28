@@ -94,7 +94,7 @@ export const translations = {
     writing_save_to_texts: "In Meine Texte speichern",
     writing_copy_prompt: "Prompt kopieren — in ChatGPT etc. einfügen",
     writing_copied: "Prompt in die Zwischenablage kopiert!",
-    writing_no_api_alternative: "Für die automatische Bewertung hinterlege deinen OpenAI API-Schlüssel in den Einstellungen. Kein Schlüssel? Kein Problem — schreib deinen Text und kopiere den Bewertungs-Prompt für ChatGPT oder ein anderes LLM.",
+    writing_no_api_alternative: "Für die automatische Bewertung hinterlege deinen Anthropic API-Schlüssel in den Einstellungen. Kein Schlüssel? Kein Problem — schreib deinen Text und kopiere den Bewertungs-Prompt für ChatGPT oder ein anderes LLM.",
 
     // Writing evaluation
     eval_results: "Bewertungsergebnisse",
@@ -207,8 +207,8 @@ export const translations = {
     daily_title: "Tagesplan",
     daily_how_much_time: "Wie viel Zeit hast du?",
     daily_minutes: "min",
-    daily_start_streak: "Starte deine Serie!",
-    daily_streak: "Serie",
+    daily_start_streak: "Starte deinen Streak!",
+    daily_streak: "Streak",
     daily_streak_days: "Tage",
     daily_time_remaining: "Verbleibend",
     daily_times_up: "Zeit ist um!",

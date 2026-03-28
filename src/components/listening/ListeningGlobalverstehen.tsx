@@ -98,21 +98,21 @@ export function ListeningGlobalverstehen({ content, solution, instructions, expl
               <span className="text-sm font-medium text-foreground w-24 shrink-0">
                 {t('listening_speaker')} {speaker.id}
               </span>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <Select
                   value={selections[speaker.id] ?? ''}
                   onValueChange={(v) => handleSelect(speaker.id, v)}
                   disabled={checked}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full overflow-hidden [&>span]:truncate [&>span]:block [&>span]:max-w-[calc(100%-1.5rem)]">
                     <SelectValue placeholder="—" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-w-[calc(100vw-2rem)] bg-gray-100 dark:bg-gray-800">
                     {statements.map(st => {
                       const isUsed = usedStatements.has(st.id) && selections[speaker.id] !== st.id;
                       return (
-                        <SelectItem key={st.id} value={st.id} disabled={isUsed}>
-                          {st.id}) {st.text.slice(0, 60)}…
+                        <SelectItem key={st.id} value={st.id} disabled={isUsed} className="whitespace-normal bg-white dark:bg-card rounded-md mb-0.5">
+                          <span className="line-clamp-3">{st.id}) {st.text}</span>
                         </SelectItem>
                       );
                     })}
@@ -156,7 +156,7 @@ export function ListeningGlobalverstehen({ content, solution, instructions, expl
 
 
       {/* Actions */}
-      <div className="flex justify-end gap-2">
+      <div className="flex flex-col sm:flex-row justify-end gap-2">
         {!checked ? (
           <Button onClick={handleCheck} disabled={!allSelected}>
             {t('listening_check_answers')}

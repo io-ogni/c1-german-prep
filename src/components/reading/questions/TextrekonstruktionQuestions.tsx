@@ -69,10 +69,7 @@ export function TextrekonstruktionQuestions({ questions, answers, setAnswers, ch
     );
   }
 
-  // Format A: shared pool — show available sentences + correct answers
-  const assignedOptions = new Set(Object.values(answers));
-  const available = options.filter(o => !assignedOptions.has(o.id));
-
+  // Format A: shared pool
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
@@ -80,22 +77,6 @@ export function TextrekonstruktionQuestions({ questions, answers, setAnswers, ch
           ? 'Klicke auf eine Lücke im Text, um den passenden Satz auszuwählen.'
           : 'Click a gap in the text to select the matching sentence.'}
       </p>
-
-      {!checked && available.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground">
-            {language === 'de' ? 'Verfügbare Sätze:' : 'Available sentences:'}
-          </p>
-          {available.map(opt => (
-            <div
-              key={opt.id}
-              className="rounded-md border px-3 py-2 text-xs text-foreground bg-card"
-            >
-              <span className="line-clamp-2">{opt.text}</span>
-            </div>
-          ))}
-        </div>
-      )}
 
       {checked && Object.entries(correct).some(([gap, val]) => answers[gap] !== val) && (
         <div className="rounded-lg bg-secondary p-3 space-y-1">
