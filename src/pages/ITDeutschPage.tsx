@@ -121,7 +121,20 @@ export default function ITDeutschPage() {
         <DialogueList dialogues={IT_DIALOGUES} onSelect={setSelectedDialogue} />
       </div>
 
-      {/* Featured video */}
+      {/* Podcasts */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <Headphones className="h-4 w-4 text-fuchsia-500" />
+          <h2 className="font-semibold text-foreground">Podcasts</h2>
+        </div>
+        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+          {PODCASTS.map((p) => (
+            <AudioCard key={p.file} podcast={p} />
+          ))}
+        </div>
+      </div>
+
+      {/* Video */}
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Video className="h-4 w-4 text-fuchsia-500" />
@@ -143,19 +156,6 @@ export default function ITDeutschPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Podcasts */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <Headphones className="h-4 w-4 text-fuchsia-500" />
-          <h2 className="font-semibold text-foreground">Podcasts</h2>
-        </div>
-        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
-          {PODCASTS.map((p) => (
-            <AudioCard key={p.file} podcast={p} />
-          ))}
-        </div>
       </div>
     </div>
   );

@@ -15,7 +15,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, PenLine, AlertCircle, Copy, CheckCheck, Trash2, Filter, MessagesSquare, PlayCircle, AlignLeft, CheckCircle, Braces, Link2, Volume2, MousePointerClick } from 'lucide-react';
+import { Loader2, PenLine, AlertCircle, Copy, CheckCheck, Trash2, Filter, MessagesSquare, PlayCircle, AlignLeft, CheckCircle, Braces, Link2, Volume2 } from 'lucide-react';
 import { usePlayAll } from '@/hooks/usePlayAll';
 import { PlayAllButton } from '@/components/PlayAllButton';
 import { toast } from '@/hooks/use-toast';
@@ -27,7 +27,7 @@ import { useHighlightedPhrases } from '@/hooks/useHighlightedPhrases';
 import { useCustomPhrases } from '@/hooks/useCustomPhrases';
 import { AddConnectorInput } from '@/components/writing-tips/AddConnectorInput';
 import { StarredButton } from '@/components/shared/StarredButton';
-import { useTableClickHint } from '@/hooks/useTableClickHint';
+import { SelectionHint, markHintInteraction } from '@/components/shared/SelectionHint';
 import { TertiaryNav } from '@/components/shared/TertiaryNav';
 import type { TertiaryNavItem } from '@/components/shared/TertiaryNav';
 import type { Tables } from '@/integrations/supabase/types';
@@ -384,7 +384,6 @@ function flattenRedemittelSection(
 function RedemittelContent() {
   const { customConnectors, addConnector, removeConnector } = useCustomPhrases();
   const { isHighlighted, toggle: toggleHighlight } = useHighlightedPhrases('writing-tips-highlights');
-  const { showClickHint, dismissClickHint } = useTableClickHint();
   const [starredOnly, setStarredOnly] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState('einleitung');
@@ -450,6 +449,7 @@ function RedemittelContent() {
   return (
     <div className="space-y-4">
       <TertiaryNav items={navItems} activeValue={activeTab} onChange={setActiveTab} color="blue" />
+      <SelectionHint />
 
       {/* Phrase section content */}
       {activeSection && (
@@ -492,7 +492,7 @@ function RedemittelContent() {
                   return (
                     <TableRow
                       key={`${row.subsectionKey}-${row.idx}`}
-                      onClick={() => { dismissClickHint(); toggleHighlight(row.de); }}
+                      onClick={() => { markHintInteraction('table'); toggleHighlight(row.de); }}
                       className={`cursor-pointer transition-colors ${isNewGroup ? 'border-t-4 border-t-muted' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}
                     >
                       <TableCell className={`border-l-4 ${REDEMITTEL_BORDER_COLORS[row.subsectionKey] ?? 'border-l-transparent'}`}>
@@ -509,12 +509,6 @@ function RedemittelContent() {
                             <Volume2 className="h-4 w-4" />
                           </button>
                           {row.de}
-                          {i === 0 && showClickHint && (
-                            <span className="inline-flex items-center gap-1 animate-bounce ml-2">
-                              <span className="bg-foreground/90 text-background text-xs font-medium px-2.5 py-1 rounded-full shadow-lg whitespace-nowrap" style={{ fontFamily: '"Comic Sans MS", "Segoe Print", cursive' }}>Klick mich!</span>
-                              <MousePointerClick className="h-5 w-5 text-foreground/80 -rotate-12" />
-                            </span>
-                          )}
                         </div>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{row.en}</TableCell>
@@ -550,7 +544,7 @@ function RedemittelContent() {
               return (
                 <div
                   key={`${row.subsectionKey}-${row.idx}`}
-                  onClick={() => { dismissClickHint(); toggleHighlight(row.de); }}
+                  onClick={() => { markHintInteraction('table'); toggleHighlight(row.de); }}
                   className={`relative rounded-lg border border-l-4 ${REDEMITTEL_BORDER_COLORS[row.subsectionKey] ?? ''} p-4 space-y-2 cursor-pointer transition-colors ${isNewGroup ? 'mt-6' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}
                 >
                   <span className={`text-xs font-normal whitespace-nowrap ${REDEMITTEL_BADGE_COLORS[row.subsectionKey] ?? ''}`}>
@@ -569,7 +563,7 @@ function RedemittelContent() {
           </div>
 
           {starredOnly && (flatSections[activeSection.tab]?.length ?? 0) === 0 && (
-            <div className="py-10 text-center text-sm space-y-2">
+            <div className="py-10 text-center text-sm space-y-2 bg-card rounded-lg border">
               <p className="text-muted-foreground">Noch keine Einträge markiert — klicke auf eine Zeile, um sie zu markieren.</p>
               <button className="text-primary text-sm font-medium hover:underline" onClick={() => setStarredOnly(false)}>Alle anzeigen</button>
             </div>
@@ -1088,9 +1082,6 @@ export default function WritingPage() {
         ))}
 
         <TabsContent value="redemittel" className="mt-4">
-          <p className="text-sm text-muted-foreground mb-4">
-            {lang === 'de' ? 'Referenzmaterial für den schriftlichen Ausdruck' : 'Reference material for written expression'}
-          </p>
           <RedemittelContent />
         </TabsContent>
       </Tabs>

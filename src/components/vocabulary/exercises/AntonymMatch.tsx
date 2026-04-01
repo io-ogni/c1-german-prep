@@ -3,6 +3,7 @@ import { ExerciseCard } from '@/components/shared/ExerciseCard';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Props {
   content: { pairs: any[] };
@@ -26,8 +27,18 @@ function normalizePairs(raw: any[]): [string, string][] {
 const RIGHT_KEYS = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'];
 const RIGHT_LABELS = ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'];
 
+const PAIR_COLORS = [
+  'border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/40',
+  'border-2 border-purple-400 bg-purple-50 dark:bg-purple-950/40',
+  'border-2 border-teal-400 bg-teal-50 dark:bg-teal-950/40',
+  'border-2 border-pink-400 bg-pink-50 dark:bg-pink-950/40',
+  'border-2 border-yellow-700 bg-yellow-50 dark:bg-yellow-950/40',
+  'border-2 border-cyan-400 bg-cyan-50 dark:bg-cyan-950/40',
+];
+
 export function AntonymMatch({ content, solution, instructions, explanation, answered, onAnswer }: Props) {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
   const [selectedLeft, setSelectedLeft] = useState<number | null>(null);
   const [matches, setMatches] = useState<Map<number, number>>(new Map());
   const [checked, setChecked] = useState(false);
@@ -114,54 +125,72 @@ export function AntonymMatch({ content, solution, instructions, explanation, ans
     return shuffledRight[rightIdx].originalIdx === shuffledLeft[leftIdx].originalIdx;
   };
 
+  const rightColorMap = useMemo(() => {
+    const m = new Map<number, number>();
+    matches.forEach((rightIdx, leftIdx) => {
+      m.set(rightIdx, shuffledLeft[leftIdx]?.originalIdx ?? 0);
+    });
+    return m;
+  }, [matches, shuffledLeft]);
+
   if (pairsData.length === 0) {
     return <ExerciseCard question={instructions} feedback={null}><p className="text-muted-foreground">No data available.</p></ExerciseCard>;
   }
 
   return (
     <ExerciseCard question={instructions} feedback={null}>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          {shuffledLeft.map((item, idx) => (
-            <Button
-              key={idx}
-              variant="outline"
-              className={cn(
-                'w-full justify-start h-auto py-3 text-left whitespace-normal',
-                selectedLeft === idx && 'ring-2 ring-primary',
-                checked && isMatchCorrect(idx) === true && 'border-green-500 bg-green-100 dark:bg-green-900/30',
-                checked && isMatchCorrect(idx) === false && 'border-destructive bg-destructive/10'
-              )}
-              onClick={() => handleLeftClick(idx)}
-              disabled={answered}
-            >
-              <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{idx + 1}</kbd>
-              {item.text}
-              {matches.has(idx) && (
-                <span className="ml-auto text-xs text-muted-foreground">
-                  → {shuffledRight[matches.get(idx)!].text}
-                </span>
-              )}
-            </Button>
-          ))}
+      <div className="grid grid-cols-2 gap-2 md:gap-3 min-w-0">
+        <div className="space-y-1.5 md:space-y-2">
+          {shuffledLeft.map((item, idx) => {
+            const colorIdx = item.originalIdx % PAIR_COLORS.length;
+            const matched = matches.has(idx);
+            return (
+              <Button
+                key={idx}
+                variant="outline"
+                className={cn(
+                  'w-full justify-start h-auto py-2 md:py-3 px-2 md:px-3 text-left whitespace-normal break-words text-sm min-w-0',
+                  selectedLeft === idx && 'ring-2 ring-primary',
+                  matched && !checked && PAIR_COLORS[colorIdx],
+                  checked && isMatchCorrect(idx) === true && 'border-green-500 bg-green-100 dark:bg-green-900/30',
+                  checked && isMatchCorrect(idx) === false && 'border-destructive bg-destructive/10'
+                )}
+                onClick={() => handleLeftClick(idx)}
+                disabled={answered}
+              >
+                {!isMobile && <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{idx + 1}</kbd>}
+                <span lang="de" style={{ hyphens: 'auto' }}>{item.text}</span>
+                {!isMobile && matched && (
+                  <span className="ml-auto text-xs text-muted-foreground">
+                    → {shuffledRight[matches.get(idx)!].text}
+                  </span>
+                )}
+              </Button>
+            );
+          })}
         </div>
-        <div className="space-y-2">
-          {shuffledRight.map((item, idx) => (
-            <Button
-              key={idx}
-              variant="outline"
-              className={cn(
-                'w-full justify-start h-auto py-3 text-left whitespace-normal',
-                matchedRightIndices.has(idx) && 'opacity-50',
-                selectedLeft !== null && !matchedRightIndices.has(idx) && !answered && 'ring-1 ring-primary/40 bg-primary/5'
-              )}
-              onClick={() => handleRightClick(idx)}
-              disabled={answered || matchedRightIndices.has(idx)}
-            >
-              <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{RIGHT_LABELS[idx]}</kbd>
-              {item.text}
-            </Button>
-          ))}
+        <div className="space-y-1.5 md:space-y-2">
+          {shuffledRight.map((item, idx) => {
+            const matchedByColor = rightColorMap.get(idx);
+            const isMatched = matchedByColor !== undefined;
+            const colorIdx = isMatched ? matchedByColor % PAIR_COLORS.length : -1;
+            return (
+              <Button
+                key={idx}
+                variant="outline"
+                className={cn(
+                  'w-full justify-start h-auto py-2 md:py-3 px-2 md:px-3 text-left whitespace-normal break-words text-sm min-w-0',
+                  isMatched && !checked && PAIR_COLORS[colorIdx],
+                  !isMatched && selectedLeft !== null && !answered && 'ring-1 ring-primary/40 bg-primary/5'
+                )}
+                onClick={() => handleRightClick(idx)}
+                disabled={answered || isMatched}
+              >
+                {!isMobile && <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{RIGHT_LABELS[idx]}</kbd>}
+                <span lang="de" style={{ hyphens: 'auto' }}>{item.text}</span>
+              </Button>
+            );
+          })}
         </div>
       </div>
 

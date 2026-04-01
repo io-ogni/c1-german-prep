@@ -104,7 +104,7 @@ function SingleMC({ content, solution, instructions, explanation, answered, onAn
             onClick={() => handleSelect(idx)}
             disabled={answered}
           >
-            <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{idx + 1}</kbd> {opt.text}
+            <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0 hidden md:inline">{idx + 1}</kbd> {opt.text}
           </Button>
         ))}
       </div>
@@ -172,16 +172,7 @@ function MultiStepMC({
   return (
     <ExerciseCard
       question={`${instructions} (${subIndex + 1}/${questions.length})`}
-      feedback={
-        subAnswered
-          ? {
-              correct: isCorrect,
-              message: isCorrect
-                ? t('exercise_correct')
-                : `${t('exercise_correct_answer')}: ${correctAnswer}${explanation ? ` — ${explanation}` : ''}`,
-            }
-          : null
-      }
+      feedback={null}
     >
       <SelectableText text={questionText} className="py-2" />
       <div className="grid gap-2 sm:grid-cols-2">
@@ -198,12 +189,26 @@ function MultiStepMC({
             onClick={() => handleSelect(idx)}
             disabled={subAnswered || parentAnswered || eliminated.has(idx)}
           >
-            <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{idx + 1}</kbd> {opt}
+            <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0 hidden md:inline">{idx + 1}</kbd> {opt}
           </Button>
         ))}
       </div>
+      {subAnswered && (
+        <div
+          className={cn(
+            'rounded-md px-3 py-2 text-sm font-medium',
+            isCorrect
+              ? 'bg-success/10 text-success'
+              : 'bg-destructive/10 text-destructive'
+          )}
+        >
+          {isCorrect
+            ? t('exercise_correct')
+            : `${t('exercise_correct_answer')}: ${correctAnswer}${explanation ? ` — ${explanation}` : ''}`}
+        </div>
+      )}
       {subAnswered && !isLast && !parentAnswered && (
-        <div className="flex justify-end pt-2">
+        <div className="flex justify-end">
           <Button size="sm" onClick={handleNext}>{t('exercise_next')}</Button>
         </div>
       )}

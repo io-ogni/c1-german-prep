@@ -58,7 +58,7 @@ export function FillIn({ content, solution, instructions, explanation, answered,
             onClick={() => handleSelect(idx)}
             disabled={answered}
           >
-            <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{idx + 1}</kbd> {opt}
+            <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0 hidden md:inline">{idx + 1}</kbd> {opt}
           </Button>
         ))}
       </div>

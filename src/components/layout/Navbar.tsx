@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown, BookOpen, FileText, ClipboardCheck } from 'lucide-react';
+import { Menu, X, ChevronDown, BookOpen, FileText, ClipboardCheck, Monitor } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useRequiredAuth } from '@/contexts/AuthContext';
 import {
@@ -87,6 +87,7 @@ export function Navbar() {
                 : 'text-fuchsia-600/80 dark:text-fuchsia-400/80 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-900/20'
             )}
           >
+            <Monitor className="h-3.5 w-3.5 inline-block mr-1" />
             {t('nav_it_deutsch')}
           </Link>
         </div>
@@ -163,6 +164,7 @@ export function Navbar() {
                   : 'text-fuchsia-600/80 dark:text-fuchsia-400/80 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-900/20'
               )}
             >
+              <Monitor className="h-4 w-4 inline-block mr-1" />
               {t('nav_it_deutsch')}
             </Link>
             <div className="my-2 border-t border-border" />

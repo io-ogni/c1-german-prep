@@ -11,10 +11,10 @@ interface ExerciseCardProps {
 export function ExerciseCard({ question, children, feedback, className }: ExerciseCardProps) {
   return (
     <Card className={cn('w-full', className)}>
-      <CardHeader className="pb-3">
+      <CardHeader className="p-3 md:p-6 pb-2 md:pb-3">
         <CardTitle className="text-base font-medium leading-relaxed">{question}</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col space-y-3">
+      <CardContent className="p-3 md:p-6 pt-0 flex flex-col space-y-3">
         {children}
         {feedback && (
           <div

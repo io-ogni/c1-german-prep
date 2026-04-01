@@ -74,7 +74,7 @@ export function DialogueList({ dialogues, onSelect }: DialogueListProps) {
             <p className="text-xs text-muted-foreground">{lang === 'de' ? d.description_de : d.description_en}</p>
             <div className="flex gap-1.5 flex-wrap">
               {d.speakers.map(s => (
-                <Badge key={s.name} variant="secondary" className={cn('text-xs font-normal px-2 py-0.5', getSpeakerColor(s.name).text)}>
+                <Badge key={s.name} variant="secondary" className={cn('text-xs font-normal px-2 py-0.5', getSpeakerColor(s.name).text, getSpeakerColor(s.name).bg)}>
                   {s.name} ({s.role})
                 </Badge>
               ))}
@@ -95,8 +95,8 @@ interface DialogueViewProps {
 
 export function DialogueView({ dialogue, onBack }: DialogueViewProps) {
   const { lang } = useTranslation();
-  const [showTranslations, setShowTranslations] = useState(false);
-  const [revealedLines, setRevealedLines] = useState<Set<number>>(new Set());
+  const [showTranslations, setShowTranslations] = useState(true);
+  const [hiddenLines, setHiddenLines] = useState<Set<number>>(new Set());
   const [playingLine, setPlayingLine] = useState<number | null>(null);
   const player = usePlayAll();
   const singleAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -142,8 +142,7 @@ export function DialogueView({ dialogue, onBack }: DialogueViewProps) {
   }, [dialogue.id, stopSingle, player, playingLine]);
 
   const toggleLine = (idx: number) => {
-    if (showTranslations) return;
-    setRevealedLines(prev => {
+    setHiddenLines(prev => {
       const next = new Set(prev);
       if (next.has(idx)) next.delete(idx); else next.add(idx);
       return next;
@@ -164,7 +163,7 @@ export function DialogueView({ dialogue, onBack }: DialogueViewProps) {
         <p className="text-sm text-muted-foreground mt-1">{lang === 'de' ? dialogue.context_de : dialogue.context_en}</p>
         <div className="flex gap-1.5 flex-wrap mt-2">
           {dialogue.speakers.map(s => (
-            <Badge key={s.name} variant="secondary" className={cn('text-xs font-normal px-2 py-0.5', getSpeakerColor(s.name).text)}>
+            <Badge key={s.name} variant="secondary" className={cn('text-xs font-normal px-2 py-0.5', getSpeakerColor(s.name).text, getSpeakerColor(s.name).bg)}>
               {s.name} — {s.role}
             </Badge>
           ))}
@@ -173,7 +172,7 @@ export function DialogueView({ dialogue, onBack }: DialogueViewProps) {
 
       <div className="flex items-center justify-end gap-2">
         <button
-          onClick={() => setShowTranslations(!showTranslations)}
+          onClick={() => { setShowTranslations(!showTranslations); setHiddenLines(new Set()); }}
           className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
             showTranslations
               ? 'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/40 dark:text-fuchsia-300'
@@ -189,7 +188,7 @@ export function DialogueView({ dialogue, onBack }: DialogueViewProps) {
       <div className="space-y-2">
         {dialogue.lines.map((line, idx) => {
           const color = getSpeakerColor(line.speaker);
-          const translationVisible = showTranslations || revealedLines.has(idx);
+          const translationVisible = showTranslations && !hiddenLines.has(idx);
           const isPlaying = playingLine === idx;
           const hasAudio = !!getLineAudioUrl(dialogue.id, idx);
 
@@ -209,7 +208,7 @@ export function DialogueView({ dialogue, onBack }: DialogueViewProps) {
                   {hasAudio && (
                     <button
                       onClick={(e) => { e.stopPropagation(); toggleLineAudio(idx); }}
-                      className={cn('opacity-0 group-hover:opacity-100 transition-opacity', isPlaying && 'opacity-100')}
+                      className="transition-colors"
                     >
                       <Volume2 className={cn('h-3.5 w-3.5 text-muted-foreground hover:text-foreground', isPlaying && 'text-fuchsia-500')} />
                     </button>
@@ -225,11 +224,6 @@ export function DialogueView({ dialogue, onBack }: DialogueViewProps) {
         })}
       </div>
 
-      {!showTranslations && (
-        <p className="text-xs text-muted-foreground text-center">
-          {lang === 'de' ? 'Klicke auf eine Zeile, um die Übersetzung zu sehen' : 'Click a line to see the translation'}
-        </p>
-      )}
     </div>
   );
 }

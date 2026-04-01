@@ -6,6 +6,15 @@ import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useNumberKeys } from '@/hooks/useNumberKeys';
 
+const PAIR_COLORS = [
+  'border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/40',
+  'border-2 border-purple-400 bg-purple-50 dark:bg-purple-950/40',
+  'border-2 border-teal-400 bg-teal-50 dark:bg-teal-950/40',
+  'border-2 border-pink-400 bg-pink-50 dark:bg-pink-950/40',
+  'border-2 border-yellow-700 bg-yellow-50 dark:bg-yellow-950/40',
+  'border-2 border-cyan-400 bg-cyan-50 dark:bg-cyan-950/40',
+];
+
 interface Props {
   content: { word?: string; options?: string[]; pairs?: { word: string; definition: string }[] };
   solution: { correct?: number; pairs?: { word: string; definition: string }[] };
@@ -85,7 +94,7 @@ export function DefinitionMatch({ content, solution, instructions, explanation, 
             onClick={() => handleSelect(idx)}
             disabled={answered}
           >
-            <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{idx + 1}</kbd> {opt.text}
+            <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0 hidden md:inline">{idx + 1}</kbd> {opt.text}
           </Button>
         ))}
       </div>
@@ -120,6 +129,14 @@ function PairsMatch({ content, solution, instructions, explanation, answered, on
   });
 
   const matchedRight = new Set(matches.values());
+
+  const rightColorMap = useMemo(() => {
+    const m = new Map<number, number>();
+    matches.forEach((rightIdx, leftIdx) => {
+      m.set(rightIdx, leftIdx);
+    });
+    return m;
+  }, [matches]);
 
   const handleLeftClick = (idx: number) => {
     if (answered) return;
@@ -156,44 +173,54 @@ function PairsMatch({ content, solution, instructions, explanation, answered, on
           : null
       }
     >
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-2">
-          {words.map((w, i) => (
-            <Button
-              key={i}
-              variant="outline"
-              size="sm"
-              className={cn(
-                'w-full justify-start text-left h-auto py-2 whitespace-normal text-xs',
-                selectedLeft === i && 'ring-2 ring-primary',
-                matches.has(i) && 'bg-muted',
-                answered && matches.get(i) === correctMap.get(i) && 'border-primary bg-primary/10',
-                answered && matches.get(i) !== correctMap.get(i) && 'border-destructive bg-destructive/10'
-              )}
-              onClick={() => handleLeftClick(i)}
-              disabled={answered}
-            >
-              {w}
-            </Button>
-          ))}
+      <div className="grid grid-cols-2 gap-2 md:gap-3 min-w-0">
+        <div className="space-y-1.5 md:space-y-2">
+          {words.map((w, i) => {
+            const colorIdx = i % PAIR_COLORS.length;
+            const matched = matches.has(i);
+            return (
+              <Button
+                key={i}
+                variant="outline"
+                size="sm"
+                className={cn(
+                  'w-full justify-start text-left h-auto py-1.5 md:py-2 px-2 md:px-3 whitespace-normal break-words text-xs min-w-0',
+                  selectedLeft === i && 'ring-2 ring-primary',
+                  matched && !answered && PAIR_COLORS[colorIdx],
+                  answered && matches.get(i) === correctMap.get(i) && 'border-primary bg-primary/10',
+                  answered && matches.get(i) !== correctMap.get(i) && 'border-destructive bg-destructive/10'
+                )}
+                onClick={() => handleLeftClick(i)}
+                disabled={answered}
+              >
+                <span lang="de" style={{ hyphens: 'auto' }}>{w}</span>
+              </Button>
+            );
+          })}
         </div>
-        <div className="space-y-2">
-          {shuffledDefs.map((d, i) => (
-            <Button
-              key={i}
-              variant="outline"
-              size="sm"
-              className={cn(
-                'w-full justify-start text-left h-auto py-2 whitespace-normal text-xs',
-                matchedRight.has(i) && 'bg-muted',
-                answered && 'pointer-events-none'
-              )}
-              onClick={() => handleRightClick(i)}
-              disabled={answered || matchedRight.has(i)}
-            >
-              {d.text}
-            </Button>
-          ))}
+        <div className="space-y-1.5 md:space-y-2">
+          {shuffledDefs.map((d, i) => {
+            const matchedByColor = rightColorMap.get(i);
+            const isMatched = matchedByColor !== undefined;
+            const colorIdx = isMatched ? matchedByColor % PAIR_COLORS.length : -1;
+            return (
+              <Button
+                key={i}
+                variant="outline"
+                size="sm"
+                className={cn(
+                  'w-full justify-start text-left h-auto py-1.5 md:py-2 px-2 md:px-3 whitespace-normal break-words text-xs min-w-0',
+                  isMatched && !answered && PAIR_COLORS[colorIdx],
+                  !isMatched && selectedLeft !== null && !answered && 'ring-1 ring-primary/40 bg-primary/5',
+                  answered && 'pointer-events-none'
+                )}
+                onClick={() => handleRightClick(i)}
+                disabled={answered || isMatched}
+              >
+                <span lang="de" style={{ hyphens: 'auto' }}>{d.text}</span>
+              </Button>
+            );
+          })}
         </div>
       </div>
       {!answered && (

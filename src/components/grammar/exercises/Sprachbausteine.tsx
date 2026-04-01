@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -54,9 +54,20 @@ export function Sprachbausteine({ content, solution, instructions, explanation, 
   const correctAnswer = answers[currentGap] ?? '';
   const isLast = currentGap === gaps.length - 1;
 
+  // Shuffle options for each gap so the correct answer isn't always first
+  const shuffledOptions = useMemo(() => {
+    if (!current?.options) return [];
+    const opts = current.options.map((text, origIdx) => ({ text, origIdx }));
+    for (let i = opts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [opts[i], opts[j]] = [opts[j], opts[i]];
+    }
+    return opts;
+  }, [currentGap, current?.options]);
+
   const handleSelect = useCallback((idx: number) => {
     if (subAnswered || parentAnswered) return;
-    const opt = current?.options[idx];
+    const opt = shuffledOptions[idx]?.text;
     const isCorrect = opt?.toLowerCase() === correctAnswer.toLowerCase();
     setSelected(idx);
 
@@ -72,9 +83,9 @@ export function Sprachbausteine({ content, solution, instructions, explanation, 
       setEliminated(prev => new Set(prev).add(idx));
       setTimeout(() => setSelected(null), 400);
     }
-  }, [subAnswered, parentAnswered, current, correctAnswer, correctCount, currentGap, isLast, onAnswer, gaps.length]);
+  }, [subAnswered, parentAnswered, shuffledOptions, correctAnswer, correctCount, currentGap, isLast, onAnswer, gaps.length]);
 
-  useNumberKeys(handleSelect, current?.options?.length ?? 0, subAnswered || parentAnswered);
+  useNumberKeys(handleSelect, shuffledOptions.length, subAnswered || parentAnswered);
 
   const handleNext = () => {
     setCurrentGap(i => i + 1);
@@ -83,7 +94,7 @@ export function Sprachbausteine({ content, solution, instructions, explanation, 
     setEliminated(new Set());
   };
 
-  const isCorrect = selected !== null && current?.options[selected]?.toLowerCase() === correctAnswer.toLowerCase();
+  const isCorrect = selected !== null && shuffledOptions[selected]?.text?.toLowerCase() === correctAnswer.toLowerCase();
 
   // Render text with gap markers highlighted
   const renderText = () => {
@@ -114,16 +125,7 @@ export function Sprachbausteine({ content, solution, instructions, explanation, 
   return (
     <ExerciseCard
       question={`${instructions} (${currentGap + 1}/${gaps.length})`}
-      feedback={
-        subAnswered
-          ? {
-              correct: isCorrect,
-              message: isCorrect
-                ? t('exercise_correct')
-                : `${t('exercise_correct_answer')}: ${correctAnswer}${explanation ? ` — ${explanation}` : ''}`,
-            }
-          : null
-      }
+      feedback={null}
     >
       {/* Full text with gaps */}
       <div className="bg-muted/50 rounded-lg p-4 text-sm leading-relaxed border">
@@ -132,31 +134,47 @@ export function Sprachbausteine({ content, solution, instructions, explanation, 
 
       {/* Current gap options */}
       {current && (
-        <div className="space-y-2">
+        <div className="space-y-1.5 md:space-y-2">
           <p className="text-xs font-medium text-muted-foreground">Lücke {currentGap + 1}:</p>
           <div className="grid gap-2 sm:grid-cols-2">
-            {current.options.map((opt, idx) => (
+            {shuffledOptions.map((opt, idx) => (
               <Button
-                key={idx}
+                key={opt.origIdx}
                 variant="outline"
                 className={cn(
                   'justify-start text-left h-auto py-3 whitespace-normal',
-                  subAnswered && opt.toLowerCase() === correctAnswer.toLowerCase() && 'border-primary bg-primary/10 text-primary',
+                  subAnswered && opt.text.toLowerCase() === correctAnswer.toLowerCase() && 'border-primary bg-primary/10 text-primary',
                   eliminated.has(idx) && 'opacity-40 pointer-events-none border-destructive/50',
-                  !subAnswered && selected === idx && opt.toLowerCase() !== correctAnswer.toLowerCase() && 'border-destructive bg-destructive/10 text-destructive'
+                  !subAnswered && selected === idx && opt.text.toLowerCase() !== correctAnswer.toLowerCase() && 'border-destructive bg-destructive/10 text-destructive'
                 )}
                 onClick={() => handleSelect(idx)}
                 disabled={subAnswered || parentAnswered || eliminated.has(idx)}
               >
-                <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{idx + 1}</kbd> {opt}
+                <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0 hidden md:inline">{idx + 1}</kbd> {opt.text}
               </Button>
             ))}
           </div>
         </div>
       )}
 
+      {/* Feedback — rendered before the Weiter button */}
+      {subAnswered && (
+        <div
+          className={cn(
+            'rounded-md px-3 py-2 text-sm font-medium',
+            isCorrect
+              ? 'bg-success/10 text-success'
+              : 'bg-destructive/10 text-destructive'
+          )}
+        >
+          {isCorrect
+            ? t('exercise_correct')
+            : `${t('exercise_correct_answer')}: ${correctAnswer}${explanation ? ` — ${explanation}` : ''}`}
+        </div>
+      )}
+
       {subAnswered && !isLast && !parentAnswered && (
-        <div className="flex justify-end pt-2">
+        <div className="flex justify-end">
           <Button size="sm" onClick={handleNext}>{t('exercise_next')}</Button>
         </div>
       )}

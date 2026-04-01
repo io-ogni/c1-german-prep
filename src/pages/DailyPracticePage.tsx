@@ -181,7 +181,15 @@ export default function DailyPracticePage() {
       supabase.from('exercises').select('id, area, exercise_type, difficulty, sort_order, title_de, title_en, instructions_de, instructions_en, content, solution, explanation_de, explanation_en').neq('area', 'sprachbausteine').neq('area', 'listening'),
     ]);
 
-    const dueCards = vocabRes.data || [];
+    // Deduplicate vocab cards by word_de (same word can exist from multiple sources)
+    const rawCards = vocabRes.data || [];
+    const seenWords = new Set<string>();
+    const dueCards = rawCards.filter(c => {
+      const key = c.word_de.toLowerCase();
+      if (seenWords.has(key)) return false;
+      seenWords.add(key);
+      return true;
+    });
     const progressMap = new Map((progressRes.data || []).map(p => [p.exercise_id, p]));
     const allExercises = (exercisesRes.data || []).filter(e => {
       const c = e.content as Record<string, unknown> | null;
@@ -566,10 +574,10 @@ export default function DailyPracticePage() {
                 {currentFlashcard.translation_custom && <p className="text-sm text-muted-foreground">→ {currentFlashcard.translation_custom}</p>}
                 <div className="flex gap-3 justify-center pt-2">
                   <Button onClick={() => handleFlashcard(true)} className="gap-1">
-                    <CheckCircle className="h-4 w-4" /><span className="hidden sm:inline">{t('vocab_knew_it')}</span><kbd className="ml-1 text-[10px] opacity-60">1</kbd>
+                    <CheckCircle className="h-4 w-4" /><span className="hidden sm:inline">{t('vocab_knew_it')}</span><kbd className="ml-1 text-[10px] opacity-60 hidden md:inline">1</kbd>
                   </Button>
                   <Button onClick={() => handleFlashcard(false)} variant="destructive" className="gap-1">
-                    <XCircle className="h-4 w-4" /><span className="hidden sm:inline">{t('vocab_didnt_know')}</span><kbd className="ml-1 text-[10px] opacity-60">2</kbd>
+                    <XCircle className="h-4 w-4" /><span className="hidden sm:inline">{t('vocab_didnt_know')}</span><kbd className="ml-1 text-[10px] opacity-60 hidden md:inline">2</kbd>
                   </Button>
                 </div>
               </div>

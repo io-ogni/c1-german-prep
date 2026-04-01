@@ -209,6 +209,28 @@ export function SelectableText({ text, sourceType = 'grammar', sourceId, classNa
     });
   };
 
+  // --- TEMPORARILY DISABLED: click-to-add-to-Wortschatz ---
+  // Render text with gap support but no interactive word selection.
+  // The full interactive version (word clicking, popup, addToVocabulary)
+  // is preserved above and can be re-enabled by uncommenting the return below.
+
+  const renderPlainWords = () => {
+    const segments = text.split(/(___)/);
+    return segments.map((segment, segIdx) => {
+      if (segment === '___') {
+        return <span key={`gap-${segIdx}`} dangerouslySetInnerHTML={{ __html: GAP_HTML }} />;
+      }
+      return <Fragment key={`seg-${segIdx}`}>{segment}</Fragment>;
+    });
+  };
+
+  return (
+    <div className="relative">
+      <p className={cn('text-base text-foreground leading-relaxed', className)}>{renderPlainWords()}</p>
+    </div>
+  );
+
+  /* --- RE-ENABLE: replace the return above with this one ---
   return (
     <div ref={containerRef} className="relative">
       <p className={cn('text-base text-foreground leading-relaxed', className)}>{renderWords()}</p>
@@ -274,4 +296,5 @@ export function SelectableText({ text, sourceType = 'grammar', sourceId, classNa
       )}
     </div>
   );
+  --- END RE-ENABLE --- */
 }

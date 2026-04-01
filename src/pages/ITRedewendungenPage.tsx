@@ -6,6 +6,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { useHighlightedPhrases } from '@/hooks/useHighlightedPhrases';
 import { ITDeutschNav } from '@/components/layout/ITDeutschNav';
 import { StarredButton } from '@/components/shared/StarredButton';
+import { SelectionHint, markHintInteraction } from '@/components/shared/SelectionHint';
 import { PlayAllButton } from '@/components/PlayAllButton';
 import { usePlayAll } from '@/hooks/usePlayAll';
 
@@ -74,7 +75,8 @@ export default function ITRedewendungenPage() {
       </div>
       <ITDeutschNav />
 
-      <div className="flex items-center justify-end gap-2">
+      <SelectionHint type="card" />
+      <div className="flex items-center justify-end gap-2 -mt-3">
         <StarredButton active={starredOnly} onClick={() => setStarredOnly(prev => !prev)} />
         <PlayAllButton player={player} getUrls={getUrls} />
       </div>
@@ -88,7 +90,7 @@ export default function ITRedewendungenPage() {
           return (
             <div
               key={idiom.id}
-              onClick={() => toggleHighlight(idiom.german)}
+              onClick={() => { toggleHighlight(idiom.german); markHintInteraction('card'); }}
               className={cn(
                 'relative rounded-xl border border-border bg-card p-4 transition-all hover:shadow-md cursor-pointer',
                 starred && 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'

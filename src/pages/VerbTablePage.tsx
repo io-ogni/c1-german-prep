@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { useHighlightedPhrases } from '@/hooks/useHighlightedPhrases';
 import { TertiaryNav } from '@/components/shared/TertiaryNav';
 import { StarredButton } from '@/components/shared/StarredButton';
+import { SelectionHint, markHintInteraction } from '@/components/shared/SelectionHint';
 import type { TertiaryNavItem } from '@/components/shared/TertiaryNav';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -62,12 +63,13 @@ export function VerbTableContent() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <TertiaryNav
-          items={FILTER_ITEMS}
-          activeValue={filter}
-          onChange={(v) => setFilter(v as Filter)}
-        />
+      <TertiaryNav
+        items={FILTER_ITEMS}
+        activeValue={filter}
+        onChange={(v) => setFilter(v as Filter)}
+      />
+      <div className="flex items-center justify-between gap-2 -mt-2">
+        <SelectionHint />
         <StarredButton active={starredOnly} onClick={() => setStarredOnly(prev => !prev)} />
       </div>
 
@@ -118,7 +120,7 @@ export function VerbTableContent() {
                 <TableRow
                   key={v.id}
                   className={cn('cursor-pointer', isHighlighted(v.infinitiv) && 'bg-yellow-50 dark:bg-yellow-900/20')}
-                  onClick={() => toggle(v.infinitiv)}
+                  onClick={() => { markHintInteraction('table'); toggle(v.infinitiv); }}
                 >
                   <TableCell className={cn('font-medium', v.is_irregular && 'text-primary')}>
                     {v.infinitiv}

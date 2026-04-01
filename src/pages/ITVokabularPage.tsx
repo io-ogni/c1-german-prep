@@ -1,8 +1,8 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
-import { Languages, Zap, Link2, Presentation, GitBranch, Shield, AlertTriangle, Volume2, Filter, MousePointerClick, Monitor } from 'lucide-react';
+import { Languages, Zap, Link2, Presentation, GitBranch, Shield, AlertTriangle, Volume2, Filter, Monitor } from 'lucide-react';
 import { StarredButton } from '@/components/shared/StarredButton';
-import { useTableClickHint } from '@/hooks/useTableClickHint';
+import { SelectionHint, markHintInteraction } from '@/components/shared/SelectionHint';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ITDeutschNav } from '@/components/layout/ITDeutschNav';
 import { useAuth } from '@/contexts/AuthContext';
@@ -476,12 +476,10 @@ export default function ITVokabularPage() {
   useEffect(() => () => stopAudio(), []);
 
   const [selectedRows, setSelectedRows] = useState<Set<string>>(() => loadHighlights(userId));
-  const { showClickHint, dismissClickHint } = useTableClickHint();
-
   useEffect(() => { saveHighlights(userId, selectedRows); }, [userId, selectedRows]);
 
   const toggleRow = useCallback((key: string) => {
-    dismissClickHint();
+    markHintInteraction('table');
     setSelectedRows(prev => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key); else next.add(key);
@@ -521,7 +519,7 @@ export default function ITVokabularPage() {
   const starredBtn = <StarredButton active={starredOnly} onClick={() => setStarredOnly(prev => !prev)} />;
 
   const emptyStarred = starredOnly ? (
-    <div className="py-10 text-center text-sm space-y-2">
+    <div className="py-10 text-center text-sm space-y-2 bg-card rounded-lg border">
       <p className="text-muted-foreground">Noch keine Einträge markiert — klicke auf eine Zeile, um sie zu markieren.</p>
       <button className="text-primary text-sm font-medium hover:underline" onClick={() => setStarredOnly(false)}>Alle anzeigen</button>
     </div>
@@ -537,11 +535,7 @@ export default function ITVokabularPage() {
         <p className="text-sm text-muted-foreground mt-1">Berufssprache für die IT-Branche — Vokabular, Redewendungen und Dialoge für den Arbeitsalltag.</p>
       </div>
       <ITDeutschNav />
-      <p className="text-sm text-muted-foreground">
-        {lang === 'de'
-          ? 'Dein komplettes C1-Toolkit: Wortschatz, Kollokationen, Phrasen und Notfall-Kit für den IT-Arbeitsalltag.'
-          : 'Your complete C1 toolkit: vocabulary, collocations, phrases and emergency kit for daily IT work.'}
-      </p>
+      <SelectionHint />
 
       <Tabs defaultValue="nomen" onValueChange={() => stopAudio()}>
         <ScrollNav>
@@ -575,17 +569,7 @@ export default function ITVokabularPage() {
                   const sel = selectedRows.has(key);
                   return (
                     <TableRow key={i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
-                      <TableCell className="text-sm font-medium text-foreground">
-                        <div className="flex items-center gap-2">
-                          {n.de}
-                          {i === 0 && showClickHint && (
-                            <span className="inline-flex items-center gap-1 animate-bounce">
-                              <span className="bg-foreground/90 text-background text-xs font-medium px-2.5 py-1 rounded-full shadow-lg" style={{ fontFamily: '"Comic Sans MS", "Segoe Print", cursive' }}>Klick mich!</span>
-                              <MousePointerClick className="h-5 w-5 text-foreground/80 -rotate-12" />
-                            </span>
-                          )}
-                        </div>
-                      </TableCell>
+                      <TableCell className="text-sm font-medium text-foreground">{n.de}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{n.en}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">

@@ -3,16 +3,17 @@ import { useRequiredAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
 import { Plus, X, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Props {
   content: string;
   textId: string;
   textType: string;
+  wordAnnotations?: Record<string, { de: string; en: string }>;
   gapAnswers?: Record<string, string>;
   gapOptions?: Record<string, { id: string; text: string }[]>;
   gapCorrect?: Record<string, string>;
@@ -65,12 +66,10 @@ function InlineGap({
   const ref = useRef<HTMLSpanElement>(null);
   const dropdownRef = useRef<HTMLSpanElement>(null);
 
-  // Position dropdown within viewport
   useEffect(() => {
     if (!dropdownOpen || !ref.current) return;
     const rect = ref.current.getBoundingClientRect();
     const vw = window.innerWidth;
-    // On mobile, anchor to left edge of screen with some padding
     if (vw < 640) {
       setDropdownStyle({ position: 'fixed', left: 8, right: 8, top: rect.bottom + 4 });
     } else {
@@ -78,7 +77,6 @@ function InlineGap({
     }
   }, [dropdownOpen]);
 
-  // Close dropdown on click outside
   useEffect(() => {
     if (!dropdownOpen) return;
     const handler = (e: MouseEvent) => {
@@ -90,7 +88,6 @@ function InlineGap({
     return () => document.removeEventListener('mousedown', handler);
   }, [dropdownOpen]);
 
-  // Filled gap
   if (assignedText) {
     return (
       <span ref={ref} className="inline relative">
@@ -101,9 +98,7 @@ function InlineGap({
             checked && isWrong && 'bg-destructive/15 text-destructive line-through',
             !checked && 'bg-primary/15 text-primary hover:bg-primary/25'
           )}
-          onClick={() => {
-            if (!checked) onClear();
-          }}
+          onClick={() => { if (!checked) onClear(); }}
         >
           {assignedText}
           {!checked && (
@@ -115,17 +110,13 @@ function InlineGap({
             </button>
           )}
         </span>
-        {/* Show correct answer below if wrong */}
         {checked && isWrong && correctText && (
-          <span className="block text-xs text-primary mt-0.5 ml-0.5">
-            → {correctText}
-          </span>
+          <span className="block text-xs text-primary mt-0.5 ml-0.5">→ {correctText}</span>
         )}
       </span>
     );
   }
 
-  // Empty gap — clickable with dropdown
   return (
     <span ref={ref} className="inline-block relative align-bottom">
       <button
@@ -135,16 +126,13 @@ function InlineGap({
             ? 'border-primary bg-primary/10 text-primary'
             : 'border-muted-foreground/40 text-muted-foreground hover:border-primary/60 hover:bg-primary/5'
         )}
-        onClick={() => {
-          if (!checked && options.length > 0) setDropdownOpen(!dropdownOpen);
-        }}
+        onClick={() => { if (!checked && options.length > 0) setDropdownOpen(!dropdownOpen); }}
         disabled={checked}
       >
         <span className="font-mono text-xs">{gapNum}</span>
         {!checked && options.length > 0 && <ChevronDown className="h-3 w-3 ml-0.5" />}
       </button>
 
-      {/* Dropdown */}
       {dropdownOpen && !checked && (
         <span
           ref={dropdownRef}
@@ -158,11 +146,7 @@ function InlineGap({
             <button
               key={opt.id}
               className="w-full text-left rounded-md px-3 py-2 text-xs text-popover-foreground bg-white dark:bg-card hover:bg-accent transition-colors"
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelect(opt.id);
-                setDropdownOpen(false);
-              }}
+              onClick={(e) => { e.stopPropagation(); onSelect(opt.id); setDropdownOpen(false); }}
             >
               <span className="line-clamp-2">{opt.text}</span>
             </button>
@@ -173,36 +157,23 @@ function InlineGap({
         </span>
       )}
 
-      {/* Show correct answer if checked and was empty */}
       {checked && correctText && (
-        <span className="block text-xs text-primary mt-0.5 ml-0.5">
-          → {correctText}
-        </span>
+        <span className="block text-xs text-primary mt-0.5 ml-0.5">→ {correctText}</span>
       )}
     </span>
   );
 }
 
 function VocabPopupContent({
-  selectedTexts,
-  combinedExpression,
-  dictEntry,
-  hasDictTranslation,
-  needsTranslation,
-  customTranslation,
-  setCustomTranslation,
+  word,
+  annotation,
   canAdd,
   onAdd,
   onClose,
   addLabel,
 }: {
-  selectedTexts: string[];
-  combinedExpression: string;
-  dictEntry: { word_de: string; article: string | null; translation_en: string } | null | undefined;
-  hasDictTranslation: boolean;
-  needsTranslation: boolean;
-  customTranslation: string;
-  setCustomTranslation: (v: string) => void;
+  word: string;
+  annotation: { de: string; en: string };
   canAdd: boolean;
   onAdd: () => void;
   onClose: () => void;
@@ -212,43 +183,13 @@ function VocabPopupContent({
     <>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-            {selectedTexts.length > 1 ? 'Ausdruck' : 'Wort'}
-          </p>
-          <p className="font-semibold text-sm text-foreground break-words">
-            {hasDictTranslation && dictEntry?.article
-              ? `${dictEntry.article} ${dictEntry.word_de}`
-              : combinedExpression}
-          </p>
+          <p className="font-semibold text-sm text-foreground break-words">{annotation.de}</p>
+          <p className="text-xs text-muted-foreground mt-1">{annotation.en}</p>
         </div>
         <Button variant="ghost" size="sm" className="h-6 w-6 p-0 shrink-0" onClick={onClose}>
           <X className="h-3.5 w-3.5" />
         </Button>
       </div>
-
-      {hasDictTranslation && (
-        <p className="text-xs text-muted-foreground">EN: {dictEntry!.translation_en}</p>
-      )}
-
-      {needsTranslation && (
-        <div className="space-y-1">
-          <Input
-            value={customTranslation}
-            onChange={e => setCustomTranslation(e.target.value)}
-            placeholder="Übersetzung eingeben..."
-            className="h-8 text-sm"
-            autoFocus
-            onKeyDown={e => {
-              if (e.key === 'Enter' && canAdd) onAdd();
-            }}
-          />
-          {!customTranslation.trim() && (
-            <p className="text-xs text-muted-foreground">
-              Übersetzung erforderlich
-            </p>
-          )}
-        </div>
-      )}
 
       <Button
         variant="outline"
@@ -268,6 +209,7 @@ export function ClickableText({
   content,
   textId,
   textType,
+  wordAnnotations,
   gapAnswers,
   gapOptions,
   gapCorrect,
@@ -277,113 +219,71 @@ export function ClickableText({
 }: Props) {
   const { t } = useTranslation();
   const { profile } = useRequiredAuth();
-  const [lookupCache, setLookupCache] = useState<Record<string, { word_de: string; article: string | null; translation_en: string } | null>>({});
+  const isMobile = useIsMobile();
 
-  // Selection state for vocabulary lookup
-  const [selectedWords, setSelectedWords] = useState<WordKey[]>([]);
-  const [selectedTexts, setSelectedTexts] = useState<string[]>([]);
-  const [customTranslation, setCustomTranslation] = useState('');
+  const [selectedKey, setSelectedKey] = useState<WordKey | null>(null);
+  const [selectedWord, setSelectedWord] = useState<string | null>(null);
+  const [popupPos, setPopupPos] = useState<{ top: number; left: number } | null>(null);
   const popupRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const combinedExpression = selectedTexts.join(' ');
-  const firstSelectedClean = selectedTexts.length === 1 ? stripPunctuation(selectedTexts[0]) : null;
-  const dictEntry = firstSelectedClean ? lookupCache[firstSelectedClean.toLowerCase()] : null;
-  const hasDictTranslation = !!dictEntry?.translation_en;
-
-  const lookupWord = useCallback(async (cleanWord: string) => {
-    const key = cleanWord.toLowerCase();
-    if (lookupCache[key] !== undefined) return;
-
-    const lw = key;
-    const candidates = [lw];
-    if (lw.endsWith('e')) candidates.push(lw + 'n');
-    if (lw.endsWith('t')) candidates.push(lw.slice(0, -1) + 'en');
-    if (lw.endsWith('st')) candidates.push(lw.slice(0, -2) + 'en');
-    if (lw.endsWith('te')) candidates.push(lw.slice(0, -2) + 'en');
-    if (lw.endsWith('et')) candidates.push(lw.slice(0, -2) + 'en');
-    candidates.push(lw + 'en', lw + 'n');
-
-    const unique = [...new Set(candidates)];
-
-    const { data } = await supabase
-      .from('dictionary')
-      .select('word_de, article, translation_en')
-      .in('word_de', unique.map(c => c.charAt(0).toUpperCase() + c.slice(1)).concat(unique))
-      .limit(5);
-
-    if (data && data.length > 0) {
-      const exactMatch = data.find(d => d.word_de.toLowerCase() === lw);
-      const verbMatch = data.find(d => !d.article);
-      const best = exactMatch ?? verbMatch ?? data[0];
-      setLookupCache(prev => ({ ...prev, [key]: best }));
-    } else {
-      setLookupCache(prev => ({ ...prev, [key]: null }));
-    }
-  }, [lookupCache]);
+  const annotation = selectedWord ? wordAnnotations?.[selectedWord.toLowerCase()] ?? null : null;
 
   const clearSelection = useCallback(() => {
-    setSelectedWords([]);
-    setSelectedTexts([]);
-    setCustomTranslation('');
+    setSelectedKey(null);
+    setSelectedWord(null);
+    setPopupPos(null);
   }, []);
 
   useEffect(() => {
-    if (selectedWords.length === 0) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') clearSelection();
-    };
+    if (!selectedKey) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') clearSelection(); };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [selectedWords.length, clearSelection]);
+  }, [selectedKey, clearSelection]);
 
   useEffect(() => {
-    if (selectedWords.length === 0) return;
+    if (!selectedKey) return;
     const handler = (e: MouseEvent) => {
       const target = e.target as Node;
-      if (
-        containerRef.current?.contains(target) ||
-        popupRef.current?.contains(target)
-      ) return;
+      if (containerRef.current?.contains(target) || popupRef.current?.contains(target)) return;
       clearSelection();
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, [selectedWords.length, clearSelection]);
+  }, [selectedKey, clearSelection]);
 
-  const handleWordClick = (key: WordKey, cleanWord: string) => {
-    const idx = selectedWords.indexOf(key);
-    if (idx >= 0) {
-      setSelectedWords(prev => prev.filter(k => k !== key));
-      setSelectedTexts(prev => prev.filter((_, i) => i !== idx));
-      setCustomTranslation('');
+  const handleWordClick = (key: WordKey, cleanWord: string, e?: React.MouseEvent) => {
+    if (selectedKey === key) {
+      clearSelection();
       return;
     }
 
-    setSelectedWords(prev => [...prev, key]);
-    setSelectedTexts(prev => [...prev, cleanWord]);
-    setCustomTranslation('');
-    lookupWord(cleanWord);
+    if (e && containerRef.current) {
+      const wordRect = (e.target as HTMLElement).getBoundingClientRect();
+      const containerRect = containerRef.current.getBoundingClientRect();
+      setPopupPos({
+        top: wordRect.bottom - containerRect.top + 8,
+        left: Math.min(
+          Math.max(wordRect.left - containerRect.left, 0),
+          containerRect.width - 320
+        ),
+      });
+    }
+
+    setSelectedKey(key);
+    setSelectedWord(cleanWord);
   };
 
   const addToVocabulary = async () => {
-    if (!profile) return;
-    const expression = combinedExpression;
-    if (!expression) return;
+    if (!profile || !selectedWord || !annotation) return;
 
-    const translation = hasDictTranslation ? dictEntry!.translation_en : customTranslation;
-    if (!translation) return;
-
-    const wordDisplay = (hasDictTranslation && dictEntry?.article)
-      ? `${dictEntry.article} ${dictEntry.word_de}`
-      : expression;
-
-    const sentence = getSentenceAtPosition(content, content.indexOf(stripPunctuation(selectedTexts[0])));
+    const sentence = getSentenceAtPosition(content, content.toLowerCase().indexOf(selectedWord.toLowerCase()));
 
     const { error } = await supabase.from('personal_vocabulary').insert({
       user_id: profile.user_id,
-      word_de: wordDisplay,
-      translation_en: translation,
+      word_de: annotation.de,
+      translation_en: annotation.en,
       source_type: 'reading',
       source_id: textId,
       example_sentence: sentence,
@@ -398,11 +298,8 @@ export function ClickableText({
     }
   };
 
-  const isSelected = (key: WordKey) => selectedWords.includes(key);
-  const hasSelection = selectedWords.length > 0;
-  const needsTranslation = selectedTexts.length > 1 || !hasDictTranslation;
-  const canAdd = hasSelection && (hasDictTranslation || customTranslation.trim().length > 0);
-
+  const hasAnnotations = !!wordAnnotations && Object.keys(wordAnnotations).length > 0;
+  const hasSelection = !!selectedKey;
   const isTextrekonstruktion = textType === 'textrekonstruktion';
   const assignedOptionsSet = new Set(Object.values(gapAnswers ?? {}));
 
@@ -422,22 +319,17 @@ export function ClickableText({
                   const gapNum = gapMatch[1];
                   const assignedId = gapAnswers?.[gapNum] ?? null;
 
-                  // Find the assigned option's text
                   let assignedText: string | null = null;
                   if (assignedId && gapOptions) {
                     const allOpts = Object.values(gapOptions).flat();
                     assignedText = allOpts.find(o => o.id === assignedId)?.text ?? null;
                   }
 
-                  // Get available (unassigned) options for this gap
                   let availableOpts: { id: string; text: string }[] = [];
                   if (gapOptions?.[gapNum]) {
-                    // Per-gap options (Format B)
                     availableOpts = gapOptions[gapNum].filter(o => !assignedOptionsSet.has(o.id) || o.id === assignedId);
-                    // Exclude the currently assigned one from dropdown
                     availableOpts = availableOpts.filter(o => o.id !== assignedId);
                   } else if (gapOptions?.['_shared']) {
-                    // Shared pool (Format A)
                     availableOpts = gapOptions['_shared'].filter(o => !assignedOptionsSet.has(o.id));
                   }
 
@@ -446,7 +338,6 @@ export function ClickableText({
                   const isEmpty = !assignedId;
                   const isWrongEmpty = !!checked && isEmpty;
 
-                  // Find correct answer text for display when wrong
                   let correctText: string | null = null;
                   if ((isWrong || isWrongEmpty) && gapCorrect?.[gapNum] && gapOptions) {
                     const allOpts = Object.values(gapOptions).flat();
@@ -470,7 +361,7 @@ export function ClickableText({
                   );
                 }
 
-                // Regular text — clickable words for dictionary lookup
+                // Regular text — clickable words for annotation lookup
                 const words = part.split(/(\s+)/);
                 return (
                   <Fragment key={partIdx}>
@@ -480,21 +371,27 @@ export function ClickableText({
                       if (!clean) return <span key={wIdx}>{word}</span>;
 
                       const key: WordKey = `${pIdx}-${partIdx}-${wIdx}`;
-                      const selected = isSelected(key);
+                      const selected = selectedKey === key;
+                      const hasAnnotation = hasAnnotations && !!wordAnnotations[clean.toLowerCase()];
 
                       return (
                         <span
                           key={wIdx}
                           className={cn(
-                            'cursor-pointer rounded px-0.5 transition-colors',
+                            'rounded px-0.5 transition-colors',
+                            hasAnnotations && 'cursor-pointer',
                             selected
                               ? 'bg-primary/20 text-primary ring-1 ring-primary/40'
-                              : 'hover:bg-accent hover:text-accent-foreground'
+                              : hasAnnotation
+                                ? 'hover:bg-accent hover:text-accent-foreground'
+                                : hasAnnotations
+                                  ? 'hover:bg-muted/50'
+                                  : ''
                           )}
-                          onClick={(e) => {
+                          onClick={hasAnnotations ? (e) => {
                             e.stopPropagation();
-                            handleWordClick(key, clean);
-                          }}
+                            handleWordClick(key, clean, e);
+                          } : undefined}
                         >
                           {word}
                         </span>
@@ -508,51 +405,71 @@ export function ClickableText({
         })}
       </div>
 
-      {/* Vocabulary popup — drawer on mobile, sticky card on desktop */}
-      {hasSelection && (
-        <>
-          {/* Desktop: sticky card */}
-          <div
-            ref={popupRef}
-            className="hidden sm:block sticky bottom-4 mt-4 mx-auto max-w-md rounded-xl border-2 border-primary/30 bg-card p-4 shadow-xl space-y-2"
-          >
-            <VocabPopupContent
-              selectedTexts={selectedTexts}
-              combinedExpression={combinedExpression}
-              dictEntry={dictEntry}
-              hasDictTranslation={hasDictTranslation}
-              needsTranslation={needsTranslation}
-              customTranslation={customTranslation}
-              setCustomTranslation={setCustomTranslation}
-              canAdd={canAdd}
-              onAdd={addToVocabulary}
-              onClose={clearSelection}
-              addLabel={t('word_add_to_vocabulary')}
-            />
-          </div>
-
-          {/* Mobile: bottom drawer */}
-          <Drawer open={true} onOpenChange={(open) => { if (!open) clearSelection(); }}>
-            <DrawerContent className="sm:hidden">
-              <DrawerTitle className="sr-only">Wort hinzufügen</DrawerTitle>
-              <div className="p-4 pb-8 space-y-2">
-                <VocabPopupContent
-                  selectedTexts={selectedTexts}
-                  combinedExpression={combinedExpression}
-                  dictEntry={dictEntry}
-                  hasDictTranslation={hasDictTranslation}
-                  needsTranslation={needsTranslation}
-                  customTranslation={customTranslation}
-                  setCustomTranslation={setCustomTranslation}
-                  canAdd={canAdd}
-                  onAdd={addToVocabulary}
-                  onClose={clearSelection}
-                  addLabel={t('word_add_to_vocabulary')}
-                />
+      {/* Vocabulary popup — drawer on mobile, positioned card on desktop */}
+      {hasSelection && annotation && isMobile && (
+        <Drawer open={true} onOpenChange={(open) => { if (!open) clearSelection(); }}>
+          <DrawerContent>
+            <DrawerTitle className="sr-only">Wort hinzufügen</DrawerTitle>
+            <div className="p-4 pb-8 space-y-2">
+              <VocabPopupContent
+                word={selectedWord!}
+                annotation={annotation}
+                canAdd={true}
+                onAdd={addToVocabulary}
+                onClose={clearSelection}
+                addLabel={t('word_add_to_vocabulary')}
+              />
+            </div>
+          </DrawerContent>
+        </Drawer>
+      )}
+      {hasSelection && annotation && !isMobile && popupPos && (
+        <div
+          ref={popupRef}
+          className="absolute z-30 w-80 rounded-xl border-2 border-primary/30 bg-card p-4 shadow-xl space-y-2"
+          style={{ top: popupPos.top, left: popupPos.left }}
+        >
+          <VocabPopupContent
+            word={selectedWord!}
+            annotation={annotation}
+            canAdd={true}
+            onAdd={addToVocabulary}
+            onClose={clearSelection}
+            addLabel={t('word_add_to_vocabulary')}
+          />
+        </div>
+      )}
+      {/* No annotation available — show the raw word */}
+      {hasSelection && !annotation && isMobile && (
+        <Drawer open={true} onOpenChange={(open) => { if (!open) clearSelection(); }}>
+          <DrawerContent>
+            <DrawerTitle className="sr-only">Wort</DrawerTitle>
+            <div className="p-4 pb-8 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <p className="font-semibold text-sm text-foreground">{selectedWord}</p>
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0 shrink-0" onClick={clearSelection}>
+                  <X className="h-3.5 w-3.5" />
+                </Button>
               </div>
-            </DrawerContent>
-          </Drawer>
-        </>
+              <p className="text-xs text-muted-foreground">Keine Übersetzung verfügbar</p>
+            </div>
+          </DrawerContent>
+        </Drawer>
+      )}
+      {hasSelection && !annotation && !isMobile && popupPos && (
+        <div
+          ref={popupRef}
+          className="absolute z-30 w-80 rounded-xl border-2 border-primary/30 bg-card p-4 shadow-xl space-y-2"
+          style={{ top: popupPos.top, left: popupPos.left }}
+        >
+          <div className="flex items-start justify-between gap-2">
+            <p className="font-semibold text-sm text-foreground">{selectedWord}</p>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 shrink-0" onClick={clearSelection}>
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">Keine Übersetzung verfügbar</p>
+        </div>
       )}
     </div>
   );

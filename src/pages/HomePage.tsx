@@ -3,7 +3,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { useRequiredAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, PenLine, BookOpenCheck, Headphones, Languages, Flame, Briefcase } from 'lucide-react';
+import { BookOpen, PenLine, BookOpenCheck, Headphones, Languages, Flame, Monitor } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ProgressBar } from '@/components/shared/ProgressBar';
@@ -129,7 +129,7 @@ export default function HomePage() {
     { key: 'nav_writing' as const, path: '/writing', icon: PenLine, data: data?.writing },
     { key: 'nav_reading' as const, path: '/reading', icon: BookOpenCheck, data: data?.reading },
     { key: 'nav_listening' as const, path: '/listening', icon: Headphones, data: data?.listening },
-    { key: 'nav_it_deutsch' as const, path: '/it-deutsch/uebungen', icon: Briefcase, data: data?.itDeutsch, fuchsia: true },
+    { key: 'nav_it_deutsch' as const, path: '/it-deutsch/uebungen', icon: Monitor, data: data?.itDeutsch, fuchsia: true },
   ];
 
   const streak = profile?.current_streak ?? 0;

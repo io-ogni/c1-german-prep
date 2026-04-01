@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
-import { Trash2, MousePointerClick, Volume2, Mic } from 'lucide-react';
+import { Trash2, Volume2, Mic } from 'lucide-react';
 import { TelcBadge } from '@/components/shared/TelcBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 import { NAV_CONTAINER, TAB_TRIGGER_BLUE } from '@/components/shared/navStyles';
 import { ScrollNav } from '@/components/shared/ScrollNav';
 import { StarredButton } from '@/components/shared/StarredButton';
-import { useTableClickHint } from '@/hooks/useTableClickHint';
+import { SelectionHint, markHintInteraction } from '@/components/shared/SelectionHint';
 import { c1Expressions } from '@/data/c1Expressions';
 import { PlayAllButton } from '@/components/PlayAllButton';
 import { usePlayAll } from '@/hooks/usePlayAll';
@@ -317,7 +317,6 @@ export default function SpeakingPage() {
   const { lang } = useTranslation();
   const { customConnectors, addConnector, removeConnector } = useCustomPhrases('speaking-custom');
   const { isHighlighted, toggle: toggleHighlight } = useHighlightedPhrases('speaking-highlights');
-  const { showClickHint: showTableHint, dismissClickHint } = useTableClickHint();
   const [starredOnly, setStarredOnly] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<Record<string, string>>({});
   const player = usePlayAll();
@@ -380,9 +379,9 @@ export default function SpeakingPage() {
   }, [starredOnly, isHighlighted, categoryFilter]);
 
   const handleToggle = useCallback((de: string) => {
-    dismissClickHint();
+    markHintInteraction('table');
     toggleHighlight(de);
-  }, [toggleHighlight, dismissClickHint]);
+  }, [toggleHighlight]);
 
   const starredBtn = <StarredButton active={starredOnly} onClick={() => setStarredOnly(prev => !prev)} />;
 
@@ -400,7 +399,6 @@ export default function SpeakingPage() {
             : 'Phrases for the oral exam — learn by heart!'}
         </p>
       </div>
-
       <Tabs defaultValue="redewendungen">
         <ScrollNav>
           <TabsList className={`${NAV_CONTAINER} h-auto gap-1`}>
@@ -416,7 +414,8 @@ export default function SpeakingPage() {
         {/* Phrase tabs */}
         {SECTIONS.map(section => (
           <TabsContent key={section.tab} value={section.tab} className="mt-4 space-y-4">
-            <div className="mt-2 mb-4 flex items-center justify-end gap-2">{starredBtn}<PlayAllButton color="blue" player={player} getUrls={() => { const audio = TAB_TO_AUDIO[section.tab]; return (flatSections[section.tab] ?? []).map(r => audio ? getTtsUrl(audio, r.idx) : undefined).filter(Boolean) as string[]; }} /></div>
+            <SelectionHint />
+            <div className="mb-4 flex items-center justify-end gap-2 -mt-2">{starredBtn}<PlayAllButton color="blue" player={player} getUrls={() => { const audio = TAB_TO_AUDIO[section.tab]; return (flatSections[section.tab] ?? []).map(r => audio ? getTtsUrl(audio, r.idx) : undefined).filter(Boolean) as string[]; }} /></div>
 
             {/* Desktop table */}
             <div className="hidden md:block rounded-md border overflow-x-auto">
@@ -472,12 +471,6 @@ export default function SpeakingPage() {
                               <Volume2 className="h-4 w-4" />
                             </button>
                             {row.de}
-                            {i === 0 && showTableHint && (
-                              <span className="inline-flex items-center gap-1 animate-bounce ml-2">
-                                <span className="bg-foreground/90 text-background text-xs font-medium px-2.5 py-1 rounded-full shadow-lg whitespace-nowrap" style={{ fontFamily: '"Comic Sans MS", "Segoe Print", cursive' }}>Klick mich!</span>
-                                <MousePointerClick className="h-5 w-5 text-foreground/80 -rotate-12" />
-                              </span>
-                            )}
                           </div>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">{row.en}</TableCell>
@@ -533,7 +526,7 @@ export default function SpeakingPage() {
             </div>
 
             {starredOnly && (flatSections[section.tab]?.length ?? 0) === 0 && (
-              <div className="py-10 text-center text-sm space-y-2">
+              <div className="py-10 text-center text-sm space-y-2 bg-card rounded-lg border">
                 <p className="text-muted-foreground">Noch keine Einträge markiert — klicke auf eine Zeile, um sie zu markieren.</p>
                 <button className="text-primary text-sm font-medium hover:underline" onClick={() => setStarredOnly(false)}>Alle anzeigen</button>
               </div>
@@ -582,7 +575,8 @@ export default function SpeakingPage() {
 
         {/* Redewendungen */}
         <TabsContent value="redewendungen" className="mt-4 space-y-4">
-          <div className="flex items-center justify-end gap-2">
+          <SelectionHint type="card" />
+          <div className="flex items-center justify-end gap-2 -mt-2">
             {starredBtn}
             <PlayAllButton color="blue" player={player} getUrls={() => filteredExpressions.map(e => getTtsUrl('expressions', e.id - 1)).filter(Boolean) as string[]} />
           </div>
@@ -594,7 +588,7 @@ export default function SpeakingPage() {
               const isPlaying = speakingRef.current && speakingUrl === ttsUrl;
               return (
                 <div key={expr.id}
-                  onClick={() => toggleHighlight(expr.german)}
+                  onClick={() => { markHintInteraction('card'); toggleHighlight(expr.german); }}
                   className={cn('relative rounded-xl border border-border bg-card p-4 transition-all hover:shadow-md cursor-pointer', starred && 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800')}>
                   <div>
                     {image && (
@@ -626,7 +620,7 @@ export default function SpeakingPage() {
             })}
           </div>
           {filteredExpressions.length === 0 && (
-            <div className="py-10 text-center text-sm space-y-2">
+            <div className="py-10 text-center text-sm space-y-2 bg-card rounded-lg border">
               {starredOnly ? (
                 <>
                   <p className="text-muted-foreground">Noch keine Redewendungen markiert — klicke auf eine Karte, um sie zu markieren.</p>

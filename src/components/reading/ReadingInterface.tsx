@@ -30,6 +30,7 @@ interface ReadingText {
   text_content: string;
   questions: any;
   sort_order: number;
+  word_annotations?: Record<string, { de: string; en: string }> | null;
 }
 
 interface Props {
@@ -293,6 +294,7 @@ export function ReadingInterface({ text, onBack }: Props) {
             content={text.text_content}
             textId={text.id}
             textType={text.text_type}
+            wordAnnotations={text.word_annotations ?? undefined}
             gapAnswers={isTextrekonstruktion ? answers : undefined}
             gapOptions={gapOptions}
             gapCorrect={gapCorrect}
