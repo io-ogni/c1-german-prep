@@ -197,6 +197,13 @@ export function ReadingInterface({ text, onBack }: Props) {
     setSaving(true);
     const percentage = Math.round((score.correct / score.total) * 100);
 
+    // Fetch existing to preserve best score
+    const { data: existing } = await supabase.from('reading_progress')
+      .select('score')
+      .eq('user_id', profile.user_id)
+      .eq('reading_text_id', text.id)
+      .maybeSingle();
+
     const { error } = await supabase
       .from('reading_progress')
       .upsert(
@@ -204,7 +211,7 @@ export function ReadingInterface({ text, onBack }: Props) {
           user_id: profile.user_id,
           reading_text_id: text.id,
           completed: true,
-          score: percentage,
+          score: Math.max(percentage, existing?.score ?? 0),
           self_score: selfScore,
           answers: answers,
           time_spent_seconds: timerSecondsRef.current,

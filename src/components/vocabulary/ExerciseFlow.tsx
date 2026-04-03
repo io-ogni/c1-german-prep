@@ -126,16 +126,30 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
     setAnswered(true);
     if (!auth?.user) return;
 
-    await supabase.from('exercise_progress').upsert(
-      {
+    const { data: existing } = await supabase.from('exercise_progress')
+      .select('id, attempts, completed')
+      .eq('user_id', auth.user.id)
+      .eq('exercise_id', exerciseId)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase.from('exercise_progress').update({
+        completed: correct || existing.completed,
+        attempts: existing.attempts + 1,
+        last_attempt_at: new Date().toISOString(),
+        score: correct ? 100 : existing.completed ? undefined : 0,
+      }).eq('id', existing.id);
+    } else {
+      await supabase.from('exercise_progress').insert({
         user_id: auth.user.id,
         exercise_id: exerciseId,
         completed: correct,
-        last_attempt_at: new Date().toISOString(),
         attempts: 1,
-      },
-      { onConflict: 'user_id,exercise_id' as any }
-    );
+        last_attempt_at: new Date().toISOString(),
+        score: correct ? 100 : 0,
+      });
+    }
+
     // Only invalidate topic lists (for progress display), NOT the exercise-progress
     // query — the queue must stay stable during the session
     queryClient.invalidateQueries({ queryKey: ['grammar-topics'] });

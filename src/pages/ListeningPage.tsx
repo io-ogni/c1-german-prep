@@ -72,17 +72,32 @@ export default function ListeningPage() {
 
   const handleSaveProgress = async (exerciseId: string, score: number, total: number) => {
     if (!user) return;
-    await supabase.from('exercise_progress').upsert(
-      {
+    const percentage = Math.round((score / total) * 100);
+    const isComplete = score === total;
+
+    const { data: existing } = await supabase.from('exercise_progress')
+      .select('id, attempts, completed, score')
+      .eq('user_id', user.id)
+      .eq('exercise_id', exerciseId)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase.from('exercise_progress').update({
+        completed: isComplete || existing.completed,
+        score: Math.max(percentage, existing.score ?? 0),
+        attempts: existing.attempts + 1,
+        last_attempt_at: new Date().toISOString(),
+      }).eq('id', existing.id);
+    } else {
+      await supabase.from('exercise_progress').insert({
         user_id: user.id,
         exercise_id: exerciseId,
-        completed: score === total,
-        score: Math.round((score / total) * 100),
-        last_attempt_at: new Date().toISOString(),
+        completed: isComplete,
+        score: percentage,
         attempts: 1,
-      },
-      { onConflict: 'user_id,exercise_id' as any }
-    );
+        last_attempt_at: new Date().toISOString(),
+      });
+    }
   };
 
   if (activeExercise) {

@@ -47,71 +47,48 @@ export default function HomePage() {
   async function loadProgress() {
     setLoading(true);
     try {
-      // Lazy-import sync to avoid pulling in ITVokabularPage/SpeakingPage/WritingPage modules on home load
-      const syncPromise = import('@/lib/syncStarredVocab').then(m => m.syncStarredToDb(user!.id));
+      // Fire sync as fire-and-forget — doesn't block homepage
+      import('@/lib/syncStarredVocab').then(m => m.syncStarredToDb(user!.id)).catch(() => {});
 
-      // Fire exercise/content queries in parallel with sync
+      // All queries in parallel: cache + lightweight counts
       const [
-        { data: allExercises },
-        { data: completedRows },
+        { data: cache },
         { count: totalWritingPrompts },
         { count: totalReadingTexts },
         { count: writingSubmissions },
         { count: completedReading },
+        { count: vocabCount },
+        { data: dueData },
       ] = await Promise.all([
-        supabase.from('exercises').select('id, area, exam_format'),
-        supabase.from('exercise_progress').select('exercise_id, completed').eq('user_id', user!.id),
+        supabase.from('user_progress_cache' as any).select('*').eq('user_id', user!.id).maybeSingle(),
         supabase.from('writing_prompts').select('*', { count: 'exact', head: true }),
         supabase.from('reading_texts').select('*', { count: 'exact', head: true }),
         supabase.from('writing_submissions').select('*', { count: 'exact', head: true }).eq('user_id', user!.id),
         supabase.from('reading_progress').select('*', { count: 'exact', head: true }).eq('user_id', user!.id).eq('completed', true),
-        syncPromise,
-      ]);
-
-      // Vocab queries run AFTER sync so newly starred items are included
-      const [{ count: vocabCount }, { data: dueData }] = await Promise.all([
         supabase.from('personal_vocabulary').select('*', { count: 'exact', head: true }).eq('user_id', user!.id),
         supabase.from('personal_vocabulary').select('*').eq('user_id', user!.id).lte('next_review_at', new Date().toISOString()).order('next_review_at'),
       ]);
 
-      // Process exercises
-      const exercisesByArea: Record<string, string[]> = {};
-      const examIds: string[] = [];
-      for (const ex of allExercises ?? []) {
-        const a = ex.area ?? 'unknown';
-        (exercisesByArea[a] ??= []).push(ex.id);
-        if (ex.exam_format) examIds.push(ex.id);
+      // If no cache row yet (first visit after migration), initialize it
+      let c = cache as any;
+      if (!c) {
+        await supabase.rpc('initialize_progress_cache');
+        const { data: fresh } = await supabase.from('user_progress_cache' as any).select('*').eq('user_id', user!.id).maybeSingle();
+        c = fresh;
       }
-
-      const completedSet = new Set((completedRows ?? []).filter(r => r.completed).map(r => r.exercise_id));
-      const countCompleted = (ids: string[]) => ids.filter(id => completedSet.has(id)).length;
-
-      const vocabIds = exercisesByArea['vocabulary'] ?? [];
-      const grammarIds = [...(exercisesByArea['grammar'] ?? []), ...(exercisesByArea['sprachbausteine'] ?? [])];
-      const itIds = exercisesByArea['berufssprache_it'] ?? [];
-      const listeningIds = exercisesByArea['listening'] ?? [];
-
-      const cVocab = countCompleted(vocabIds);
-      const cGrammar = countCompleted(grammarIds);
-      const cExam = countCompleted(examIds);
-      const cIT = countCompleted(itIds);
-      const cListening = countCompleted(listeningIds);
-
-      console.log('[Home] completedRows raw:', completedRows?.length, completedRows?.slice(0, 5));
-      console.log('[Home] user id:', user!.id);
 
       const dueReviewCount = dueData?.length ?? 0;
       if (dueReviewCount > 0) setHomeDueCards(dueData!);
 
       setData({
-        vocabulary: { completed: cVocab, total: vocabIds.length },
-        grammar: { completed: cGrammar, total: grammarIds.length },
+        vocabulary: { completed: c?.vocabulary_completed ?? 0, total: c?.vocabulary_total ?? 0 },
+        grammar: { completed: c?.grammar_completed ?? 0, total: c?.grammar_total ?? 0 },
         writing: { completed: writingSubmissions ?? 0, total: totalWritingPrompts ?? 0 },
         reading: { completed: completedReading ?? 0, total: totalReadingTexts ?? 0 },
-        listening: { completed: cListening, total: listeningIds.length },
-        itDeutsch: { completed: cIT, total: itIds.length },
-        examPrep: { completed: cExam, total: examIds.length },
-        totalExercises: cVocab + cGrammar + cExam + cIT + cListening,
+        listening: { completed: c?.listening_completed ?? 0, total: c?.listening_total ?? 0 },
+        itDeutsch: { completed: c?.it_completed ?? 0, total: c?.it_total ?? 0 },
+        examPrep: { completed: c?.exam_completed ?? 0, total: c?.exam_total ?? 0 },
+        totalExercises: (c?.vocabulary_completed ?? 0) + (c?.grammar_completed ?? 0) + (c?.exam_completed ?? 0) + (c?.it_completed ?? 0) + (c?.listening_completed ?? 0),
         vocabCount: vocabCount ?? 0,
         writingCount: writingSubmissions ?? 0,
         dueReviewCount,
