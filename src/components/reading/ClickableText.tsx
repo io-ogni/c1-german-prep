@@ -8,6 +8,7 @@ import { Plus, X, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { markHintInteraction } from '@/components/shared/SelectionHint';
 
 interface Props {
   content: string;
@@ -68,12 +69,12 @@ function InlineGap({
 
   useEffect(() => {
     if (!dropdownOpen || !ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
     const vw = window.innerWidth;
     if (vw < 640) {
-      setDropdownStyle({ position: 'fixed', left: 8, right: 8, top: rect.bottom + 4 });
+      // Bottom sheet: always anchored to bottom of screen, scrollable
+      setDropdownStyle({ position: 'fixed', left: 8, right: 8, bottom: 8, maxHeight: '60vh', overflowY: 'auto' });
     } else {
-      setDropdownStyle({});
+      setDropdownStyle({ maxHeight: '16rem', overflowY: 'auto' });
     }
   }, [dropdownOpen]);
 
@@ -137,10 +138,10 @@ function InlineGap({
         <span
           ref={dropdownRef}
           className={cn(
-            'z-50 rounded-lg border bg-gray-100 dark:bg-gray-800 p-1 shadow-xl',
+            'z-50 rounded-lg border bg-blue-50 dark:bg-blue-950 p-1 space-y-0.5 shadow-xl',
             dropdownStyle.position === 'fixed' ? 'fixed' : 'absolute left-0 top-full mt-1 w-[min(28rem,85vw)]'
           )}
-          style={dropdownStyle.position === 'fixed' ? dropdownStyle : undefined}
+          style={dropdownStyle}
         >
           {options.map(opt => (
             <button
@@ -293,6 +294,7 @@ export function ClickableText({
     if (error) {
       toast.error(error.message);
     } else {
+      markHintInteraction('reading');
       toast.success(t('word_added'));
       clearSelection();
     }

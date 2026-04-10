@@ -5,6 +5,12 @@ import WelcomePage from '@/pages/WelcomePage';
 export function RootRoute() {
   const auth = useAuth();
 
+  // Supabase recovery links land on / with #type=recovery — redirect to reset page
+  const hash = window.location.hash;
+  if (hash.includes('type=recovery')) {
+    return <Navigate to={`/reset-password${hash}`} replace />;
+  }
+
   if (auth?.loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">

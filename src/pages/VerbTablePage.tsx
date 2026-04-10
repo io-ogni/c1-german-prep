@@ -12,14 +12,16 @@ import { TertiaryNav } from '@/components/shared/TertiaryNav';
 import { StarredButton } from '@/components/shared/StarredButton';
 import { SelectionHint, markHintInteraction } from '@/components/shared/SelectionHint';
 import type { TertiaryNavItem } from '@/components/shared/TertiaryNav';
+import { VerbFlashcard } from '@/components/shared/VerbFlashcard';
 import type { Tables } from '@/integrations/supabase/types';
 
-type Filter = 'all' | 'irregular' | 'separable';
+type Filter = 'all' | 'irregular' | 'separable' | 'lernkarten';
 
 const FILTER_ITEMS: TertiaryNavItem[] = [
   { value: 'all', label: 'Alle' },
   { value: 'irregular', label: 'Unregelmäßig' },
   { value: 'separable', label: 'Trennbar' },
+  { value: 'lernkarten', label: 'Lernkarten' },
 ];
 
 export function VerbTableContent() {
@@ -68,8 +70,18 @@ export function VerbTableContent() {
         activeValue={filter}
         onChange={(v) => setFilter(v as Filter)}
       />
+      {filter === 'lernkarten' ? (
+        verbs && verbs.length > 0 ? (
+          <VerbFlashcard verbs={verbs} />
+        ) : (
+          <Skeleton className="h-96 w-full rounded-lg" />
+        )
+      ) : (
+      <>
       <div className="flex items-center justify-between gap-2 -mt-2">
         <SelectionHint />
+      </div>
+      <div className="flex items-center justify-end">
         <StarredButton active={starredOnly} onClick={() => setStarredOnly(prev => !prev)} />
       </div>
 
@@ -130,26 +142,26 @@ export function VerbTableContent() {
                   <TableCell className="text-sm">{v.praeteritum_ich}</TableCell>
                   <TableCell className="text-sm">{v.perfekt}</TableCell>
                   <TableCell className="text-sm">{v.konjunktiv_ii}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{v.bedeutung_en}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{v.bedeutung_en}</TableCell>
                 </TableRow>
               ))}
-              {noResults && (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
-                    {starredOnly ? (
-                      <div className="space-y-2">
-                        <p className="text-muted-foreground">Noch keine Verben markiert — klicke auf eine Zeile, um sie zu markieren.</p>
-                        <button className="text-primary text-sm font-medium hover:underline" onClick={() => setStarredOnly(false)}>Alle anzeigen</button>
-                      </div>
-                    ) : (
-                      <p className="text-muted-foreground">{search ? 'Keine Ergebnisse.' : t('page_coming_soon')}</p>
-                    )}
-                  </TableCell>
-                </TableRow>
-              )}
             </TableBody>
           </Table>
         </div>
+      )}
+      {noResults && (
+        <div className="text-center py-8 rounded-lg border bg-white dark:bg-card">
+          {starredOnly ? (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Noch keine Verben markiert — klicke auf eine Zeile, um sie zu markieren.</p>
+              <button className="text-primary text-sm font-medium hover:underline" onClick={() => setStarredOnly(false)}>Alle anzeigen</button>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">{search ? 'Keine Ergebnisse.' : t('page_coming_soon')}</p>
+          )}
+        </div>
+      )}
+      </>
       )}
     </div>
   );

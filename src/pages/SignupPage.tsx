@@ -6,8 +6,10 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Sparkles, BookOpen, Headphones, PenLine } from 'lucide-react';
 
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
@@ -61,33 +63,100 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
-          <div className="mb-2 text-2xl font-bold">
-            <span className="text-primary">C1</span> Werkstatt
+    <div className="min-h-screen flex bg-background">
+      {/* Left decorative panel */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-primary via-blue-500 to-violet-600">
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+
+        <div className="relative z-10 flex flex-col justify-center px-12 xl:px-16 text-white">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-sm font-medium mb-8">
+              <Sparkles className="h-4 w-4" />
+              Start your journey
+            </div>
+            <h1 className="text-4xl xl:text-5xl font-extrabold leading-tight mb-4">
+              Dein Weg
+              <br />
+              zur C1
+              <br />
+              Prüfung.
+            </h1>
+            <p className="text-lg text-white/80 max-w-sm leading-relaxed">
+              Interactive exercises, real-life vocabulary, and AI feedback — everything you need from B2 to C1.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="mt-12 flex gap-4"
+          >
+            {[
+              { icon: BookOpen, label: 'Lesen & Hören' },
+              { icon: PenLine, label: 'Schreiben mit AI' },
+              { icon: Headphones, label: 'IT-Deutsch' },
+            ].map((s) => (
+              <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 flex items-center gap-2">
+                <s.icon className="h-4 w-4" />
+                <p className="text-xs text-white/90">{s.label}</p>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Right form panel */}
+      <div className="flex w-full lg:w-1/2 items-center justify-center px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-sm"
+        >
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to home
+          </Link>
+
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold lg:hidden mb-1">
+              <span className="text-primary">C1</span> Werkstatt
+            </h2>
+            <h3 className="text-2xl font-bold">{t('auth_signup')}</h3>
+            <p className="text-muted-foreground text-sm mt-1">
+              Kostenlos starten · Kein Abo nötig
+            </p>
           </div>
-          <CardTitle className="text-lg">{t('auth_signup')}</CardTitle>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="name">{t('auth_display_name')}</Label>
-              <Input id="name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+              <Input id="name" required value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="h-11 rounded-xl" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">{t('auth_email')}</Label>
-              <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+              <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="h-11 rounded-xl" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">{t('auth_password')}</Label>
-              <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+              <Input id="password" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} className="h-11 rounded-xl" />
               <p className="text-xs text-muted-foreground">{t('auth_password_hint')}</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirm-password">{t('auth_confirm_password')}</Label>
-              <Input id="confirm-password" type="password" required minLength={6} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+              <Input id="confirm-password" type="password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="h-11 rounded-xl" />
             </div>
+
             {TURNSTILE_SITE_KEY && (
               <Turnstile
                 siteKey={TURNSTILE_SITE_KEY}
@@ -97,23 +166,29 @@ export default function SignupPage() {
                 options={{ size: 'flexible' }}
               />
             )}
-          </CardContent>
-          <CardFooter className="flex flex-col gap-3">
-            <Button type="submit" className="w-full" disabled={loading}>
+
+            <Button
+              type="submit"
+              className="w-full h-11 rounded-xl text-base font-semibold shadow-lg shadow-primary/20"
+              disabled={loading}
+            >
               {loading ? t('common_loading') : t('auth_signup')}
             </Button>
-            <span className="text-sm text-muted-foreground">
-              {t('auth_has_account')}{' '}
-              <Link to="/login" className="font-medium text-primary hover:underline">{t('auth_login')}</Link>
-            </span>
-          </CardFooter>
-        </form>
-      </Card>
+          </form>
 
-      <div className="mt-8 pb-4 text-center text-xs text-muted-foreground">
-        Built by <a href="https://ioana-ognibeni.eu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Ioana Ognibeni</a> with{' '}
-        <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Claude</a> &{' '}
-        <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Lovable</a>
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            {t('auth_has_account')}{' '}
+            <Link to="/login" className="font-semibold text-primary hover:underline">
+              {t('auth_login')}
+            </Link>
+          </p>
+
+          <p className="mt-6 text-center text-xs text-muted-foreground">
+            Built by <a href="https://ioana-ognibeni.eu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Ioana Ognibeni</a> with{' '}
+            <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Claude</a> &{' '}
+            <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Lovable</a>
+          </p>
+        </motion.div>
       </div>
     </div>
   );

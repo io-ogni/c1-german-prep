@@ -34,15 +34,15 @@ export function Timer({ className }: TimerProps) {
 
   return (
     <div className={`flex items-center gap-2 ${className ?? ''}`}>
-      <span className="font-mono text-lg font-semibold text-foreground tabular-nums">
-        {mm}:{ss}
-      </span>
       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={running ? stop : start}>
         {running ? <TimerOff className="h-4 w-4" /> : <TimerIcon className="h-4 w-4" />}
       </Button>
       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={reset}>
         <RotateCcw className="h-4 w-4" />
       </Button>
+      <span className="text-sm text-muted-foreground tabular-nums">
+        {mm}:{ss}
+      </span>
     </div>
   );
 }

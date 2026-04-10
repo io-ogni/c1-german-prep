@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { ProgressBar } from '@/components/shared/ProgressBar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ReviewCard } from '@/components/shared/ReviewCard';
+import { VerbFlashcard } from '@/components/shared/VerbFlashcard';
+import type { Tables } from '@/integrations/supabase/types';
 
 interface AreaProgress {
   completed: number;
@@ -31,6 +33,39 @@ interface HomeData {
 
 const TIME_OPTIONS = [5, 10, 15, 20, 30];
 
+const SUBTITLES = [
+  'Ready to slay some Nebensätze today?',
+  'Dein Konjunktiv II wird nicht von alleine besser.',
+  'Time to make your Genitiv great again.',
+  'Heute schon einen Relativsatz gebaut?',
+  'Your next Meeting-Flex starts here.',
+  'Trennbare Verben? Hold my Kaffee.',
+  'Lass uns ein paar Präpositionen zerstören.',
+  'Dein Deutsch-Level-up wartet.',
+  'Bereit, im nächsten Refinement verbal aufzuräumen?',
+  'Plot twist: du kannst das.',
+  'Passiv-Konstruktionen are your friend today.',
+  'Modalpartikeln? Ja, halt schon.',
+  'Mach deinen Teamlead sprachlos. Im guten Sinne.',
+  'Heute üben, morgen im Meeting flexen.',
+  "Let's turn that B2 energy into C1 Souveränität.",
+  'Wortstellung: because Deutsch has its own Logik.',
+  'Noch ein Tag, noch ein Stück näher an der C1.',
+  'Dein Gehirn will das. Trust the Prozess.',
+  'Kein Meeting ohne dich und deinen Konjunktiv.',
+  'Partizip II can be beautiful. Allegedly.',
+  'Substantivierung klingt schlimm, ist aber dein Superpower.',
+  'Sprachbausteine sind wie Lego. Für Erwachsene.',
+  'Wer braucht schon Netflix wenn es Leseverstehen gibt.',
+  'Nominalisierung: weil ein Nomen mehr sagt als tausend Verben.',
+  'Deutsch lernen ist wie Debugging. Aber mit Umlauten.',
+];
+
+function getTodaysSubtitle(): string {
+  const day = Math.floor(Date.now() / 86400000);
+  return SUBTITLES[day % SUBTITLES.length];
+}
+
 export default function HomePage() {
   const { t } = useTranslation();
   const { user, profile } = useRequiredAuth();
@@ -39,12 +74,22 @@ export default function HomePage() {
   const [data, setData] = useState<HomeData | null>(null);
   const [homeDueCards, setHomeDueCards] = useState<any[]>([]);
   const [dueLoading, setDueLoading] = useState(true);
+  const [homeVerbs, setHomeVerbs] = useState<Tables<'verb_conjugations'>[]>([]);
 
   useEffect(() => {
     if (!user) return;
     loadProgress();
     loadDueCards();
+    loadVerbs();
   }, [user]);
+
+  async function loadVerbs() {
+    const { data } = await supabase
+      .from('verb_conjugations')
+      .select('*')
+      .order('frequency_rank');
+    if (data) setHomeVerbs(data as Tables<'verb_conjugations'>[]);
+  }
 
   async function loadDueCards() {
     setDueLoading(true);
@@ -132,39 +177,44 @@ export default function HomePage() {
         <h1 className="text-2xl font-bold text-foreground">
           {t('home_welcome')}{displayName ? `, ${displayName}` : ''}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">C1 Werkstatt — {t('home_subtitle')}</p>
+        <p className="text-sm text-muted-foreground mt-1">{getTodaysSubtitle()}</p>
       </div>
 
       {/* Session Builder */}
       <Card className="bg-gradient-to-r from-blue-100/70 via-violet-100/70 to-fuchsia-100/70 dark:from-blue-950/30 dark:via-violet-950/30 dark:to-fuchsia-950/30 border-blue-200/50 dark:border-violet-900/40">
-        <CardContent className="px-5 py-4 space-y-2">
-          <div className="flex items-center gap-2">
-            <Flame className="h-5 w-5 text-primary" />
-            <h2 className="font-semibold text-card-foreground">{t('daily_title')}</h2>
-            {streak > 0 && (
-              <span className="text-xs text-muted-foreground ml-auto sm:hidden">
-                {t('daily_streak')}: {streak} {t('daily_streak_days')}
-              </span>
-            )}
+        <CardContent className="px-5 py-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-orange-100 dark:bg-orange-900/30">
+                <Flame className={`h-5 w-5 ${streak > 0 ? 'text-orange-500' : 'text-orange-300'}`} />
+              </div>
+              <div>
+                {streak > 0 ? (
+                  <>
+                    <p className="font-bold text-foreground text-lg leading-tight">{streak} {streak === 1 ? 'Tag' : 'Tage'} am Stück!</p>
+                    <p className="text-xs text-muted-foreground">Weiter so — 30 min reichen.</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-bold text-foreground leading-tight">Starte deine Serie!</p>
+                    <p className="text-xs text-muted-foreground">15 Minuten reichen für den ersten Tag.</p>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-muted-foreground sm:inline block w-full sm:w-auto">{t('daily_how_much_time')}</span>
+          <div className="flex items-center gap-2">
             {TIME_OPTIONS.map((min) => (
               <Button
                 key={min}
                 variant={min === 15 ? 'default' : 'outline'}
                 size="sm"
-                className="min-w-[2.5rem] h-7 text-xs"
+                className="min-w-[2.5rem] h-8 text-xs"
                 onClick={() => navigate(`/daily-practice?minutes=${min}`)}
               >
-                {min} {t('daily_minutes')}
+                {min} min
               </Button>
             ))}
-            {streak > 0 && (
-              <span className="text-sm text-muted-foreground ml-auto hidden sm:inline">
-                {t('daily_streak')}: {streak} {t('daily_streak_days')}
-              </span>
-            )}
           </div>
         </CardContent>
       </Card>
@@ -196,8 +246,8 @@ export default function HomePage() {
                     ) : (
                       <>
                         <ProgressBar value={pct} barClassName={area.fuchsia ? 'bg-fuchsia-500' : undefined} />
-                        <p className="text-sm text-muted-foreground">
-                          {progress?.completed ?? 0} / {progress?.total ?? 0} {t('home_exercises_completed')}
+                        <p className="text-xs text-muted-foreground">
+                          <span className="font-medium text-foreground">{progress?.completed ?? 0}</span> / {progress?.total ?? 0} {t('home_exercises_completed')}
                         </p>
                       </>
                     )}
@@ -232,14 +282,29 @@ export default function HomePage() {
           </Card>
         ) : !loading && data ? (
           <Card>
-            <CardContent className="py-6 text-center space-y-1">
-              <p className="text-foreground font-medium">Noch leer</p>
-              <p className="text-sm text-muted-foreground">Markiere Einträge in beliebigen Vokabeltabellen (z.B. <Link to="/it-deutsch/vokabular" className="text-primary hover:underline">IT-Vokabular</Link>) oder Redewendungen (z.B. <Link to="/speaking" className="text-primary hover:underline">Sprechen</Link>, <Link to="/writing?tab=redemittel" className="text-primary hover:underline">Schreiben</Link>) — sie landen automatisch hier.</p>
+            <CardContent className="py-10 text-center space-y-3">
+              <Languages className="h-10 w-10 mx-auto text-muted-foreground/30" />
+              <p className="text-sm text-muted-foreground">Noch keine Wörter gesammelt</p>
+              <p className="text-xs text-muted-foreground/70">Markiere Wörter in Übungen, Redewendungen oder Lesetexten — sie erscheinen hier zum Wiederholen.</p>
+              <Link to="/it-deutsch/vokabular" className="inline-block text-xs text-primary hover:underline mt-1">Jetzt starten →</Link>
             </CardContent>
           </Card>
         ) : null}
       </div>
 
+
+      {/* Verb Flashcards */}
+      {homeVerbs.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-foreground">Verb-Lernkarten</h2>
+            <Link to="/grammar/verbs" className="text-sm text-primary hover:underline">
+              Alle Verben →
+            </Link>
+          </div>
+          <VerbFlashcard verbs={homeVerbs} compact />
+        </div>
+      )}
 
       {/* Stats */}
       {!loading && data && (

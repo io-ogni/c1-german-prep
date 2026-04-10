@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { ArrowLeft, Eye, EyeOff, Volume2 } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Volume2, MessageCircle, Hash } from 'lucide-react';
 import { PlayAllButton } from '@/components/PlayAllButton';
 import { usePlayAll } from '@/hooks/usePlayAll';
 import type { ITDialogue } from '@/data/itDialogues';
@@ -60,28 +60,41 @@ export function DialogueList({ dialogues, onSelect }: DialogueListProps) {
   const { lang } = useTranslation();
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
-      {dialogues.map(d => (
-        <Card
-          key={d.id}
-          className="cursor-pointer transition-shadow hover:shadow-md"
-          onClick={() => onSelect(d)}
-        >
-          <CardContent className="p-4 space-y-2">
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-sm text-foreground">{lang === 'de' ? d.title_de : d.title_en}</h3>
-            </div>
-            <p className="text-xs text-muted-foreground">{lang === 'de' ? d.description_de : d.description_en}</p>
-            <div className="flex gap-1.5 flex-wrap">
-              {d.speakers.map(s => (
-                <Badge key={s.name} variant="secondary" className={cn('text-xs font-normal px-2 py-0.5', getSpeakerColor(s.name).text, getSpeakerColor(s.name).bg)}>
-                  {s.name} ({s.role})
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+    <div className="grid gap-4 sm:grid-cols-2">
+      {dialogues.map(d => {
+        const isMeeting = d.category === 'meeting';
+        return (
+          <Card
+            key={d.id}
+            className="cursor-pointer transition-all hover:shadow-md group overflow-hidden"
+            onClick={() => onSelect(d)}
+          >
+            <CardContent className="p-0">
+              <div className={cn(
+                'px-4 py-2 flex items-center gap-2 text-xs font-medium',
+                isMeeting
+                  ? 'bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-950/30 dark:text-fuchsia-300'
+                  : 'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300',
+              )}>
+                {isMeeting ? <MessageCircle className="h-3 w-3" /> : <Hash className="h-3 w-3" />}
+                {isMeeting ? 'Meeting' : 'Slack'}
+                <span className="ml-auto text-[10px] opacity-70">{d.lines.length} Zeilen</span>
+              </div>
+              <div className="px-4 py-4 space-y-3">
+                <h3 className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{lang === 'de' ? d.title_de : d.title_en}</h3>
+                <p className="text-xs text-muted-foreground line-clamp-2">{lang === 'de' ? d.description_de : d.description_en}</p>
+                <div className="flex gap-1.5 flex-wrap">
+                  {d.speakers.map(s => (
+                    <span key={s.name} className={cn('inline-flex items-center justify-center text-[10px] font-medium px-2 py-0.5 rounded-full', getSpeakerColor(s.name).text, getSpeakerColor(s.name).bg)}>
+                      {s.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }

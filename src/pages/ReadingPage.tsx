@@ -143,7 +143,7 @@ export default function ReadingPage() {
           <TelcBadge className="ml-1" />
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {language === 'de' ? 'Lies und verstehe anspruchsvolle Texte auf C1-Niveau.' : 'Read and comprehend demanding texts at C1 level.'}
+          Texte, die länger sind als deine Attention Span. Let's go.
         </p>
       </div>
 

@@ -67,12 +67,12 @@ export default function ResetPasswordPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="password">{t('auth_new_password')}</Label>
-              <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+              <Input id="password" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} />
               <p className="text-xs text-muted-foreground">{t('auth_password_hint')}</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirm-password">{t('auth_confirm_password')}</Label>
-              <Input id="confirm-password" type="password" required minLength={6} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+              <Input id="confirm-password" type="password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
             </div>
           </CardContent>
           <CardFooter>

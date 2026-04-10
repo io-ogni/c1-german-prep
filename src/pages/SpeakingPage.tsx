@@ -394,9 +394,7 @@ export default function SpeakingPage() {
           <TelcBadge className="ml-1" />
         </h1>
         <p className="text-sm text-muted-foreground">
-          {lang === 'de'
-            ? 'Redemittel für die mündliche Prüfung — auswendig lernen!'
-            : 'Phrases for the oral exam — learn by heart!'}
+          Damit du im Meeting nicht nur nickst und 'ja genau' sagst.
         </p>
       </div>
       <Tabs defaultValue="redewendungen">
@@ -473,7 +471,7 @@ export default function SpeakingPage() {
                             {row.de}
                           </div>
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{row.en}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{row.en}</TableCell>
                       </TableRow>
                     );
                   })}
@@ -519,7 +517,7 @@ export default function SpeakingPage() {
                       </button>
                       <p className="text-sm font-medium text-foreground">{row.de}</p>
                     </div>
-                    <p className="text-sm text-muted-foreground">{row.en}</p>
+                    <p className="text-xs text-muted-foreground">{row.en}</p>
                   </div>
                 );
               })}
@@ -600,7 +598,7 @@ export default function SpeakingPage() {
                       <span className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold w-5 h-5 shrink-0 mt-0.5">{expr.id}</span>
                       <p className="font-semibold text-base text-foreground leading-snug pr-6">{expr.german}</p>
                     </div>
-                    <p className="text-sm text-muted-foreground ml-7">{expr.english}</p>
+                    <p className="text-xs text-muted-foreground ml-7">{expr.english}</p>
                     <div className="flex items-start gap-2 mt-3">
                       {ttsUrl ? (
                         <button

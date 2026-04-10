@@ -40,9 +40,11 @@ const PODCASTS = [
   },
 ];
 
-function AudioCard({ podcast }: { podcast: typeof PODCASTS[0] }) {
+function AudioCard({ podcast, index }: { podcast: typeof PODCASTS[0]; index: number }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState('0:00');
 
   const toggle = () => {
     if (!audioRef.current) return;
@@ -54,30 +56,43 @@ function AudioCard({ podcast }: { podcast: typeof PODCASTS[0] }) {
     setPlaying(!playing);
   };
 
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${sec.toString().padStart(2, '0')}`;
+  };
+
   return (
-    <Card className="group transition-shadow hover:shadow-md">
-      <CardContent className="p-5">
-        <div className="flex gap-4">
-          <button
-            onClick={toggle}
-            className="shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-fuchsia-500 to-pink-500 flex items-center justify-center text-white shadow-md hover:shadow-lg transition-shadow"
-          >
-            {playing ? (
-              <div className="flex gap-0.5">
-                <div className="w-1 h-4 bg-white rounded-full" />
-                <div className="w-1 h-4 bg-white rounded-full" />
+    <Card className="group transition-all hover:shadow-md overflow-hidden">
+      <CardContent className="p-0">
+        <div className="px-4 py-2 flex items-center gap-2 text-xs font-medium bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-950/30 dark:text-fuchsia-300">
+          <Headphones className="h-3 w-3" />
+          Episode {index + 1}
+          <span className="ml-auto text-[10px] opacity-70">{podcast.duration}</span>
+        </div>
+        <div className="px-4 py-4 space-y-3">
+          <h3 className="font-semibold text-foreground text-sm leading-snug">{podcast.title}</h3>
+          <p className="text-xs text-muted-foreground leading-relaxed">{podcast.description}</p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggle}
+              className="shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-fuchsia-500 to-pink-500 flex items-center justify-center text-white shadow-md hover:shadow-lg hover:scale-105 transition-all"
+            >
+              {playing ? (
+                <div className="flex gap-0.5">
+                  <div className="w-1 h-3.5 bg-white rounded-full" />
+                  <div className="w-1 h-3.5 bg-white rounded-full" />
+                </div>
+              ) : (
+                <Play className="h-4 w-4 ml-0.5" />
+              )}
+            </button>
+            <div className="flex-1 min-w-0 space-y-1">
+              <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                <div className="h-full rounded-full bg-fuchsia-400 transition-all duration-300" style={{ width: `${progress}%` }} />
               </div>
-            ) : (
-              <Play className="h-5 w-5 ml-0.5" />
-            )}
-          </button>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <Headphones className="h-3.5 w-3.5 text-fuchsia-500 shrink-0" />
-              <span className="text-xs text-muted-foreground font-medium">{podcast.duration}</span>
+              <span className="text-[10px] text-muted-foreground">{currentTime}</span>
             </div>
-            <h3 className="font-semibold text-foreground text-sm leading-snug mb-1">{podcast.title}</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">{podcast.description}</p>
           </div>
         </div>
         <audio
@@ -85,11 +100,15 @@ function AudioCard({ podcast }: { podcast: typeof PODCASTS[0] }) {
           src={`${MEDIA_BASE}/${podcast.file}`}
           controlsList="nodownload"
           preload="none"
-          onEnded={() => setPlaying(false)}
+          onEnded={() => { setPlaying(false); setProgress(0); setCurrentTime('0:00'); }}
           onPause={() => setPlaying(false)}
           onPlay={() => setPlaying(true)}
-          className="w-full mt-3"
-          controls
+          onTimeUpdate={(e) => {
+            const el = e.currentTarget;
+            if (el.duration) setProgress((el.currentTime / el.duration) * 100);
+            setCurrentTime(formatTime(el.currentTime));
+          }}
+          className="hidden"
         />
       </CardContent>
     </Card>
@@ -111,7 +130,7 @@ export default function ITDeutschPage() {
           <Monitor className="h-6 w-6" />
           {t('nav_it_deutsch')}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Berufssprache für die IT-Branche — Vokabular, Redewendungen und Dialoge für den Arbeitsalltag.</p>
+        <p className="text-sm text-muted-foreground mt-1">Damit 'Can you maybe look into this?' endlich auf Deutsch genauso passiv-aggressiv klingt.</p>
       </div>
       <ITDeutschNav />
 
@@ -130,26 +149,29 @@ export default function ITDeutschPage() {
 
         <TabsContent value="podcasts">
           <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
-            {PODCASTS.map((p) => (
-              <AudioCard key={p.file} podcast={p} />
+            {PODCASTS.map((p, i) => (
+              <AudioCard key={p.file} podcast={p} index={i} />
             ))}
           </div>
         </TabsContent>
 
         <TabsContent value="video">
-          <Card className="sm:max-w-[calc(50%-0.375rem)]">
-            <CardContent className="p-0 overflow-hidden rounded-lg">
+          <Card className="sm:max-w-[calc(50%-0.375rem)] overflow-hidden transition-all hover:shadow-md">
+            <CardContent className="p-0">
+              <div className="px-4 py-2 flex items-center gap-2 text-xs font-medium bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-950/30 dark:text-fuchsia-300">
+                <Video className="h-3 w-3" />
+                Roleplay
+              </div>
               <video
                 src={`${MEDIA_BASE}/${VIDEO.file}`}
                 controls
                 controlsList="nodownload"
                 preload="metadata"
                 className="w-full aspect-video bg-black"
-                poster=""
               />
-              <div className="p-5">
-                <h3 className="font-semibold text-foreground mb-1">{VIDEO.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{VIDEO.description}</p>
+              <div className="px-4 py-4">
+                <h3 className="font-semibold text-foreground text-sm mb-1">{VIDEO.title}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{VIDEO.description}</p>
               </div>
             </CardContent>
           </Card>

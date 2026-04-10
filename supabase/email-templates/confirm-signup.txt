@@ -1,0 +1,18 @@
+<h2>Confirm your signup with C1 Werkstatt</h2>
+
+<p>Hey there,</p>
+
+<p>So I hear you want to learn German and speak like a pro during your meetings? 😎</p>
+
+<p>Just follow this link to confirm your user and start learning:</p>
+
+<p><a href="{{ .ConfirmationURL }}">Confirm your mail</a></p>
+
+<p>
+Enjoy,<br>
+Ioana
+</p>
+
+<hr style="border: none; border-top: 1px solid #e5e7eb; margin: 16px 0;" />
+
+<p style="font-size: 12px; color: #888;">{{ .SiteURL }}</p>

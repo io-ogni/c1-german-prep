@@ -71,7 +71,7 @@ export function ListeningAudioPlayer({ audioFile, audioUrl, className }: Props) 
 
   if (!src) {
     return (
-      <Card className={cn('bg-muted/30', className)}>
+      <Card className={cn('bg-blue-50 dark:bg-blue-950/30 border-blue-200/50 dark:border-blue-900/40', className)}>
         <CardContent className="py-3 text-center">
           <p className="text-xs text-muted-foreground">{t('listening_no_audio')}</p>
         </CardContent>
@@ -80,14 +80,26 @@ export function ListeningAudioPlayer({ audioFile, audioUrl, className }: Props) 
   }
 
   return (
-    <Card className={cn('bg-muted/30', className)}>
+    <Card className={cn('bg-blue-50 dark:bg-blue-950/30 border-blue-200/50 dark:border-blue-900/40', className)}>
       <CardContent className="py-3 space-y-2">
         <audio
           ref={audioRef}
           src={src}
           preload="metadata"
-          onTimeUpdate={() => setCurrentTime(audioRef.current?.currentTime ?? 0)}
-          onLoadedMetadata={() => setDuration(audioRef.current?.duration ?? 0)}
+          onTimeUpdate={() => {
+            const el = audioRef.current;
+            if (!el) return;
+            setCurrentTime(el.currentTime);
+            if (el.duration && isFinite(el.duration) && el.duration !== duration) setDuration(el.duration);
+          }}
+          onLoadedMetadata={() => {
+            const d = audioRef.current?.duration;
+            if (d && isFinite(d)) setDuration(d);
+          }}
+          onDurationChange={() => {
+            const d = audioRef.current?.duration;
+            if (d && isFinite(d)) setDuration(d);
+          }}
           onEnded={() => setPlaying(false)}
           onError={() => setError(true)}
           muted={muted}
@@ -109,7 +121,7 @@ export function ListeningAudioPlayer({ audioFile, audioUrl, className }: Props) 
                 max={duration || 100}
                 step={0.5}
                 onValueChange={seek}
-                className="flex-1"
+                className="flex-1 [&>span:first-child]:bg-white dark:[&>span:first-child]:bg-card"
               />
               <span className="text-xs text-muted-foreground tabular-nums w-20 text-right shrink-0">
                 {formatTime(currentTime)} / {formatTime(duration)}

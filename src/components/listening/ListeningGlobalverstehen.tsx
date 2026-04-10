@@ -90,9 +90,9 @@ export function ListeningGlobalverstehen({ content, solution, instructions, expl
             <div
               key={speaker.id}
               className={cn(
-                'flex items-center gap-3 rounded-md border p-3',
-                checked && isCorrect && 'border-primary/30 bg-primary/5',
-                checked && isWrong && 'border-destructive/30 bg-destructive/5'
+                'flex items-center gap-3 rounded-md border p-3 bg-white dark:bg-card',
+                checked && isCorrect && 'border-primary/30 !bg-primary/5',
+                checked && isWrong && 'border-destructive/30 !bg-destructive/5'
               )}
             >
               <span className="text-sm font-medium text-foreground w-24 shrink-0">

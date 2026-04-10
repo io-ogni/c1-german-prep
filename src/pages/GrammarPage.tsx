@@ -109,7 +109,7 @@ export default function GrammarPage() {
           <TelcBadge className="ml-1" />
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {lang === 'de' ? 'Trainiere Grammatikstrukturen für die C1-Prüfung.' : 'Practice grammar structures for the C1 exam.'}
+          Dativ oder Akkusativ? Let's settle this once and for all.
         </p>
       </div>
 

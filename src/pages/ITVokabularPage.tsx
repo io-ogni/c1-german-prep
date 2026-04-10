@@ -532,7 +532,7 @@ export default function ITVokabularPage() {
           <Monitor className="h-6 w-6" />
           {t('nav_it_deutsch')}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Berufssprache für die IT-Branche — Vokabular, Redewendungen und Dialoge für den Arbeitsalltag.</p>
+        <p className="text-sm text-muted-foreground mt-1">Damit 'Can you maybe look into this?' endlich auf Deutsch genauso passiv-aggressiv klingt.</p>
       </div>
       <ITDeutschNav />
       <SelectionHint />
@@ -570,7 +570,7 @@ export default function ITVokabularPage() {
                   return (
                     <TableRow key={i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
                       <TableCell className="text-sm font-medium text-foreground">{n.de}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{n.en}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{n.en}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <button onClick={(e) => { e.stopPropagation(); speak(n.example, getTtsUrl('nouns', n._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
@@ -593,7 +593,7 @@ export default function ITVokabularPage() {
               return (
                 <div key={i} onClick={() => toggleRow(key)} className={`relative rounded-lg border p-4 space-y-2 cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
                   <p className="text-sm font-medium text-foreground">{n.de}</p>
-                  <p className="text-sm text-muted-foreground">{n.en}</p>
+                  <p className="text-xs text-muted-foreground">{n.en}</p>
                   <div className="flex items-center gap-2">
                     <button onClick={(e) => { e.stopPropagation(); speak(n.example, getTtsUrl('nouns', n._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
                       <Volume2 className="h-4 w-4" />
@@ -626,7 +626,7 @@ export default function ITVokabularPage() {
                   return (
                     <TableRow key={i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
                       <TableCell className="text-sm font-medium text-foreground">{v.de}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{v.en}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{v.en}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <button onClick={(e) => { e.stopPropagation(); speak(v.example, getTtsUrl('verbs', v._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
@@ -648,7 +648,7 @@ export default function ITVokabularPage() {
               return (
                 <div key={i} onClick={() => toggleRow(key)} className={`relative rounded-lg border p-4 space-y-2 cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
                   <p className="text-sm font-medium text-foreground">{v.de}</p>
-                  <p className="text-sm text-muted-foreground">{v.en}</p>
+                  <p className="text-xs text-muted-foreground">{v.en}</p>
                   <div className="flex items-center gap-2">
                     <button onClick={(e) => { e.stopPropagation(); speak(v.example, getTtsUrl('verbs', v._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
                       <Volume2 className="h-4 w-4" />
@@ -683,7 +683,7 @@ export default function ITVokabularPage() {
                     <TableRow key={i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
                       <TableCell className="text-sm font-medium text-foreground">{c.noun}</TableCell>
                       <TableCell className="text-sm font-medium text-primary">{c.verb}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{c.en}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{c.en}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <button onClick={(e) => { e.stopPropagation(); speak(c.example, getTtsUrl('kollokationen', c._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
@@ -708,7 +708,7 @@ export default function ITVokabularPage() {
                     <span className="text-sm font-medium text-foreground">{c.noun}</span>
                     <span className="text-sm font-medium text-primary">+ {c.verb}</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{c.en}</p>
+                  <p className="text-xs text-muted-foreground">{c.en}</p>
                   <div className="flex items-center gap-2">
                     <button onClick={(e) => { e.stopPropagation(); speak(c.example, getTtsUrl('kollokationen', c._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
                       <Volume2 className="h-4 w-4" />
@@ -775,7 +775,7 @@ export default function ITVokabularPage() {
                     <TableRow key={p._i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${isNewGroup ? 'border-t-4 border-t-muted' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
                       <TableCell className={`border-l-4 ${BORDER_COLORS[p.phase] ?? 'border-l-transparent'}`}><span className={`text-xs font-normal whitespace-nowrap ${PHASE_COLORS[p.phase] ?? ''}`}>{LABEL_DE[p.phase] || p.phase}</span></TableCell>
                       <TableCell className="text-sm font-medium text-foreground">{p.de}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{p.en}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{p.en}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <button onClick={(e) => { e.stopPropagation(); speak(p.example, getTtsUrl('workshop', p._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
@@ -800,7 +800,7 @@ export default function ITVokabularPage() {
                 <div key={p._i} onClick={() => toggleRow(key)} className={`relative rounded-lg border border-l-4 ${BORDER_COLORS[p.phase] ?? ''} p-4 space-y-2 cursor-pointer transition-colors ${isNewGroup ? 'mt-6' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
                   <span className={`text-xs font-normal whitespace-nowrap ${PHASE_COLORS[p.phase] ?? ''}`}>{LABEL_DE[p.phase] || p.phase}</span>
                   <p className="text-sm font-medium text-foreground">{p.de}</p>
-                  <p className="text-sm text-muted-foreground">{p.en}</p>
+                  <p className="text-xs text-muted-foreground">{p.en}</p>
                   <div className="flex items-center gap-2">
                     <button onClick={(e) => { e.stopPropagation(); speak(p.example, getTtsUrl('workshop', p._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
                       <Volume2 className="h-4 w-4" />
@@ -869,7 +869,7 @@ export default function ITVokabularPage() {
                       <TableCell className={`text-xs text-muted-foreground border-l-4 ${BORDER_COLORS[p.category] ?? 'border-l-transparent'}`}>{p._i + 1}</TableCell>
                       <TableCell><span className={`text-xs font-normal whitespace-nowrap ${PHASE_COLORS[p.category] ?? ''}`}>{LABEL_DE[p.category] || p.category}</span></TableCell>
                       <TableCell className="text-sm font-medium text-foreground">{p.de}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{p.en}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{p.en}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <button onClick={(e) => { e.stopPropagation(); speak(p.example, getTtsUrl('refinement', p._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
@@ -894,7 +894,7 @@ export default function ITVokabularPage() {
                 <div key={p._i} onClick={() => toggleRow(key)} className={`relative rounded-lg border border-l-4 ${BORDER_COLORS[p.category] ?? ''} p-4 space-y-2 cursor-pointer transition-colors ${isNewGroup ? 'mt-6' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
                   <span className={`text-xs font-normal whitespace-nowrap ${PHASE_COLORS[p.category] ?? ''}`}>{LABEL_DE[p.category] || p.category}</span>
                   <p className="text-sm font-medium text-foreground">{p.de}</p>
-                  <p className="text-sm text-muted-foreground">{p.en}</p>
+                  <p className="text-xs text-muted-foreground">{p.en}</p>
                   <div className="flex items-center gap-2">
                     <button onClick={(e) => { e.stopPropagation(); speak(p.example, getTtsUrl('refinement', p._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
                       <Volume2 className="h-4 w-4" />
@@ -969,7 +969,7 @@ export default function ITVokabularPage() {
                           <span className="text-sm font-medium text-foreground">{p.de}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{p.en}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{p.en}</TableCell>
                     </TableRow>
                   );
                 })}
@@ -991,7 +991,7 @@ export default function ITVokabularPage() {
                     </button>
                     <p className="text-sm font-medium text-foreground">{p.de}</p>
                   </div>
-                  <p className="text-sm text-muted-foreground">{p.en}</p>
+                  <p className="text-xs text-muted-foreground">{p.en}</p>
                 </div>
               );
             })}
@@ -1017,7 +1017,7 @@ export default function ITVokabularPage() {
                   const sel = selectedRows.has(key);
                   return (
                     <TableRow key={i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
-                      <TableCell className="text-sm text-muted-foreground">{c.trigger}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{c.trigger}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <button onClick={(e) => { e.stopPropagation(); speak(c.response, getTtsUrl('notfallkit', c._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
@@ -1026,7 +1026,7 @@ export default function ITVokabularPage() {
                           <span className="text-sm font-medium text-foreground">{c.response}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{c.strategy}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{c.strategy}</TableCell>
                     </TableRow>
                   );
                 })}
@@ -1039,7 +1039,7 @@ export default function ITVokabularPage() {
               const sel = selectedRows.has(key);
               return (
                 <div key={i} onClick={() => toggleRow(key)} className={`relative rounded-lg border p-4 space-y-2 cursor-pointer transition-colors ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}>
-                  <p className="text-sm text-muted-foreground">{c.trigger}</p>
+                  <p className="text-xs text-muted-foreground">{c.trigger}</p>
                   <div className="flex items-center gap-2">
                     <button onClick={(e) => { e.stopPropagation(); speak(c.response, getTtsUrl('notfallkit', c._i)); }} className="shrink-0 text-muted-foreground hover:text-fuchsia-500 transition-colors">
                       <Volume2 className="h-4 w-4" />

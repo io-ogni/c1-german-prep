@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { flashcards, type Flashcard } from '@/data/flashcards';
-import { RotateCcw, SkipForward, Check, X, Eye, Trophy, Sparkles, Monitor } from 'lucide-react';
+import { RotateCcw, Check, X, Eye, CheckCircle, XCircle, Trophy, Sparkles, Monitor } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ITDeutschNav } from '@/components/layout/ITDeutschNav';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -118,7 +118,7 @@ export default function FlashcardsPage() {
           <Monitor className="h-6 w-6" />
           {t('nav_it_deutsch')}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Berufssprache für die IT-Branche — Vokabular, Redewendungen und Dialoge für den Arbeitsalltag.</p>
+        <p className="text-sm text-muted-foreground mt-1">Damit 'Can you maybe look into this?' endlich auf Deutsch genauso passiv-aggressiv klingt.</p>
       </div>
           <ITDeutschNav />
         <div className="min-h-[50vh] flex items-center justify-center">
@@ -189,32 +189,38 @@ export default function FlashcardsPage() {
           <Monitor className="h-6 w-6" />
           {t('nav_it_deutsch')}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Berufssprache für die IT-Branche — Vokabular, Redewendungen und Dialoge für den Arbeitsalltag.</p>
+        <p className="text-sm text-muted-foreground mt-1">Damit 'Can you maybe look into this?' endlich auf Deutsch genauso passiv-aggressiv klingt.</p>
       </div>
       <ITDeutschNav />
 
-      <div className="flex flex-col items-center gap-6 relative">
+      <div className="flex flex-col items-center gap-4 relative rounded-2xl border border-border bg-muted/30 p-4 sm:p-6">
 
-      {/* Header */}
+      {/* Feedback toast */}
+      {feedbackMessage && (
+        <div className={cn(
+          'absolute top-2 z-10 px-4 py-2 rounded-full text-sm font-medium shadow-lg animate-bounce',
+          feedbackType === 'correct' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800',
+        )}>
+          {feedbackMessage}
+        </div>
+      )}
+
+      {/* Progress */}
       <div className="w-full max-w-xl">
-        <div className="flex items-center justify-end mb-3">
+        <div className="flex items-center justify-end mb-2">
           <div className="flex items-center gap-3 text-sm font-medium text-muted-foreground">
-            <span className="flex items-center gap-1 text-success">
-              <Check className="w-4 h-4" /> {correctCount}
-            </span>
-            <span className="flex items-center gap-1 text-destructive">
-              <X className="w-4 h-4" /> {wrongCount}
-            </span>
+            <span className="flex items-center gap-1 text-green-600"><Check className="w-4 h-4" /> {correctCount}</span>
+            <span className="flex items-center gap-1 text-destructive"><X className="w-4 h-4" /> {wrongCount}</span>
             <span>{currentIndex + 1} / {cards.length}</span>
           </div>
         </div>
-        <Progress value={progress} className="h-2" />
+        <Progress value={progress} className="h-1.5" />
       </div>
 
       {/* Card */}
       <div
         className={cn(
-          "w-full max-w-xl perspective-1000 cursor-pointer select-none",
+          "w-full max-w-xl cursor-pointer select-none",
           exitAnim === 'right' && 'animate-slide-out-right',
           exitAnim === 'left' && 'animate-slide-out-left',
         )}
@@ -223,41 +229,41 @@ export default function FlashcardsPage() {
       >
         <div
           className={cn(
-            "relative w-full min-h-[320px] transition-transform duration-500",
+            "relative w-full min-h-[280px] transition-transform duration-500",
             isFlipped && "[transform:rotateY(180deg)]"
           )}
           style={{ transformStyle: 'preserve-3d' }}
         >
           {/* Front */}
           <div
-            className="absolute inset-0 rounded-2xl border-2 border-border bg-card p-8 flex flex-col items-center justify-center text-center shadow-lg"
+            className="absolute inset-0 rounded-2xl border-2 border-border bg-card p-6 flex flex-col items-center justify-center text-center shadow-lg"
             style={{ backfaceVisibility: 'hidden' }}
           >
-            <div className="absolute top-4 right-4">
-              <span className="text-xs font-medium text-muted-foreground bg-secondary px-2 py-1 rounded-full">
+            <div className="absolute top-3 right-3">
+              <span className="text-[10px] font-medium text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
                 Frage
               </span>
             </div>
-            <p className="text-xl font-semibold text-card-foreground leading-relaxed max-w-md">
+            <p className="text-xl font-bold text-foreground leading-relaxed max-w-md">
               {currentCard.question}
             </p>
-            <div className="mt-6 flex items-center gap-2 text-muted-foreground text-sm">
-              <Eye className="w-4 h-4" />
+            <div className="mt-4 flex items-center gap-1.5 text-muted-foreground text-xs">
+              <Eye className="w-3.5 h-3.5" />
               <span>Klicken zum Aufdecken</span>
             </div>
           </div>
 
           {/* Back */}
           <div
-            className="absolute inset-0 rounded-2xl border-2 border-primary/30 bg-card p-8 flex flex-col items-center justify-center text-center shadow-lg"
+            className="absolute inset-0 rounded-2xl border-2 border-primary/30 bg-card p-6 flex flex-col items-center justify-center text-center shadow-lg"
             style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
           >
-            <div className="absolute top-4 right-4">
-              <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
+            <div className="absolute top-3 right-3">
+              <span className="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
                 Antwort
               </span>
             </div>
-            <p className="text-xl font-semibold text-card-foreground leading-relaxed max-w-md">
+            <p className="text-xl font-bold text-foreground leading-relaxed max-w-md">
               {currentCard.answer}
             </p>
           </div>
@@ -267,60 +273,28 @@ export default function FlashcardsPage() {
       {/* Action buttons */}
       <div className="w-full max-w-xl">
         {!isFlipped ? (
-          <div className="flex justify-center gap-3">
-            <Button variant="outline" size="sm" onClick={() => goNext('skipped')}>
-              <SkipForward className="w-4 h-4" /> Überspringen
-            </Button>
+          <div className="flex justify-center">
             <Button size="sm" onClick={() => setIsFlipped(true)}>
-              <Eye className="w-4 h-4" /> Antwort zeigen
+              <Eye className="w-4 h-4 mr-1" /> Aufdecken
             </Button>
           </div>
         ) : (
           <div className="flex justify-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-destructive/50 text-destructive hover:bg-destructive hover:text-destructive-foreground"
-              onClick={() => goNext('wrong')}
-            >
-              <X className="w-4 h-4" /> Falsch
+            <Button variant="destructive" size="sm" className="gap-1" onClick={() => goNext('wrong')}>
+              <XCircle className="h-4 w-4" /> Nicht gewusst
             </Button>
-            <Button variant="outline" size="sm" onClick={() => goNext('skipped')}>
-              <SkipForward className="w-4 h-4" /> Überspringen
+            <Button size="sm" className="gap-1" onClick={() => goNext('correct')}>
+              <CheckCircle className="h-4 w-4" /> Gewusst
             </Button>
-            <Button
-              size="sm"
-              className="bg-success text-success-foreground hover:bg-success/90"
-              onClick={() => goNext('correct')}
-            >
-              <Check className="w-4 h-4" /> Richtig
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {/* Feedback message */}
-      <div className="h-10 flex items-center justify-center">
-        {feedbackMessage && (
-          <div
-            className={cn(
-              "px-4 py-1.5 rounded-xl text-sm sm:text-lg font-bold",
-              feedbackType === 'correct'
-                ? "bg-success text-success-foreground"
-                : "bg-destructive text-destructive-foreground"
-            )}
-            style={{ animation: 'fade-in 0.2s ease-out, fade-out 0.3s ease-out 1s forwards' }}
-          >
-            {feedbackMessage}
           </div>
         )}
       </div>
 
       {/* Keyboard hints — desktop only */}
       <p className="hidden sm:block text-xs text-muted-foreground">
-        Tastatur: <kbd className="px-1.5 py-0.5 rounded border bg-secondary text-xs">Leertaste</kbd> aufdecken ·
+        <kbd className="px-1.5 py-0.5 rounded border bg-secondary text-xs">Leertaste</kbd> aufdecken ·
         <kbd className="px-1.5 py-0.5 rounded border bg-secondary text-xs ml-1">→</kbd> richtig ·
-        <kbd className="px-1.5 py-0.5 rounded border bg-secondary text-xs ml-1">←</kbd> falsch ·
+        <kbd className="px-1.5 py-0.5 rounded border bg-secondary text-xs ml-1">←</kbd> falsch
         <kbd className="px-1.5 py-0.5 rounded border bg-secondary text-xs ml-1">S</kbd> überspringen
       </p>
       </div>

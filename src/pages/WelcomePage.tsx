@@ -126,17 +126,17 @@ export default function WelcomePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
-            className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-sm text-muted-foreground"
+            className="mt-6 mb-2 flex items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground"
           >
-            <span className="flex items-center gap-1.5"><Zap className="h-4 w-4 text-amber-500" /> AI-powered</span>
-            <span className="flex items-center gap-1.5"><Target className="h-4 w-4 text-fuchsia-500" /> IT-flavoured</span>
-            <span className="flex items-center gap-1.5">🇩🇪 B2 → C1</span>
+            <span className="flex items-center gap-1"><Zap className="h-3.5 w-3.5 text-amber-500" /> AI-powered</span>
+            <span className="flex items-center gap-1"><Target className="h-3.5 w-3.5 text-fuchsia-500" /> IT-flavoured</span>
+            <span className="flex items-center gap-1">🇩🇪 B2 → C1</span>
           </motion.div>
         </div>
 
         {/* Scroll indicator */}
         <motion.div
-          className="absolute bottom-8"
+          className="absolute bottom-4"
           animate={{ y: [0, 8, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
@@ -191,18 +191,14 @@ export default function WelcomePage() {
             transition={{ delay: 0.5 }}
             className="mt-6 relative rounded-2xl border-2 border-dashed border-pink-500/40 bg-gradient-to-br from-pink-500/10 via-fuchsia-500/10 to-violet-500/5 p-8 overflow-hidden"
           >
-            <div className="flex items-start gap-5">
-              <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-pink-500 to-fuchsia-600 text-white shrink-0">
-                <Code className="h-6 w-6" />
-              </div>
-              <div>
-                <div className="inline-block px-2.5 py-0.5 rounded-md bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-xs font-mono font-bold tracking-wider uppercase mb-3">
-                  Deutsch für IT-ler
-                </div>
-                <h3 className="text-xl font-bold mb-2">IT vocabulary to express complex thoughts</h3>
-                <p className="text-muted-foreground">From standup updates to architecture discussions — finally say what you actually mean.</p>
-              </div>
+            <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-pink-500 to-fuchsia-600 text-white mb-5">
+              <Code className="h-6 w-6" />
             </div>
+            <div className="block w-fit px-2.5 py-0.5 rounded-md bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-xs font-mono font-bold tracking-wider uppercase mb-3">
+              Deutsch für IT-ler
+            </div>
+            <h3 className="text-xl font-bold mb-2">IT vocabulary to express complex thoughts</h3>
+            <p className="text-muted-foreground">From standup updates to architecture discussions — finally say what you actually mean.</p>
             <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full bg-primary/10 blur-2xl" />
           </motion.div>
         </div>

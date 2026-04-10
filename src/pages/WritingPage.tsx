@@ -511,7 +511,7 @@ function RedemittelContent() {
                           {row.de}
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{row.en}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{row.en}</TableCell>
                     </TableRow>
                   );
                 })}
@@ -556,7 +556,7 @@ function RedemittelContent() {
                     </button>
                     <p className="text-sm font-medium text-foreground">{row.de}</p>
                   </div>
-                  <p className="text-sm text-muted-foreground">{row.en}</p>
+                  <p className="text-xs text-muted-foreground">{row.en}</p>
                 </div>
               );
             })}
@@ -1044,7 +1044,7 @@ export default function WritingPage() {
           <TelcBadge className="ml-1" />
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {lang === 'de' ? 'Übe das Schreiben von Texten auf Prüfungsniveau.' : 'Practice writing texts at exam level.'}
+          Erörterungen schreiben, die dein Prüfer nicht vergisst.
         </p>
       </div>
 

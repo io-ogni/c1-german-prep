@@ -29,7 +29,7 @@ export const translations = {
     auth_has_account: "Bereits ein Konto?",
     auth_reset_sent: "Falls ein Konto mit dieser E-Mail existiert, haben wir dir einen Link zum Zurücksetzen geschickt.",
     auth_check_email: "Bitte überprüfe deine E-Mail für die Bestätigung.",
-    auth_password_hint: "Mindestens 6 Zeichen",
+    auth_password_hint: "Mindestens 8 Zeichen",
     auth_passwords_no_match: "Passwörter stimmen nicht überein.",
     auth_new_password: "Neues Passwort",
     auth_set_new_password: "Neues Passwort setzen",
@@ -37,7 +37,7 @@ export const translations = {
 
     // Home
     home_welcome: "Willkommen",
-    home_subtitle: "Dein Weg zur telc C1 Prüfung — und dazu, im Meeting endlich das zu sagen, was du wirklich denkst.",
+    home_subtitle: "",
     home_progress: "Fortschritt",
     home_exercises_completed: "Übungen abgeschlossen",
     home_review_vocabulary: "Wortschatz wiederholen",
@@ -179,7 +179,7 @@ export const translations = {
 
     // Listening
     listening_title: "Hörverstehen",
-    listening_subtitle: "Höre den Audio-Beitrag extern an und bearbeite dann die Aufgaben hier.",
+    listening_subtitle: "Zuhören wie ein Profi. Verstehen wie ein Muttersprachler. Fast.",
     listening_set: "Set",
     listening_teil: "Teil",
     listening_completed: "abgeschlossen",
@@ -248,7 +248,7 @@ export const translations = {
 
     // IT Deutsch
     nav_it_deutsch: "IT Deutsch",
-    it_deutsch_subtitle: "Professionelles Deutsch für die IT-Branche — Vokabular, Phrasen und Redewendungen für deinen Arbeitsalltag.",
+    it_deutsch_subtitle: "Because ohne Übungen wirklich nichts Gutes happens.",
     it_phrasen_spickzettel: "Phrasen-Spickzettel",
     it_redewendungen: "Redewendungen",
     it_search_phrase: "Phrase suchen...",

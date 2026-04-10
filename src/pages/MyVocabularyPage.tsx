@@ -14,6 +14,8 @@ import { toast } from 'sonner';
 import { BookOpen, Plus, Search, Trash2 } from 'lucide-react';
 import { ReviewCard } from '@/components/shared/ReviewCard';
 import { syncStarredToDb } from '@/lib/syncStarredVocab';
+import { NAV_CONTAINER, TAB_TRIGGER_BLUE } from '@/components/shared/navStyles';
+import { ScrollNav } from '@/components/shared/ScrollNav';
 
 interface VocabWord {
   id: string;
@@ -148,14 +150,15 @@ export default function MyVocabularyPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <BookOpen className="h-6 w-6" />
           {lang === 'de' ? 'Mein Wortschatz' : 'My Vocabulary'}
         </h1>
-        <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <p className="text-sm text-muted-foreground mt-1">
+          <Dialog open={addOpen} onOpenChange={setAddOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" className="gap-1"><Plus className="h-4 w-4" />{t('vocab_add_word')}</Button>
+              <button className="text-primary hover:underline inline-flex items-center gap-1"><Plus className="h-3.5 w-3.5" />{t('vocab_add_word')}</button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>{t('vocab_add_word')}</DialogTitle></DialogHeader>
@@ -170,13 +173,16 @@ export default function MyVocabularyPage() {
               </div>
             </DialogContent>
           </Dialog>
+        </p>
       </div>
 
       <Tabs defaultValue="review">
-        <TabsList>
-          <TabsTrigger value="review">{t('vocab_review_due')} ({dueCards.length})</TabsTrigger>
-          <TabsTrigger value="all">{t('vocab_all_words')} ({allWords.length})</TabsTrigger>
-        </TabsList>
+        <ScrollNav>
+          <TabsList className={`${NAV_CONTAINER} h-auto gap-1`}>
+            <TabsTrigger value="review" className={`${TAB_TRIGGER_BLUE} gap-1.5`}>{t('vocab_review_due')} ({dueCards.length})</TabsTrigger>
+            <TabsTrigger value="all" className={`${TAB_TRIGGER_BLUE} gap-1.5`}>{t('vocab_all_words')} ({allWords.length})</TabsTrigger>
+          </TabsList>
+        </ScrollNav>
 
         <TabsContent value="review" className="mt-4">
           {loading ? (

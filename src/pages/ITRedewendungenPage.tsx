@@ -71,7 +71,7 @@ export default function ITRedewendungenPage() {
           <Monitor className="h-6 w-6" />
           {t('nav_it_deutsch')}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Berufssprache für die IT-Branche — Vokabular, Redewendungen und Dialoge für den Arbeitsalltag.</p>
+        <p className="text-sm text-muted-foreground mt-1">Damit 'Can you maybe look into this?' endlich auf Deutsch genauso passiv-aggressiv klingt.</p>
       </div>
       <ITDeutschNav />
 

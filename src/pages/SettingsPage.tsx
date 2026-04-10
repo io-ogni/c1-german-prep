@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { FunctionsHttpError } from '@supabase/supabase-js';
-import { Key, CheckCircle, Loader2, ShieldCheck, Trash2, Lock, Type } from 'lucide-react';
+import { Key, CheckCircle, Loader2, ShieldCheck, Trash2, Lock, Type, User } from 'lucide-react';
 import { useTextSize, type TextSize } from '@/hooks/useTextSize';
 
 async function getEdgeFunctionError(err: unknown): Promise<string> {
@@ -207,18 +207,76 @@ export default function SettingsPage() {
     <div className="max-w-lg space-y-6">
       <h1 className="text-2xl font-bold text-foreground">{t('settings_title')}</h1>
 
+      {/* API Key Section */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{t('auth_display_name')}</CardTitle>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Key className="h-4 w-4" />
+            {t('settings_api_key')}
+          </CardTitle>
+          <CardDescription className="text-sm text-muted-foreground">
+            {t('settings_api_key_note')}
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+        <CardContent className="space-y-3">
+          {hasKey && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <CheckCircle className="h-4 w-4 text-green-500" />
+              <span>API-Schlüssel ist konfiguriert</span>
+            </div>
+          )}
+          <div className="flex gap-2">
+            <Input
+              type="password"
+              placeholder={hasKey ? '••••••••••••••••' : 'sk-ant-...'}
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              className="flex-1"
+            />
+            <Button onClick={handleSaveKey} disabled={savingKey || !apiKey.trim()} size="sm">
+              {savingKey ? <Loader2 className="h-4 w-4 animate-spin" /> : t('settings_save_key')}
+            </Button>
+          </div>
+          {hasKey && (
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={handleTestKey} disabled={testingKey}>
+                {testingKey ? <Loader2 className="h-4 w-4 animate-spin" /> : t('settings_test_key')}
+              </Button>
+              <Button variant="destructive" size="sm" onClick={handleRemoveKey} disabled={savingKey}>
+                Schlüssel löschen
+              </Button>
+            </div>
+          )}
+          <div className="flex items-start gap-2 rounded-md border border-border bg-muted/50 p-3 text-xs text-muted-foreground">
+            <ShieldCheck className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
+            <span>Dein Schlüssel wird mit AES-256-GCM auf dem Server verschlüsselt und nie in deinem Browser gespeichert. Er wird nur kurzzeitig in sicheren Backend-Funktionen entschlüsselt.</span>
+          </div>
+          <div className="flex items-start gap-2 rounded-md border border-orange-200 bg-orange-50 dark:border-orange-900 dark:bg-orange-950/30 p-3 text-xs text-orange-800 dark:text-orange-300">
+            <ShieldCheck className="h-4 w-4 mt-0.5 shrink-0" />
+            <span><strong>Security tip:</strong> Generate a dedicated API key just for this app. Set a spending limit, and delete it when you're done learning.</span>
+          </div>
         </CardContent>
       </Card>
 
-      <Button onClick={handleSave} disabled={saving}>
-        {saving ? t('common_loading') : t('common_save')}
-      </Button>
+      {/* Anzeigename */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <User className="h-4 w-4" />
+            {t('auth_display_name')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+          <Button onClick={handleSave} disabled={saving} size="sm">
+            {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+            {t('common_save')}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Change Password */}
+      <ChangePasswordCard />
 
       {/* Text Size */}
       <Card>
@@ -245,56 +303,6 @@ export default function SettingsPage() {
                 <p className="text-xs text-muted-foreground">{opt.desc}</p>
               </button>
             ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Change Password */}
-      <ChangePasswordCard />
-
-      {/* API Key Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Key className="h-4 w-4" />
-            {t('settings_api_key')}
-          </CardTitle>
-          <CardDescription className="text-sm text-muted-foreground">
-            {t('settings_api_key_note')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {hasKey && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              <span>API-Schlüssel ist konfiguriert</span>
-            </div>
-          )}
-          <div className="flex gap-2">
-            <Input
-              type="password"
-              placeholder="sk-ant-..."
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="flex-1"
-            />
-            <Button onClick={handleSaveKey} disabled={savingKey || !apiKey.trim()} size="sm">
-              {savingKey ? <Loader2 className="h-4 w-4 animate-spin" /> : t('settings_save_key')}
-            </Button>
-          </div>
-          {hasKey && (
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={handleTestKey} disabled={testingKey}>
-                {testingKey ? <Loader2 className="h-4 w-4 animate-spin" /> : t('settings_test_key')}
-              </Button>
-              <Button variant="destructive" size="sm" onClick={handleRemoveKey} disabled={savingKey}>
-                {t('common_delete') || 'Entfernen'}
-              </Button>
-            </div>
-          )}
-          <div className="flex items-start gap-2 rounded-md border border-border bg-muted/50 p-3 text-xs text-muted-foreground">
-            <ShieldCheck className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
-            <span>Dein Schlüssel wird mit AES-256-GCM auf dem Server verschlüsselt und nie in deinem Browser gespeichert. Er wird nur kurzzeitig in sicheren Backend-Funktionen entschlüsselt.</span>
           </div>
         </CardContent>
       </Card>

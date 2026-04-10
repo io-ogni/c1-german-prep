@@ -98,7 +98,7 @@ export default function VocabularyPage() {
           <TelcBadge className="ml-1" />
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {lang === 'de' ? 'Erweitere deinen Wortschatz mit themenbasierten Übungen.' : 'Expand your vocabulary with topic-based exercises.'}
+          Wörter sammeln wie Pokémon. Gotta catch 'em all.
         </p>
       </div>
       <LevelTabs value={level} onValueChange={setLevel} />
