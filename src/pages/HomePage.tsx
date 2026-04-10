@@ -38,11 +38,29 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<HomeData | null>(null);
   const [homeDueCards, setHomeDueCards] = useState<any[]>([]);
+  const [dueLoading, setDueLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     loadProgress();
+    loadDueCards();
   }, [user]);
+
+  async function loadDueCards() {
+    setDueLoading(true);
+    try {
+      const { data: dueData } = await supabase
+        .from('personal_vocabulary')
+        .select('id,word_de,translation_en,translation_custom,example_sentence,box_number,next_review_at,review_count,source_type')
+        .eq('user_id', user!.id)
+        .lte('next_review_at', new Date().toISOString())
+        .order('next_review_at')
+        .limit(50);
+      if (dueData && dueData.length > 0) setHomeDueCards(dueData);
+    } catch {} finally {
+      setDueLoading(false);
+    }
+  }
 
   async function loadProgress() {
     setLoading(true);
@@ -58,7 +76,6 @@ export default function HomePage() {
         { count: writingSubmissions },
         { count: completedReading },
         { count: vocabCount },
-        { data: dueData },
       ] = await Promise.all([
         supabase.from('user_progress_cache' as any).select('*').eq('user_id', user!.id).maybeSingle(),
         supabase.from('writing_prompts').select('*', { count: 'exact', head: true }),
@@ -66,7 +83,6 @@ export default function HomePage() {
         supabase.from('writing_submissions').select('*', { count: 'exact', head: true }).eq('user_id', user!.id),
         supabase.from('reading_progress').select('*', { count: 'exact', head: true }).eq('user_id', user!.id).eq('completed', true),
         supabase.from('personal_vocabulary').select('*', { count: 'exact', head: true }).eq('user_id', user!.id),
-        supabase.from('personal_vocabulary').select('*').eq('user_id', user!.id).lte('next_review_at', new Date().toISOString()).order('next_review_at'),
       ]);
 
       // If no cache row yet (first visit after migration), initialize it
@@ -76,9 +92,6 @@ export default function HomePage() {
         const { data: fresh } = await supabase.from('user_progress_cache' as any).select('*').eq('user_id', user!.id).maybeSingle();
         c = fresh;
       }
-
-      const dueReviewCount = dueData?.length ?? 0;
-      if (dueReviewCount > 0) setHomeDueCards(dueData!);
 
       setData({
         vocabulary: { completed: c?.vocabulary_completed ?? 0, total: c?.vocabulary_total ?? 0 },
@@ -91,7 +104,7 @@ export default function HomePage() {
         totalExercises: (c?.vocabulary_completed ?? 0) + (c?.grammar_completed ?? 0) + (c?.exam_completed ?? 0) + (c?.it_completed ?? 0) + (c?.listening_completed ?? 0),
         vocabCount: vocabCount ?? 0,
         writingCount: writingSubmissions ?? 0,
-        dueReviewCount,
+        dueReviewCount: 0,
       });
     } catch (err) {
       console.error('Failed to load progress', err);
@@ -206,25 +219,25 @@ export default function HomePage() {
             </Link>
           )}
         </div>
-        {!loading && data && (
-          data.dueReviewCount > 0 ? (
-            <ReviewCard dueCards={homeDueCards} compact onCardReviewed={() => setData(prev => prev ? { ...prev, dueReviewCount: Math.max(0, prev.dueReviewCount - 1) } : prev)} />
-          ) : data.vocabCount > 0 ? (
-            <Card>
-              <CardContent className="py-6 text-center space-y-1">
-                <p className="text-foreground font-medium">Alles wiederholt — gut gemacht!</p>
-                <p className="text-sm text-muted-foreground">{data.vocabCount} Wörter & Sätze insgesamt</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardContent className="py-6 text-center space-y-1">
-                <p className="text-foreground font-medium">Noch leer</p>
-                <p className="text-sm text-muted-foreground">Klicke auf eine Zeile in einer <Link to="/it-deutsch/vokabular" className="text-primary hover:underline">Vokabeltabelle</Link>, um sie zu markieren — markierte Einträge landen automatisch hier.</p>
-              </CardContent>
-            </Card>
-          )
-        )}
+        {dueLoading ? (
+          <Card><CardContent className="py-6 text-center"><Skeleton className="h-5 w-40 mx-auto" /></CardContent></Card>
+        ) : homeDueCards.length > 0 ? (
+          <ReviewCard dueCards={homeDueCards} compact onCardReviewed={() => {}} />
+        ) : !loading && data && data.vocabCount > 0 ? (
+          <Card>
+            <CardContent className="py-6 text-center space-y-1">
+              <p className="text-foreground font-medium">Alles wiederholt — gut gemacht!</p>
+              <p className="text-sm text-muted-foreground">{data.vocabCount} Wörter & Sätze insgesamt</p>
+            </CardContent>
+          </Card>
+        ) : !loading && data ? (
+          <Card>
+            <CardContent className="py-6 text-center space-y-1">
+              <p className="text-foreground font-medium">Noch leer</p>
+              <p className="text-sm text-muted-foreground">Klicke auf eine Zeile in einer <Link to="/it-deutsch/vokabular" className="text-primary hover:underline">Vokabeltabelle</Link>, um sie zu markieren — markierte Einträge landen automatisch hier.</p>
+            </CardContent>
+          </Card>
+        ) : null}
       </div>
 
 
