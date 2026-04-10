@@ -54,12 +54,15 @@ Deno.serve(async (req) => {
       "personal_vocabulary",
       "reading_progress",
       "writing_submissions",
-      "profiles",
+      "user_progress_cache",
     ];
 
     for (const table of tables) {
       await adminClient.from(table).delete().eq("user_id", user.id);
     }
+
+    // profiles uses "id" not "user_id"
+    await adminClient.from("profiles").delete().eq("id", user.id);
 
     // Delete the auth user
     const { error: deleteError } = await adminClient.auth.admin.deleteUser(user.id);

@@ -182,6 +182,8 @@ export default function SettingsPage() {
       const { data, error } = await supabase.functions.invoke('delete-account');
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      // Clear localStorage so starred vocab doesn't re-sync into a future account
+      localStorage.clear();
       // User is already deleted server-side, sign out locally (ignore errors)
       await supabase.auth.signOut().catch(() => {});
       navigate('/login');

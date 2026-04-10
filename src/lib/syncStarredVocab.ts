@@ -104,7 +104,7 @@ export async function syncStarredToDb(userId: string): Promise<void> {
   if (toInsert.length === 0) return;
 
   const now = new Date().toISOString();
-  await supabase.from('personal_vocabulary').insert(
+  await supabase.from('personal_vocabulary').upsert(
     toInsert.map(item => ({
       user_id: userId,
       word_de: item.de,
@@ -114,6 +114,7 @@ export async function syncStarredToDb(userId: string): Promise<void> {
       source_type: item.source,
       box_number: 1,
       next_review_at: now,
-    }))
+    })),
+    { onConflict: 'user_id,word_de,source_type', ignoreDuplicates: true }
   );
 }
