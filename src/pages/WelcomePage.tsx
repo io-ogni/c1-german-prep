@@ -128,8 +128,8 @@ export default function WelcomePage() {
             transition={{ delay: 0.7 }}
             className="mt-6 mb-2 flex items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground"
           >
-            <span className="flex items-center gap-1"><Zap className="h-3.5 w-3.5 text-amber-500" /> AI-powered</span>
-            <span className="flex items-center gap-1"><Target className="h-3.5 w-3.5 text-fuchsia-500" /> IT-flavoured</span>
+            <span className="flex items-center gap-1">⚛️ AI-powered</span>
+            <span className="flex items-center gap-1">🍦 IT-flavoured</span>
             <span className="flex items-center gap-1">🇩🇪 B2 → C1</span>
           </motion.div>
         </div>

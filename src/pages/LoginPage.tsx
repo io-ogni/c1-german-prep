@@ -81,7 +81,7 @@ export default function LoginPage() {
           >
             {[
               { num: '7', label: 'Bereiche' },
-              { num: '500+', label: 'Übungen' },
+              { num: '980+', label: 'Übungen' },
               { num: 'AI', label: 'Feedback' },
             ].map((s) => (
               <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3">
@@ -190,6 +190,9 @@ export default function LoginPage() {
             <Link to="/signup" className="font-semibold text-primary hover:underline">
               {t('auth_signup')}
             </Link>
+          </p>
+          <p className="mt-3 text-center text-xs text-muted-foreground/60">
+            Your data is safe. Jerry guards it personally. 🐕
           </p>
         </motion.div>
       </div>
