@@ -81,9 +81,9 @@ export default function SignupPage() {
               Start your journey
             </div>
             <h1 className="text-4xl xl:text-5xl font-extrabold leading-tight mb-4">
-              Dein Weg
+              Dein non-boring
               <br />
-              zur C1
+              Weg zur C1
               <br />
               Prüfung.
             </h1>
