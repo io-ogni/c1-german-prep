@@ -102,7 +102,7 @@ export default function WelcomePage() {
             className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto mb-14 leading-relaxed"
           >
             Interactive exercises, real-life examples and AI feedback —
-            everything you need from B2 to C1 and your next Refinement meeting.
+            everything you need from B2 to C1. And yes, your next Refinement meeting counts as practice.
           </motion.p>
 
           <motion.div
@@ -159,7 +159,7 @@ export default function WelcomePage() {
               For B2 IT expats who want more than just pass the C1 exam.
             </h2>
             <p className="text-muted-foreground text-lg max-w-lg mx-auto">
-              Four skills. One platform. Zero fluff.
+              Four skills. One platform. Zero fluff. (Just dog hair.)
             </p>
           </motion.div>
 
@@ -217,11 +217,11 @@ export default function WelcomePage() {
               <span className="text-primary"> freaking free</span>
               {' '}in my everyday work in IT."
             </p>
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex flex-col items-center gap-2">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-violet-500 flex items-center justify-center text-white font-bold text-sm">
                 I
               </div>
-              <div className="text-left">
+              <div className="text-center">
                 <p className="font-semibold text-sm">Ioana, Product Manager</p>
                 <p className="text-xs text-muted-foreground">Was bored of all language tools and made this app instead</p>
               </div>
@@ -239,10 +239,10 @@ export default function WelcomePage() {
           className="max-w-2xl mx-auto text-center"
         >
           <h2 className="text-3xl md:text-5xl font-extrabold mb-6">
-            Ready to stop procrastinating?
+            Ready to stop starting and start finishing?
           </h2>
           <p className="text-lg text-muted-foreground mb-10">
-            Join other expats who are actually having fun preparing for C1. 100% free — no ads, no costs.
+            Join other expats who are actually having fun preparing for C1. 100% free, no ads, no costs — because Jerry 🐕 likes it this way.
           </p>
           <Button size="lg" className="text-base px-10 h-13 rounded-xl shadow-lg shadow-primary/25" asChild>
             <Link to="/signup">
