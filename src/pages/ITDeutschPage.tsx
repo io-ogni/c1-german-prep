@@ -1,11 +1,14 @@
 import { useTranslation } from '@/i18n/useTranslation';
 import { ITDeutschNav } from '@/components/layout/ITDeutschNav';
 import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Play, Headphones, Video, Monitor, MessageSquareText } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { DialogueList, DialogueView } from '@/components/it-deutsch/DialogueReader';
 import { IT_DIALOGUES } from '@/data/itDialogues';
 import type { ITDialogue } from '@/data/itDialogues';
+import { PILL_CONTAINER, TAB_TRIGGER_FUCHSIA } from '@/components/shared/navStyles';
+import { ScrollNav } from '@/components/shared/ScrollNav';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const MEDIA_BASE = `${SUPABASE_URL}/storage/v1/object/public/Media%20IT`;
@@ -112,51 +115,46 @@ export default function ITDeutschPage() {
       </div>
       <ITDeutschNav />
 
-      {/* Dialogues — prominent placement */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <MessageSquareText className="h-4 w-4 text-fuchsia-500" />
-          <h2 className="font-semibold text-foreground">{lang === 'de' ? 'Dialoge' : 'Dialogues'}</h2>
-        </div>
-        <DialogueList dialogues={IT_DIALOGUES} onSelect={setSelectedDialogue} />
-      </div>
+      <Tabs defaultValue="dialoge">
+        <ScrollNav>
+          <TabsList className={PILL_CONTAINER}>
+            <TabsTrigger value="dialoge" className={TAB_TRIGGER_FUCHSIA}><MessageSquareText className="h-3.5 w-3.5" /> Dialoge</TabsTrigger>
+            <TabsTrigger value="podcasts" className={TAB_TRIGGER_FUCHSIA}><Headphones className="h-3.5 w-3.5" /> Podcasts</TabsTrigger>
+            <TabsTrigger value="video" className={TAB_TRIGGER_FUCHSIA}><Video className="h-3.5 w-3.5" /> Video</TabsTrigger>
+          </TabsList>
+        </ScrollNav>
 
-      {/* Podcasts */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <Headphones className="h-4 w-4 text-fuchsia-500" />
-          <h2 className="font-semibold text-foreground">Podcasts</h2>
-        </div>
-        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
-          {PODCASTS.map((p) => (
-            <AudioCard key={p.file} podcast={p} />
-          ))}
-        </div>
-      </div>
+        <TabsContent value="dialoge">
+          <DialogueList dialogues={IT_DIALOGUES} onSelect={setSelectedDialogue} />
+        </TabsContent>
 
-      {/* Video */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <Video className="h-4 w-4 text-fuchsia-500" />
-          <h2 className="font-semibold text-foreground">Video</h2>
-        </div>
-        <Card className="sm:max-w-[calc(50%-0.375rem)]">
-          <CardContent className="p-0 overflow-hidden rounded-lg">
-            <video
-              src={`${MEDIA_BASE}/${VIDEO.file}`}
-              controls
-              controlsList="nodownload"
-              preload="metadata"
-              className="w-full aspect-video bg-black"
-              poster=""
-            />
-            <div className="p-5">
-              <h3 className="font-semibold text-foreground mb-1">{VIDEO.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{VIDEO.description}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        <TabsContent value="podcasts">
+          <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+            {PODCASTS.map((p) => (
+              <AudioCard key={p.file} podcast={p} />
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="video">
+          <Card className="sm:max-w-[calc(50%-0.375rem)]">
+            <CardContent className="p-0 overflow-hidden rounded-lg">
+              <video
+                src={`${MEDIA_BASE}/${VIDEO.file}`}
+                controls
+                controlsList="nodownload"
+                preload="metadata"
+                className="w-full aspect-video bg-black"
+                poster=""
+              />
+              <div className="p-5">
+                <h3 className="font-semibold text-foreground mb-1">{VIDEO.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{VIDEO.description}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

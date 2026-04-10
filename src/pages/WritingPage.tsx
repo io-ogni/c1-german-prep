@@ -19,7 +19,7 @@ import { Loader2, PenLine, AlertCircle, Copy, CheckCheck, Trash2, Filter, Messag
 import { usePlayAll } from '@/hooks/usePlayAll';
 import { PlayAllButton } from '@/components/PlayAllButton';
 import { toast } from '@/hooks/use-toast';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
@@ -859,7 +859,7 @@ function WritingInterface({
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder={lang === 'de' ? 'Schreibe hier deinen Text...' : 'Write your text here...'}
-            className="min-h-[200px] resize-y text-base"
+            className="min-h-[200px] resize-y text-base bg-white dark:bg-card"
           />
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -1014,7 +1014,8 @@ export default function WritingPage() {
   const { t } = useTranslation();
   const lang = profile?.ui_language || 'de';
 
-  const [activeTab, setActiveTab] = useState<string>('almost_c1');
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<string>(searchParams.get('tab') || 'almost_c1');
   const [selectedPrompt, setSelectedPrompt] = useState<WritingPrompt | null>(null);
 
   const hasApiKey = !!profile?.api_key_encrypted;

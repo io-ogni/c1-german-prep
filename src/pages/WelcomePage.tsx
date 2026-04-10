@@ -126,7 +126,7 @@ export default function WelcomePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
-            className="mt-8 flex items-center justify-center gap-6 text-sm text-muted-foreground"
+            className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-sm text-muted-foreground"
           >
             <span className="flex items-center gap-1.5"><Zap className="h-4 w-4 text-amber-500" /> AI-powered</span>
             <span className="flex items-center gap-1.5"><Target className="h-4 w-4 text-fuchsia-500" /> IT-flavoured</span>

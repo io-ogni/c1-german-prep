@@ -234,7 +234,7 @@ export default function HomePage() {
           <Card>
             <CardContent className="py-6 text-center space-y-1">
               <p className="text-foreground font-medium">Noch leer</p>
-              <p className="text-sm text-muted-foreground">Klicke auf eine Zeile in einer <Link to="/it-deutsch/vokabular" className="text-primary hover:underline">Vokabeltabelle</Link>, um sie zu markieren — markierte Einträge landen automatisch hier.</p>
+              <p className="text-sm text-muted-foreground">Markiere Einträge in beliebigen Vokabeltabellen (z.B. <Link to="/it-deutsch/vokabular" className="text-primary hover:underline">IT-Vokabular</Link>) oder Redewendungen (z.B. <Link to="/speaking" className="text-primary hover:underline">Sprechen</Link>, <Link to="/writing?tab=redemittel" className="text-primary hover:underline">Schreiben</Link>) — sie landen automatisch hier.</p>
             </CardContent>
           </Card>
         ) : null}
