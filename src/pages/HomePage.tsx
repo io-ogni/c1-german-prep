@@ -259,6 +259,19 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* Verb Flashcards */}
+      {homeVerbs.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-foreground">Verb-Lernkarten</h2>
+            <Link to="/grammar/verbs" className="text-sm text-primary hover:underline">
+              Alle Verben →
+            </Link>
+          </div>
+          <VerbFlashcard verbs={homeVerbs} compact />
+        </div>
+      )}
+
       {/* Wortschatz wiederholen */}
       <div>
         <div className="flex items-center justify-between mb-4">
@@ -292,20 +305,6 @@ export default function HomePage() {
         ) : null}
       </div>
 
-
-      {/* Verb Flashcards */}
-      {homeVerbs.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-foreground">Verb-Lernkarten</h2>
-            <Link to="/grammar/verbs" className="text-sm text-primary hover:underline">
-              Alle Verben →
-            </Link>
-          </div>
-          <VerbFlashcard verbs={homeVerbs} compact />
-        </div>
-      )}
-
       {/* Stats */}
       {!loading && data && (
         <div className="grid grid-cols-3 gap-4">
@@ -327,7 +326,8 @@ export default function HomePage() {
         <p>
           Built by <a href="https://ioana-ognibeni.eu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Ioana Ognibeni</a> with{' '}
           <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Claude</a> &{' '}
-          <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Lovable</a>
+          <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Lovable</a>.
+          {' '}Approved by Jerry the 🐕
         </p>
       </div>
     </div>

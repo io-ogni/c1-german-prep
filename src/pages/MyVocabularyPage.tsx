@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useRequiredAuth, useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { BookOpen, Plus, Search, Trash2 } from 'lucide-react';
+import { BookOpen, Plus, Search, Trash2, Languages } from 'lucide-react';
 import { ReviewCard } from '@/components/shared/ReviewCard';
 import { syncStarredToDb } from '@/lib/syncStarredVocab';
 import { NAV_CONTAINER, TAB_TRIGGER_BLUE } from '@/components/shared/navStyles';
@@ -231,9 +232,15 @@ export default function MyVocabularyPage() {
             )}
           </div>
           {filteredWords.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">
-              {allWords.length === 0 ? (lang === 'de' ? 'Noch keine Wörter gespeichert.' : 'No words saved yet.') : (lang === 'de' ? 'Keine Ergebnisse.' : 'No results.')}
-            </p>
+            allWords.length === 0 ? (
+              <div className="text-center py-8 space-y-3">
+                <Languages className="h-10 w-10 mx-auto text-muted-foreground/30" />
+                <p className="text-sm text-muted-foreground">Noch leer — aber nicht lange.</p>
+                <p className="text-xs text-muted-foreground/70">Markiere Wörter in <Link to="/it-deutsch/vokabular" className="text-primary hover:underline">IT-Vokabular</Link>, <Link to="/speaking" className="text-primary hover:underline">Sprechen</Link> oder tippe auf ein Wort in einem <Link to="/reading" className="text-primary hover:underline">Lesetext</Link>.</p>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground py-4 text-center">{lang === 'de' ? 'Keine Ergebnisse.' : 'No results.'}</p>
+            )
           ) : (
             <div className="space-y-2">
               {filteredWords.map(w => (

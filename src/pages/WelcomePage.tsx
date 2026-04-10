@@ -28,9 +28,9 @@ const features = [
 
 export default function WelcomePage() {
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
+    <div className="h-screen bg-background overflow-y-auto snap-y snap-mandatory">
       {/* Hero */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 py-20">
+      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 py-20 snap-start">
         {/* Floating emojis */}
         {floatingEmojis.map((emoji, i) => (
           <FloatingEmoji
@@ -147,7 +147,7 @@ export default function WelcomePage() {
       </section>
 
       {/* Features */}
-      <section className="relative px-6 py-24 md:py-32">
+      <section className="relative px-6 py-24 md:py-32 snap-start snap-always">
         <div className="max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -261,7 +261,8 @@ export default function WelcomePage() {
           <div className="text-center">
             Built by <a href="https://ioana-ognibeni.eu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Ioana Ognibeni</a> with{' '}
             <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Claude</a> &{' '}
-            <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Lovable</a>
+            <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Lovable</a>.
+            {' '}Approved by Jerry the 🐕
           </div>
         </div>
       </footer>

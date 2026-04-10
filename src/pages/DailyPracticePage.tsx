@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import {
-  ArrowLeft, CheckCircle, XCircle, Eye, Flame, StopCircle, Loader2,
+  ArrowLeft, CheckCircle, XCircle, Eye, Flame, StopCircle, Loader2, Trophy, Sparkles,
 } from 'lucide-react';
 import type { Json } from '@/integrations/supabase/types';
 import { DefinitionMatch } from '@/components/vocabulary/exercises/DefinitionMatch';
@@ -457,15 +457,22 @@ export default function DailyPracticePage() {
 
   if (status === 'empty') {
     return (
-      <div className="space-y-6 text-center py-12">
-        <CheckCircle className="h-12 w-12 text-primary mx-auto" />
-        <h2 className="text-xl font-bold text-foreground">{lang === 'de' ? 'Alles erledigt!' : 'All done!'}</h2>
-        <p className="text-sm text-muted-foreground max-w-md mx-auto">
-          {lang === 'de'
-            ? 'Keine Übungen oder Karteikarten verfügbar. Probiere Schreiben oder füge neue Vokabeln hinzu.'
-            : 'No exercises or flashcards available. Try writing or add new vocabulary.'}
-        </p>
-        <Button onClick={() => navigate('/home')}>{lang === 'de' ? 'Zur Startseite' : 'Back to Home'}</Button>
+      <div className="max-w-md mx-auto space-y-6 text-center py-12">
+        <div className="relative mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+          <Trophy className="w-10 h-10 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-foreground">{lang === 'de' ? 'Du hast literally alles gemacht.' : 'You literally did everything.'}</h2>
+          <p className="text-sm text-muted-foreground mt-2">
+            {lang === 'de'
+              ? 'Respect. Probier Schreiben mit AI-Feedback oder füge neue Vokabeln hinzu.'
+              : 'Respect. Try writing with AI feedback or add new vocabulary.'}
+          </p>
+        </div>
+        <div className="flex gap-3 justify-center">
+          <Button variant="outline" onClick={() => navigate('/home')}>{lang === 'de' ? 'Startseite' : 'Home'}</Button>
+          <Button onClick={() => navigate('/writing')}>{lang === 'de' ? 'Schreiben üben' : 'Practice Writing'}</Button>
+        </div>
       </div>
     );
   }
@@ -477,33 +484,67 @@ export default function DailyPracticePage() {
     const accuracy = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
 
     return (
-      <div className="max-w-md mx-auto space-y-6 py-8 text-center">
-        <h2 className="text-2xl font-bold text-foreground">
-          {lang === 'de' ? 'Geschafft!' : 'Done!'}
-        </h2>
-        <div className="space-y-3">
-          <p className="text-foreground">
-            {exercisesCompleted} / {exercises.length} {lang === 'de' ? 'Übungen abgeschlossen' : 'exercises completed'}
+      <div className="max-w-md mx-auto space-y-6 py-8 text-center animate-in fade-in duration-500">
+        {/* Trophy */}
+        <div className="relative mx-auto w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
+          <Trophy className="w-12 h-12 text-primary" />
+          <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
+            <Sparkles className="w-4 h-4 text-white" />
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">
+            {lang === 'de' ? 'Geschafft!' : 'Done!'} 🎉
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            {lang === 'de' ? `${em}:${es} gut investiert.` : `${em}:${es} well spent.`}
           </p>
+        </div>
+
+        {/* Score ring */}
+        {totalAnswered > 0 && (
+          <div className="relative mx-auto w-28 h-28">
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="42" fill="none" strokeWidth="8" className="stroke-secondary" />
+              <circle cx="50" cy="50" r="42" fill="none" strokeWidth="8" className="stroke-primary" strokeLinecap="round"
+                strokeDasharray={`${accuracy * 2.64} ${264 - accuracy * 2.64}`}
+                style={{ transition: 'stroke-dasharray 1s ease-out' }}
+              />
+            </svg>
+            <span className="absolute inset-0 flex items-center justify-center text-xl font-bold text-foreground">{accuracy}%</span>
+          </div>
+        )}
+
+        {/* Stats */}
+        <div className="flex justify-center gap-6 text-sm">
+          <div className="text-center">
+            <p className="text-lg font-bold text-foreground">{exercisesCompleted}</p>
+            <p className="text-xs text-muted-foreground">{lang === 'de' ? 'Übungen' : 'Exercises'}</p>
+          </div>
           {flashcardsReviewed > 0 && (
-            <p className="text-foreground">
-              {flashcardsReviewed} {lang === 'de' ? 'Karteikarten wiederholt' : 'flashcards reviewed'}
-            </p>
-          )}
-          <p className="text-muted-foreground">{lang === 'de' ? 'Zeit' : 'Time'}: {em}:{es}</p>
-          {totalAnswered > 0 && (
-            <div className="space-y-1">
-              <Progress value={accuracy} className="h-3" />
-              <p className="text-sm text-muted-foreground">{accuracy}% {lang === 'de' ? 'richtig' : 'correct'}</p>
+            <div className="text-center">
+              <p className="text-lg font-bold text-foreground">{flashcardsReviewed}</p>
+              <p className="text-xs text-muted-foreground">{lang === 'de' ? 'Karten' : 'Cards'}</p>
             </div>
           )}
-          {profile && (
-            <p className="flex items-center justify-center gap-1 text-foreground">
-              <Flame className="h-5 w-5 text-orange-500" />
-              {lang === 'de' ? 'Serie' : 'Streak'}: {profile.current_streak} {lang === 'de' ? (profile.current_streak === 1 ? 'Tag' : 'Tage') : (profile.current_streak === 1 ? 'day' : 'days')}
-            </p>
+          {totalAnswered > 0 && (
+            <div className="text-center">
+              <p className="text-lg font-bold text-foreground">{correctCount}/{totalAnswered}</p>
+              <p className="text-xs text-muted-foreground">{lang === 'de' ? 'Richtig' : 'Correct'}</p>
+            </div>
           )}
         </div>
+
+        {/* Streak */}
+        {profile && (
+          <div className="inline-flex items-center gap-2 bg-orange-100 dark:bg-orange-900/30 rounded-full px-4 py-2">
+            <Flame className="h-5 w-5 text-orange-500" />
+            <span className="font-bold text-foreground">{profile.current_streak} {lang === 'de' ? (profile.current_streak === 1 ? 'Tag' : 'Tage') : (profile.current_streak === 1 ? 'day' : 'days')}</span>
+            <span className="text-xs text-muted-foreground">{lang === 'de' ? 'am Stück' : 'streak'}</span>
+          </div>
+        )}
+
         <div className="flex gap-3 justify-center">
           <Button variant="outline" onClick={() => navigate('/home')}>
             {lang === 'de' ? 'Startseite' : 'Home'}

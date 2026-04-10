@@ -142,6 +142,7 @@ export function ReviewCard({ dueCards, onCardReviewed, compact }: ReviewCardProp
           <>
             <CheckCircle className={`${compact ? 'h-8 w-8' : 'h-10 w-10'} text-primary`} />
             <p className="text-foreground font-medium">{t('vocab_no_reviews')}</p>
+            <p className="text-xs text-muted-foreground">Deine Wörter chillen noch in ihrer Box. Komm morgen wieder.</p>
           </>
         )}
       </div>

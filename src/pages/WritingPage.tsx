@@ -642,6 +642,23 @@ function ScoreCard({ label, grade }: { label: string; grade: string }) {
 
 // ─── Evaluation Display ──────────────────────────────
 
+function overallGrade(evaluation: EvaluationResponse): string {
+  const grades = [evaluation.aufgabengerechtheit?.grade, evaluation.korrektheit?.grade, evaluation.repertoire?.grade, evaluation.kommunikative_gestaltung?.grade].filter(Boolean) as string[];
+  if (!grades.length) return 'C';
+  const avg = grades.reduce((s, g) => s + (GRADE_POINTS[g] ?? 0), 0) / grades.length;
+  if (avg >= 10) return 'A';
+  if (avg >= 7) return 'B';
+  if (avg >= 4) return 'C';
+  return 'D';
+}
+
+const GRADE_MESSAGES: Record<string, string> = {
+  A: 'Dein Prüfer wäre beeindruckt. Seriously.',
+  B: 'Solide Arbeit. Da geht noch was, aber du bist on track.',
+  C: 'Ausbaufähig — aber hey, du hast geschrieben. Das ist schon die halbe Miete.',
+  D: 'Rome wasn\'t built in a day. Und dein C1 auch nicht.',
+};
+
 function EvaluationDisplay({ evaluation }: { evaluation: EvaluationResponse }) {
   const { t } = useTranslation();
   const { profile } = useRequiredAuth();
@@ -649,20 +666,41 @@ function EvaluationDisplay({ evaluation }: { evaluation: EvaluationResponse }) {
 
   const corrections = evaluation.korrektheit?.corrections ?? [];
   const feedback = lang === 'de' ? evaluation.overall_feedback_de : evaluation.overall_feedback_en;
+  const grade = overallGrade(evaluation);
+  const pct = evaluation.max_points > 0 ? Math.round((evaluation.total_points / evaluation.max_points) * 100) : 0;
 
   return (
-    <div className="space-y-4 rounded-lg border border-border bg-card p-4">
-      <h3 className="text-lg font-semibold text-foreground">{t('eval_results')}</h3>
+    <div className="space-y-5 rounded-2xl border border-border bg-card p-5 animate-in fade-in duration-500">
+      {/* Big grade reveal */}
+      <div className="text-center space-y-3 py-4">
+        <div className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl text-3xl font-black ${gradeColor(grade)}`}>
+          {grade}
+        </div>
+        <div>
+          <p className="text-lg font-bold text-foreground">{evaluation.total_points}/{evaluation.max_points} Punkte</p>
+          <p className="text-sm text-muted-foreground mt-1">{GRADE_MESSAGES[grade]}</p>
+        </div>
+      </div>
 
+      {/* Score ring */}
+      <div className="relative mx-auto w-24 h-24">
+        <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" fill="none" strokeWidth="8" className="stroke-secondary" />
+          <circle cx="50" cy="50" r="42" fill="none" strokeWidth="8" strokeLinecap="round"
+            className={grade === 'A' || grade === 'B' ? 'stroke-primary' : 'stroke-amber-500'}
+            strokeDasharray={`${pct * 2.64} ${264 - pct * 2.64}`}
+            style={{ transition: 'stroke-dasharray 1s ease-out' }}
+          />
+        </svg>
+        <span className="absolute inset-0 flex items-center justify-center text-lg font-bold text-foreground">{pct}%</span>
+      </div>
+
+      {/* Category breakdown */}
       <div className="grid grid-cols-2 gap-3">
         <ScoreCard label={t('eval_aufgabengerechtheit')} grade={evaluation.aufgabengerechtheit?.grade} />
         <ScoreCard label={t('eval_korrektheit')} grade={evaluation.korrektheit?.grade} />
         <ScoreCard label={t('eval_repertoire')} grade={evaluation.repertoire?.grade} />
         <ScoreCard label={t('eval_kommunikative_gestaltung')} grade={evaluation.kommunikative_gestaltung?.grade} />
-      </div>
-
-      <div className="text-center text-lg font-bold text-foreground">
-        {t('eval_total')}: {evaluation.total_points}/{evaluation.max_points}
       </div>
 
       <Accordion type="multiple" className="w-full">

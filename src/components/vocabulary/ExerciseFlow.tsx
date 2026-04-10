@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n/useTranslation';
 import { ProgressBar } from '@/components/shared/ProgressBar';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, RotateCcw } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Trophy, Sparkles } from 'lucide-react';
 import { DefinitionMatch } from './exercises/DefinitionMatch';
 import { FillIn } from './exercises/FillIn';
 import { SynonymMatch } from './exercises/SynonymMatch';
@@ -210,12 +210,38 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
       ? totalCount
       : Object.values(progressMap ?? {}).filter(Boolean).length;
 
+    const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
     return (
-      <div className="space-y-4 text-center py-12">
-        <h2 className="text-xl font-bold text-foreground">🎉 {topicTitle}</h2>
-        <p className="text-muted-foreground">
-          {completedCount} {t('exercise_of')} {totalCount} {t('exercise_progress')}
-        </p>
+      <div className="max-w-md mx-auto space-y-6 py-8 text-center animate-in fade-in duration-500">
+        <div className="relative mx-auto w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
+          <Trophy className="w-12 h-12 text-primary" />
+          <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
+            <Sparkles className="w-4 h-4 text-white" />
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">{topicTitle}</h2>
+          <p className="text-muted-foreground mt-1">
+            {allCompleted
+              ? (lang === 'de' ? 'Alle Übungen geschafft! Mega.' : 'All exercises done! Mega.')
+              : (lang === 'de' ? 'Runde abgeschlossen!' : 'Round complete!')}
+          </p>
+        </div>
+
+        <div className="relative mx-auto w-28 h-28">
+          <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" fill="none" strokeWidth="8" className="stroke-secondary" />
+            <circle cx="50" cy="50" r="42" fill="none" strokeWidth="8" className="stroke-primary" strokeLinecap="round"
+              strokeDasharray={`${pct * 2.64} ${264 - pct * 2.64}`}
+              style={{ transition: 'stroke-dasharray 1s ease-out' }}
+            />
+          </svg>
+          <span className="absolute inset-0 flex items-center justify-center text-xl font-bold text-foreground">{pct}%</span>
+        </div>
+
+        <p className="text-sm text-muted-foreground">{completedCount} / {totalCount} {t('exercise_progress')}</p>
+
         <div className="flex gap-3 justify-center">
           <Button variant="outline" onClick={onBack}>{t('exercise_back_to_topics')}</Button>
           <Button onClick={handleRestart}>
