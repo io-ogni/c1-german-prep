@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Eye, CheckCircle, XCircle, RotateCcw, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { track } from '@/lib/posthog';
 
 interface VocabWord {
   id: string;
@@ -82,6 +83,7 @@ export function ReviewCard({ dueCards, onCardReviewed, compact }: ReviewCardProp
 
     if (knewIt) setCorrect(c => c + 1);
     setTotal(t => t + 1);
+    track('flashcard_reviewed', { knew_it: knewIt, box_number: card.box_number, source_type: card.source_type });
 
     const newBox = knewIt ? Math.min(card.box_number + 1, 6) : 1;
     const daysUntilNext = BOX_INTERVALS[newBox - 1];

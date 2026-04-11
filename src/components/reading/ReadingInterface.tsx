@@ -13,6 +13,7 @@ import { DetailverstehenQuestions } from './questions/DetailverstehenQuestions';
 import { SelektivesVerstehenQuestions } from './questions/SelektivesVerstehenQuestions';
 import { GeneralQuestions } from './questions/GeneralQuestions';
 import { SelectionHint } from '@/components/shared/SelectionHint';
+import { track } from '@/lib/posthog';
 
 const readingAudio = import.meta.glob('/src/assets/audio/reading/*.mp3', { eager: true, import: 'default' }) as Record<string, string>;
 
@@ -224,6 +225,7 @@ export function ReadingInterface({ text, onBack }: Props) {
     if (error) {
       toast.error(error.message);
     } else {
+      track('reading_completed', { score: percentage, text_type: text.text_type, time_spent: timerSecondsRef.current });
       toast.success(language === 'de' ? 'Fortschritt gespeichert!' : 'Progress saved!');
       onBack();
     }

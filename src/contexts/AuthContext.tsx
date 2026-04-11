@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
+import { track, identifyUser, resetUser } from '@/lib/posthog';
 
 interface Profile {
   id: string;
@@ -64,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
+        identifyUser(s.user.id);
         fetchProfile(s.user.id).then(setProfile);
       }
       setLoading(false);
@@ -83,11 +85,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string, captchaToken?: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error, data } = await supabase.auth.signInWithPassword({
       email,
       password,
       options: captchaToken ? { captchaToken } : undefined,
     });
+    if (!error && data.user) {
+      identifyUser(data.user.id);
+      track('login');
+    }
     return { error: error as Error | null };
   };
 
@@ -100,10 +106,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ...(captchaToken ? { captchaToken } : {}),
       },
     });
+    if (!error) track('signup');
     return { error: error as Error | null };
   };
 
   const logout = async () => {
+    track('logout');
+    resetUser();
     await supabase.auth.signOut();
     setProfile(null);
   };

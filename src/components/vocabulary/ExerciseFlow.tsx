@@ -6,6 +6,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { ProgressBar } from '@/components/shared/ProgressBar';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, RotateCcw, Trophy, Sparkles } from 'lucide-react';
+import { track } from '@/lib/posthog';
 import { DefinitionMatch } from './exercises/DefinitionMatch';
 import { FillIn } from './exercises/FillIn';
 import { SynonymMatch } from './exercises/SynonymMatch';
@@ -125,6 +126,8 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
   const handleAnswer = async (correct: boolean, exerciseId: string) => {
     setAnswered(true);
     if (!auth?.user) return;
+    const ex = exercises[currentIndex];
+    track('exercise_completed', { correct, area, topic, exercise_type: ex?.exercise_type });
 
     const { data: existing } = await supabase.from('exercise_progress')
       .select('id, attempts, completed')

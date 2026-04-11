@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { PostHogPageTracker } from "@/components/PostHogPageTracker";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import LoginPage from "@/pages/LoginPage";
@@ -35,6 +36,9 @@ import FlashcardsPage from "@/pages/FlashcardsPage";
 import WelcomePage from "@/pages/WelcomePage";
 import NotFound from "@/pages/NotFound";
 import { RootRoute } from "@/components/RootRoute";
+import { initPostHog } from "@/lib/posthog";
+
+initPostHog();
 
 const queryClient = new QueryClient();
 
@@ -46,6 +50,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <PostHogPageTracker />
           <Routes>
             {/* Root — welcome or dashboard depending on auth */}
             <Route path="/" element={<RootRoute />} />

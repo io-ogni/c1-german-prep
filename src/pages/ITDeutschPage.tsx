@@ -9,6 +9,7 @@ import { IT_DIALOGUES } from '@/data/itDialogues';
 import type { ITDialogue } from '@/data/itDialogues';
 import { PILL_CONTAINER, TAB_TRIGGER_FUCHSIA } from '@/components/shared/navStyles';
 import { ScrollNav } from '@/components/shared/ScrollNav';
+import { track } from '@/lib/posthog';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const MEDIA_BASE = `${SUPABASE_URL}/storage/v1/object/public/Media%20IT`;
@@ -52,6 +53,7 @@ function AudioCard({ podcast, index }: { podcast: typeof PODCASTS[0]; index: num
       audioRef.current.pause();
     } else {
       audioRef.current.play();
+      track('audio_played', { type: 'podcast', title: podcast.title });
     }
     setPlaying(!playing);
   };
@@ -144,7 +146,7 @@ export default function ITDeutschPage() {
         </ScrollNav>
 
         <TabsContent value="dialoge">
-          <DialogueList dialogues={IT_DIALOGUES} onSelect={setSelectedDialogue} />
+          <DialogueList dialogues={IT_DIALOGUES} onSelect={(d) => { track('dialogue_opened', { dialogue_id: d.id, title: d.title_de, category: d.category }); setSelectedDialogue(d); }} />
         </TabsContent>
 
         <TabsContent value="podcasts">

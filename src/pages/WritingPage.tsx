@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRequiredAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
+import { track } from '@/lib/posthog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -822,6 +823,7 @@ function WritingInterface({
       }
 
       setEvaluation(data);
+      track('writing_submitted', { prompt_type: prompt.prompt_type, word_count: wordCount, grade: overallGrade(data) });
 
       const { data: newSub } = await supabase
         .from('writing_submissions')

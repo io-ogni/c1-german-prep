@@ -9,6 +9,7 @@ import { TelcBadge } from '@/components/shared/TelcBadge';
 import { ProgressBar } from '@/components/shared/ProgressBar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Headphones, ArrowLeft } from 'lucide-react';
+import { track } from '@/lib/posthog';
 import { ListeningGlobalverstehen } from '@/components/listening/ListeningGlobalverstehen';
 import { ListeningDetailverstehen } from '@/components/listening/ListeningDetailverstehen';
 import { ListeningInformationstransfer } from '@/components/listening/ListeningInformationstransfer';
@@ -74,6 +75,7 @@ export default function ListeningPage() {
     if (!user) return;
     const percentage = Math.round((score / total) * 100);
     const isComplete = score === total;
+    track('listening_completed', { score: percentage, exercise_type: exercises?.find(e => e.id === exerciseId)?.exercise_type });
 
     const { data: existing } = await supabase.from('exercise_progress')
       .select('id, attempts, completed, score')

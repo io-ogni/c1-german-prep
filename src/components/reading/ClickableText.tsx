@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { markHintInteraction } from '@/components/shared/SelectionHint';
+import { track } from '@/lib/posthog';
 
 interface Props {
   content: string;
@@ -295,6 +296,7 @@ export function ClickableText({
       toast.error(error.message);
     } else {
       markHintInteraction('reading');
+      track('vocab_saved', { word_de: annotation.de, source_type: 'reading', source_page: 'reading' });
       toast.success(t('word_added'));
       clearSelection();
     }

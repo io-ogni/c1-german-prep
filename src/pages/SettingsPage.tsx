@@ -20,6 +20,7 @@ import {
 import { toast } from 'sonner';
 import { FunctionsHttpError } from '@supabase/supabase-js';
 import { Key, CheckCircle, Loader2, ShieldCheck, Trash2, Lock, Type, User } from 'lucide-react';
+import { track, resetUser } from '@/lib/posthog';
 import { useTextSize, type TextSize } from '@/hooks/useTextSize';
 
 async function getEdgeFunctionError(err: unknown): Promise<string> {
@@ -182,6 +183,8 @@ export default function SettingsPage() {
       const { data, error } = await supabase.functions.invoke('delete-account');
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      track('account_deleted');
+      resetUser();
       // Clear localStorage so starred vocab doesn't re-sync into a future account
       localStorage.clear();
       // User is already deleted server-side, sign out locally (ignore errors)

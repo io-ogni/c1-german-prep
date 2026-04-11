@@ -10,6 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { track } from '@/lib/posthog';
 import {
   ArrowLeft, CheckCircle, XCircle, Eye, Flame, StopCircle, Loader2, Trophy, Sparkles,
 } from 'lucide-react';
@@ -276,6 +277,7 @@ export default function DailyPracticePage() {
     setCurrentIndex(0);
     startTimeRef.current = new Date();
     setStatus(selectedCards.length > 0 ? 'flashcards' : 'exercises');
+    track('daily_session_started', { minutes_selected: minutes, flashcard_count: selectedCards.length, exercise_count: selectedExercises.length });
   }, [profile, minutes]);
 
   useEffect(() => { generateSession(); }, [generateSession]);
@@ -338,6 +340,7 @@ export default function DailyPracticePage() {
     setExercisesCompleted(c => c + 1);
     setTotalAnswered(a => a + 1);
     if (correct) setCorrectCount(c => c + 1);
+    track('daily_exercise_answered', { correct });
 
     // Upsert progress
     const { data: existing } = await supabase.from('exercise_progress').select('id, attempts, completed').eq('user_id', profile.user_id).eq('exercise_id', ex.id).maybeSingle();
@@ -421,6 +424,17 @@ export default function DailyPracticePage() {
   const endSession = async (sessionCompleted = false) => {
     if (timerRef.current) clearInterval(timerRef.current);
     const elapsed = Math.floor((new Date().getTime() - startTimeRef.current.getTime()) / 1000);
+    const totalItems = flashcards.length + exercises.length;
+
+    track(sessionCompleted ? 'daily_session_completed' : 'daily_session_cancelled', {
+      minutes_selected: minutes,
+      elapsed_seconds: elapsed,
+      exercises_completed: exercisesCompleted,
+      flashcards_reviewed: flashcardsReviewed,
+      accuracy: totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0,
+      streak: profile?.current_streak ?? 0,
+      ...(!sessionCompleted && { cancel_point: `${currentIndex}/${totalItems}` }),
+    });
 
     try {
       // Update session

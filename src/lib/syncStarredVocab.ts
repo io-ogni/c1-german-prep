@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { track } from '@/lib/posthog';
 import { NOUNS, VERBS, COLLOCATIONS, WORKSHOP_PHRASES, REFINEMENT_PHRASES, COMPOSURE_PHRASES, CRISIS_TRIGGERS } from '@/pages/ITVokabularPage';
 import { SECTIONS } from '@/pages/SpeakingPage';
 import { REDEMITTEL_SECTIONS } from '@/pages/WritingPage';
@@ -117,4 +118,5 @@ export async function syncStarredToDb(userId: string): Promise<void> {
     })),
     { onConflict: 'user_id,word_de,source_type', ignoreDuplicates: true }
   );
+  track('vocab_synced', { count: toInsert.length, source_types: [...new Set(toInsert.map(i => i.source))] });
 }
