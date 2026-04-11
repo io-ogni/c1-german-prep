@@ -4,7 +4,7 @@ import { Sparkles, BookOpen, PenTool, Headphones, MessageCircle, ArrowRight, Zap
 import { Button } from '@/components/ui/button';
 
 
-const floatingEmojis = ['🇩🇪', '📚', '✍️', '🎧', '💬', '🎯', '⚡', '🏆'];
+const floatingEmojis = ['🇩🇪', '✍️', '📚', '🎧', '💬', '🎯', '⚡', '🏆'];
 
 function FloatingEmoji({ emoji, delay, x, y }: { emoji: string; delay: number; x: number; y: number }) {
   return (

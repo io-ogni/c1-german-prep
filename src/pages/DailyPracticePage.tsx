@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import {
   ArrowLeft, CheckCircle, XCircle, Eye, Flame, StopCircle, Loader2, Trophy, Sparkles,
@@ -278,7 +279,7 @@ export default function DailyPracticePage() {
   const advance = () => {
     const nextIdx = currentIndex + 1;
     if (nextIdx >= totalItems) {
-      endSession();
+      endSession(true);
     } else if (nextIdx >= flashcards.length && status === 'flashcards') {
       setCurrentIndex(nextIdx);
       setStatus('exercises');
@@ -397,7 +398,7 @@ export default function DailyPracticePage() {
     }
   };
 
-  const endSession = async () => {
+  const endSession = async (sessionCompleted = false) => {
     if (timerRef.current) clearInterval(timerRef.current);
     const elapsed = Math.floor((new Date().getTime() - startTimeRef.current.getTime()) / 1000);
 
@@ -410,12 +411,12 @@ export default function DailyPracticePage() {
           flashcards_reviewed: flashcardsReviewed,
           correct_count: correctCount,
           total_answered: totalAnswered,
-          completed_at: new Date().toISOString(),
+          completed_at: sessionCompleted ? new Date().toISOString() : null,
         }).eq('id', sessionId);
       }
 
-      // Update streak
-      if (profile) {
+      // Update streak only if session was completed (not cancelled)
+      if (profile && sessionCompleted) {
         const today = new Date().toISOString().slice(0, 10);
         const lastDate = profile.last_practice_date;
         let newStreak = 1;
@@ -439,7 +440,9 @@ export default function DailyPracticePage() {
       console.error('Error ending session:', e);
     }
 
-    setStatus('completed');
+    if (sessionCompleted) {
+      setStatus('completed');
+    }
   };
 
   // ----- Render -----
@@ -576,14 +579,27 @@ export default function DailyPracticePage() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <Button variant="ghost" size="sm" onClick={async () => {
-          if (confirm(lang === 'de' ? 'Sitzung abbrechen? Dein Fortschritt wird gespeichert.' : 'End session? Your progress will be saved.')) {
-            await endSession();
-            navigate('/home');
-          }
-        }}>
-          <ArrowLeft className="h-4 w-4 mr-1" />{lang === 'de' ? 'Startseite' : 'Home'}
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-1" />{lang === 'de' ? 'Startseite' : 'Home'}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{lang === 'de' ? 'Sitzung abbrechen?' : 'End session?'}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {lang === 'de' ? 'Dein Übungsfortschritt wird gespeichert, aber die Serie zählt nur bei abgeschlossenen Sitzungen.' : 'Your exercise progress will be saved, but the streak only counts for completed sessions.'}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{lang === 'de' ? 'Weiter üben' : 'Keep going'}</AlertDialogCancel>
+              <AlertDialogAction onClick={async () => { await endSession(); navigate('/home'); }}>
+                {lang === 'de' ? 'Abbrechen' : 'End session'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <h2 className="font-semibold text-foreground">{lang === 'de' ? 'Tagesplan' : 'Daily Practice'}</h2>
         <span className="font-mono text-sm text-muted-foreground">{mm}:{ss}</span>
       </div>
@@ -636,9 +652,27 @@ export default function DailyPracticePage() {
 
       {/* Bottom buttons */}
       <div className="flex justify-between items-center">
-        <Button variant="ghost" size="sm" onClick={() => endSession()}>
-          <StopCircle className="h-4 w-4 mr-1" />{lang === 'de' ? 'Sitzung beenden' : 'End Session'}
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="ghost" size="sm">
+              <StopCircle className="h-4 w-4 mr-1" />{lang === 'de' ? 'Abbrechen' : 'Cancel'}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{lang === 'de' ? 'Sitzung abbrechen?' : 'End session?'}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {lang === 'de' ? 'Dein Übungsfortschritt wird gespeichert, aber die Serie zählt nur bei abgeschlossenen Sitzungen.' : 'Your exercise progress will be saved, but the streak only counts for completed sessions.'}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{lang === 'de' ? 'Weiter üben' : 'Keep going'}</AlertDialogCancel>
+              <AlertDialogAction onClick={async () => { await endSession(); navigate('/home'); }}>
+                {lang === 'de' ? 'Abbrechen' : 'End session'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         {exerciseFeedback && !exerciseFeedback.correct && (
           <Button onClick={advance} size="sm">
             {lang === 'de' ? 'Weiter' : 'Next'}

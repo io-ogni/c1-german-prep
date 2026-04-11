@@ -78,9 +78,10 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!user) return;
-    loadProgress();
-    loadDueCards();
+    // Verbs are independent (no user data sync needed)
     loadVerbs();
+    // Progress syncs starred vocab first, then due cards can query accurately
+    loadProgress().then(() => loadDueCards());
   }, [user]);
 
   async function loadVerbs() {
@@ -110,39 +111,44 @@ export default function HomePage() {
   async function loadProgress() {
     setLoading(true);
     try {
-      // Fire sync as fire-and-forget — doesn't block homepage
-      import('@/lib/syncStarredVocab').then(m => m.syncStarredToDb(user!.id)).catch(() => {});
+      // Sync starred vocab + fetch cache in parallel (sync must finish before vocab count)
+      const [, cacheResult] = await Promise.all([
+        import('@/lib/syncStarredVocab').then(m => m.syncStarredToDb(user!.id)).catch(() => {}),
+        supabase.from('user_progress_cache' as any).select('*').eq('user_id', user!.id).maybeSingle(),
+      ]);
 
-      // All queries in parallel: cache + lightweight counts
+      // Single fast query: the cache row has exercise counts
+      let cache = cacheResult.data;
+
+      // If no cache row yet (first visit), initialize in background and use zeros
+      if (!cache) {
+        supabase.rpc('initialize_progress_cache').catch(() => {});
+        cache = {};
+      }
+
+      const c = cache as any;
+
+      // Only the counts not in cache — run in parallel
       const [
-        { data: cache },
         { count: totalWritingPrompts },
-        { count: totalReadingTexts },
         { count: writingSubmissions },
         { count: completedReading },
         { count: vocabCount },
       ] = await Promise.all([
-        supabase.from('user_progress_cache' as any).select('*').eq('user_id', user!.id).maybeSingle(),
         supabase.from('writing_prompts').select('*', { count: 'exact', head: true }),
-        supabase.from('reading_texts').select('*', { count: 'exact', head: true }),
         supabase.from('writing_submissions').select('*', { count: 'exact', head: true }).eq('user_id', user!.id),
         supabase.from('reading_progress').select('*', { count: 'exact', head: true }).eq('user_id', user!.id).eq('completed', true),
         supabase.from('personal_vocabulary').select('*', { count: 'exact', head: true }).eq('user_id', user!.id),
       ]);
 
-      // If no cache row yet (first visit after migration), initialize it
-      let c = cache as any;
-      if (!c) {
-        await supabase.rpc('initialize_progress_cache');
-        const { data: fresh } = await supabase.from('user_progress_cache' as any).select('*').eq('user_id', user!.id).maybeSingle();
-        c = fresh;
-      }
+      // reading_texts total is static — hardcode to avoid a query
+      const totalReadingTexts = 40;
 
       setData({
         vocabulary: { completed: c?.vocabulary_completed ?? 0, total: c?.vocabulary_total ?? 0 },
         grammar: { completed: c?.grammar_completed ?? 0, total: c?.grammar_total ?? 0 },
         writing: { completed: writingSubmissions ?? 0, total: totalWritingPrompts ?? 0 },
-        reading: { completed: completedReading ?? 0, total: totalReadingTexts ?? 0 },
+        reading: { completed: completedReading ?? 0, total: totalReadingTexts },
         listening: { completed: c?.listening_completed ?? 0, total: c?.listening_total ?? 0 },
         itDeutsch: { completed: c?.it_completed ?? 0, total: c?.it_total ?? 0 },
         examPrep: { completed: c?.exam_completed ?? 0, total: c?.exam_total ?? 0 },
@@ -192,12 +198,12 @@ export default function HomePage() {
                 {streak > 0 ? (
                   <>
                     <p className="font-bold text-foreground text-lg leading-tight">{streak} {streak === 1 ? 'Tag' : 'Tage'} am Stück!</p>
-                    <p className="text-xs text-muted-foreground">Weiter so — 30 min reichen.</p>
+                    <p className="text-xs text-muted-foreground">5 min = gefährlich gut. 30 min = unstoppable.</p>
                   </>
                 ) : (
                   <>
                     <p className="font-bold text-foreground leading-tight">Starte deine Serie!</p>
-                    <p className="text-xs text-muted-foreground">15 Minuten reichen für den ersten Tag.</p>
+                    <p className="text-xs text-muted-foreground">5 min = gefährlich gut. 30 min = unstoppable.</p>
                   </>
                 )}
               </div>
@@ -207,9 +213,9 @@ export default function HomePage() {
             {TIME_OPTIONS.map((min) => (
               <Button
                 key={min}
-                variant={min === 15 ? 'default' : 'outline'}
+                variant="outline"
                 size="sm"
-                className="min-w-[2.5rem] h-8 text-xs"
+                className="min-w-[2.5rem] h-8 text-xs bg-white dark:bg-card border-2 border-primary/50 text-primary hover:bg-primary/5"
                 onClick={() => navigate(`/daily-practice?minutes=${min}`)}
               >
                 {min} min
