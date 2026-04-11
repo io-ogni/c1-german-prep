@@ -36,6 +36,12 @@ const SOURCE_LABELS: Record<string, string> = {
   'sprechen-zusammenfassung': 'Zusammenfassung',
   'sprechen-redemittel': 'Redemittel',
   'sprechen-redewendungen': 'Redewendungen',
+  'schreiben-einleitung': 'Schreiben: Einleitung',
+  'schreiben-hauptteil': 'Schreiben: Hauptteil',
+  'schreiben-schluss': 'Schreiben: Schluss',
+  'schreiben-c1-strukturen': 'Schreiben: C1-Strukturen',
+  'schreiben-konnektoren': 'Schreiben: Konnektoren',
+  reading: 'Lesetext',
 };
 
 const SUCCESS_MESSAGES = [

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import {
   ArrowLeft, CheckCircle, XCircle, Eye, Flame, StopCircle, Loader2, Trophy, Sparkles,
 } from 'lucide-react';
@@ -104,6 +105,10 @@ export default function DailyPracticePage() {
   const [exercises, setExercises] = useState<ExerciseItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
+  const [cardFlipped, setCardFlipped] = useState(false);
+  const [cardExitAnim, setCardExitAnim] = useState<'left' | 'right' | null>(null);
+  const [cardFeedback, setCardFeedback] = useState<string | null>(null);
+  const [cardFeedbackType, setCardFeedbackType] = useState<'correct' | 'wrong' | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const sessionStartedRef = useRef(false);
 
@@ -137,11 +142,11 @@ export default function DailyPracticePage() {
       if (isFlashcardPhase && currentFlashcard) {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          if (!showAnswer) setShowAnswer(true);
+          if (!cardFlipped) setCardFlipped(true);
         }
-        if (showAnswer) {
-          if (e.key === '1') { e.preventDefault(); handleFlashcard(true); }
-          if (e.key === '2') { e.preventDefault(); handleFlashcard(false); }
+        if (cardFlipped) {
+          if (e.key === 'ArrowRight' || e.key === '1') { e.preventDefault(); handleFlashcard(true); }
+          if (e.key === 'ArrowLeft' || e.key === '2') { e.preventDefault(); handleFlashcard(false); }
         }
       }
 
@@ -293,9 +298,18 @@ export default function DailyPracticePage() {
     }
   };
 
+  const CARD_SUCCESS = ["Perfekt! 🔥", "Stark! 💪", "Genau! ✨", "Weiter so! 🚀", "Klasse! 🌟"];
+  const CARD_FAIL = ["Nächstes Mal! 💡", "Dranbleiben! 🧠", "Kommt noch! 🌱"];
+
   const handleFlashcard = async (knewIt: boolean) => {
     const card = currentFlashcard;
     if (!card) return;
+
+    setCardExitAnim(knewIt ? 'right' : 'left');
+    const msgs = knewIt ? CARD_SUCCESS : CARD_FAIL;
+    setCardFeedback(msgs[Math.floor(Math.random() * msgs.length)]);
+    setCardFeedbackType(knewIt ? 'correct' : 'wrong');
+
     const newBox = knewIt ? Math.min(card.box_number + 1, 6) : 1;
     const nextReview = new Date();
     nextReview.setDate(nextReview.getDate() + BOX_INTERVALS[newBox - 1]);
@@ -307,7 +321,13 @@ export default function DailyPracticePage() {
     }).eq('id', card.id);
 
     setFlashcardsReviewed(f => f + 1);
-    advance();
+
+    setTimeout(() => {
+      setCardFlipped(false);
+      setCardExitAnim(null);
+      requestAnimationFrame(() => advance());
+      setTimeout(() => { setCardFeedback(null); setCardFeedbackType(null); }, 1200);
+    }, 350);
   };
 
   const handleExerciseAnswer = async (correct: boolean) => {
@@ -612,35 +632,86 @@ export default function DailyPracticePage() {
 
       {/* Flashcard */}
       {isFlashcardPhase && currentFlashcard && (
-        <Card className="min-h-[250px] flex flex-col items-center justify-center">
-          <CardContent className="py-8 text-center space-y-4 w-full">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider">
-              {lang === 'de' ? 'Karteikarte' : 'Flashcard'}
-            </p>
-            <p className="text-xl font-bold text-foreground">{currentFlashcard.word_de}</p>
-            {!showAnswer ? (
-              <div className="space-y-2">
-                <Button onClick={() => setShowAnswer(true)} variant="outline">
-                  <Eye className="h-4 w-4 mr-1" />{t('vocab_show_answer')}
-                </Button>
-                <p className="text-xs text-muted-foreground">Enter</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <p className="text-lg text-foreground">→ {currentFlashcard.translation_en}</p>
-                {currentFlashcard.translation_custom && <p className="text-sm text-muted-foreground">→ {currentFlashcard.translation_custom}</p>}
-                <div className="flex gap-3 justify-center pt-2">
-                  <Button onClick={() => handleFlashcard(true)} className="gap-1">
-                    <CheckCircle className="h-4 w-4" /><span className="hidden sm:inline">{t('vocab_knew_it')}</span><kbd className="ml-1 text-[10px] opacity-60 hidden md:inline">1</kbd>
-                  </Button>
-                  <Button onClick={() => handleFlashcard(false)} variant="destructive" className="gap-1">
-                    <XCircle className="h-4 w-4" /><span className="hidden sm:inline">{t('vocab_didnt_know')}</span><kbd className="ml-1 text-[10px] opacity-60 hidden md:inline">2</kbd>
-                  </Button>
+        <div className="flex flex-col items-center gap-4 relative rounded-2xl border border-border bg-muted/30 p-4 sm:p-6">
+          {/* Feedback toast */}
+          {cardFeedback && (
+            <div className={cn(
+              'absolute top-2 z-10 px-4 py-2 rounded-full text-sm font-medium shadow-lg animate-bounce',
+              cardFeedbackType === 'correct' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800',
+            )}>
+              {cardFeedback}
+            </div>
+          )}
+
+          {/* Flip card */}
+          <div
+            className={cn(
+              'w-full max-w-xl cursor-pointer select-none',
+              cardExitAnim === 'right' && 'animate-slide-out-right',
+              cardExitAnim === 'left' && 'animate-slide-out-left',
+            )}
+            onClick={() => !cardFlipped && setCardFlipped(true)}
+            style={{ perspective: '1200px' }}
+          >
+            <div
+              className={cn(
+                'relative w-full min-h-[220px] transition-transform duration-500',
+                cardFlipped && '[transform:rotateY(180deg)]',
+              )}
+              style={{ transformStyle: 'preserve-3d' }}
+            >
+              {/* Front */}
+              <div
+                className="absolute inset-0 rounded-2xl border-2 border-border bg-card p-6 flex flex-col items-center justify-center text-center shadow-lg"
+                style={{ backfaceVisibility: 'hidden' }}
+              >
+                <div className="absolute top-3 right-3">
+                  <span className="text-[10px] text-muted-foreground">Box {currentFlashcard.box_number}/6</span>
+                </div>
+                <p className="text-xl font-bold text-foreground">{currentFlashcard.word_de}</p>
+                <div className="mt-4 flex items-center gap-1.5 text-muted-foreground text-xs">
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Klicken zum Aufdecken</span>
                 </div>
               </div>
+
+              {/* Back */}
+              <div
+                className="absolute inset-0 rounded-2xl border-2 border-primary/30 bg-card p-6 flex flex-col items-center justify-center text-center shadow-lg"
+                style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+              >
+                <div className="absolute top-3 right-3">
+                  <span className="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">Antwort</span>
+                </div>
+                <p className="text-lg font-bold text-foreground mb-3">{currentFlashcard.word_de}</p>
+                <p className="text-base text-foreground">→ {currentFlashcard.translation_en}</p>
+                {currentFlashcard.translation_custom && (
+                  <p className="text-sm text-muted-foreground mt-1">→ {currentFlashcard.translation_custom}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div className="w-full max-w-xl">
+            {!cardFlipped ? (
+              <div className="flex justify-center">
+                <Button size="sm" onClick={() => setCardFlipped(true)}>
+                  <Eye className="w-4 h-4 mr-1" /> Aufdecken
+                </Button>
+              </div>
+            ) : (
+              <div className="flex justify-center gap-3">
+                <Button onClick={() => handleFlashcard(false)} variant="destructive" size="sm" className="gap-1">
+                  <XCircle className="h-4 w-4" /> {t('vocab_didnt_know')}
+                </Button>
+                <Button onClick={() => handleFlashcard(true)} size="sm" className="gap-1">
+                  <CheckCircle className="h-4 w-4" /> {t('vocab_knew_it')}
+                </Button>
+              </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Exercise */}

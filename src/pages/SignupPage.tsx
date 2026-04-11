@@ -138,23 +138,23 @@ export default function SignupPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5" autoComplete="off">
             <div className="space-y-2">
-              <Label htmlFor="name">{t('auth_display_name')}</Label>
-              <Input id="name" required value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="h-11 rounded-xl" />
+              <Label htmlFor="signup-name">{t('auth_display_name')}</Label>
+              <Input id="signup-name" autoComplete="off" required value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="h-11 rounded-xl" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">{t('auth_email')}</Label>
-              <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="h-11 rounded-xl" />
+              <Label htmlFor="signup-email">{t('auth_email')}</Label>
+              <Input id="signup-email" type="email" autoComplete="new-email" required value={email} onChange={(e) => setEmail(e.target.value)} className="h-11 rounded-xl" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">{t('auth_password')}</Label>
-              <Input id="password" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} className="h-11 rounded-xl" />
+              <Label htmlFor="signup-password">{t('auth_password')}</Label>
+              <Input id="signup-password" type="password" autoComplete="new-password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} className="h-11 rounded-xl" />
               <p className="text-xs text-muted-foreground">{t('auth_password_hint')}</p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirm-password">{t('auth_confirm_password')}</Label>
-              <Input id="confirm-password" type="password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="h-11 rounded-xl" />
+              <Label htmlFor="signup-confirm-password">{t('auth_confirm_password')}</Label>
+              <Input id="signup-confirm-password" type="password" autoComplete="new-password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="h-11 rounded-xl" />
             </div>
 
             {TURNSTILE_SITE_KEY && (
