@@ -7,11 +7,13 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BookOpen, Table2 } from 'lucide-react';
+import { BookOpen, Table2, Link2, ArrowRightLeft } from 'lucide-react';
 import { TelcBadge } from '@/components/shared/TelcBadge';
 import { NAV_CONTAINER, TAB_TRIGGER_BLUE } from '@/components/shared/navStyles';
 import { ScrollNav } from '@/components/shared/ScrollNav';
 import { VerbTableContent } from '@/pages/VerbTablePage';
+import { NVVerbindungenContent } from '@/pages/NVVerbindungenContent';
+import { PraepositionenContent } from '@/pages/PraepositionenContent';
 
 const TOPIC_NAMES: Record<string, { de: string; en: string; telc?: boolean }> = {
   // B2
@@ -38,7 +40,7 @@ const TOPIC_NAMES: Record<string, { de: string; en: string; telc?: boolean }> = 
 };
 
 export default function GrammarPage() {
-  const [level, setLevel] = useState<'b2' | 'c1' | 'verbtabelle'>('c1');
+  const [level, setLevel] = useState<'b2' | 'c1' | 'verbtabelle' | 'nv-verbindungen' | 'praepositionen'>('c1');
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const { t, lang } = useTranslation();
   const auth = useAuth();
@@ -113,7 +115,7 @@ export default function GrammarPage() {
         </p>
       </div>
 
-      <Tabs value={level} onValueChange={(v) => setLevel(v as 'b2' | 'c1' | 'verbtabelle')}>
+      <Tabs value={level} onValueChange={(v) => setLevel(v as typeof level)}>
         <ScrollNav>
           <TabsList className={`${NAV_CONTAINER} h-auto gap-1`}>
             <TabsTrigger value="b2" className={TAB_TRIGGER_BLUE}>{t('level_b2_refresh')}</TabsTrigger>
@@ -121,6 +123,14 @@ export default function GrammarPage() {
             <TabsTrigger value="verbtabelle" className={`${TAB_TRIGGER_BLUE} gap-1.5`}>
               <Table2 className="h-4 w-4" />
               {t('grammar_verb_table')}
+            </TabsTrigger>
+            <TabsTrigger value="nv-verbindungen" className={`${TAB_TRIGGER_BLUE} gap-1.5`}>
+              <Link2 className="h-4 w-4" />
+              NV-Verbindungen
+            </TabsTrigger>
+            <TabsTrigger value="praepositionen" className={`${TAB_TRIGGER_BLUE} gap-1.5`}>
+              <ArrowRightLeft className="h-4 w-4" />
+              Präpositionen
             </TabsTrigger>
           </TabsList>
         </ScrollNav>
@@ -155,6 +165,18 @@ export default function GrammarPage() {
         {level === 'verbtabelle' && (
           <div className="mt-4">
             <VerbTableContent />
+          </div>
+        )}
+
+        {level === 'nv-verbindungen' && (
+          <div className="mt-4">
+            <NVVerbindungenContent />
+          </div>
+        )}
+
+        {level === 'praepositionen' && (
+          <div className="mt-4">
+            <PraepositionenContent />
           </div>
         )}
       </Tabs>

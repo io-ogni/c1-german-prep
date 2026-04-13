@@ -223,10 +223,6 @@ export function ReviewCard({ dueCards, onCardReviewed, compact }: ReviewCardProp
               )}
             </div>
             <p className={`${compact ? 'text-xl' : 'text-2xl'} font-bold text-foreground`}>{currentCard.word_de}</p>
-            <div className="mt-4 flex items-center gap-1.5 text-muted-foreground text-xs">
-              <Eye className="w-3.5 h-3.5" />
-              <span>Klicken zum Aufdecken</span>
-            </div>
           </div>
 
           {/* Back */}

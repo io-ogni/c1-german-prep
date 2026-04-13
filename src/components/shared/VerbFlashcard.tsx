@@ -174,10 +174,6 @@ export function VerbFlashcard({ verbs, compact }: VerbFlashcardProps) {
             <p className={`${compact ? 'text-xl' : 'text-2xl'} font-bold text-foreground`}>{current.infinitiv}</p>
             <p className="text-xs text-muted-foreground mt-2">{current.bedeutung_en}</p>
             <p className="text-[10px] text-muted-foreground/60 mt-4">er/sie/es · Präteritum · Perfekt</p>
-            <div className="mt-3 flex items-center gap-1.5 text-muted-foreground text-xs">
-              <Eye className="w-3.5 h-3.5" />
-              <span>Klicken zum Aufdecken</span>
-            </div>
           </div>
 
           {/* Back */}

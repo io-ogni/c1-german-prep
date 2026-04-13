@@ -141,7 +141,7 @@ export default function SignupPage() {
           <form onSubmit={handleSubmit} className="space-y-5" autoComplete="off">
             <div className="space-y-2">
               <Label htmlFor="signup-name">{t('auth_display_name')}</Label>
-              <Input id="signup-name" autoComplete="off" required value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="h-11 rounded-xl" />
+              <Input id="signup-name" autoComplete="off" required maxLength={30} value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="h-11 rounded-xl" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="signup-email">{t('auth_email')}</Label>

@@ -247,10 +247,6 @@ export default function FlashcardsPage() {
             <p className="text-xl font-bold text-foreground leading-relaxed max-w-md">
               {currentCard.question}
             </p>
-            <div className="mt-4 flex items-center gap-1.5 text-muted-foreground text-xs">
-              <Eye className="w-3.5 h-3.5" />
-              <span>Klicken zum Aufdecken</span>
-            </div>
           </div>
 
           {/* Back */}

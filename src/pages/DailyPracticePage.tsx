@@ -683,10 +683,6 @@ export default function DailyPracticePage() {
                   <span className="text-[10px] text-muted-foreground">Box {currentFlashcard.box_number}/6</span>
                 </div>
                 <p className="text-xl font-bold text-foreground">{currentFlashcard.word_de}</p>
-                <div className="mt-4 flex items-center gap-1.5 text-muted-foreground text-xs">
-                  <Eye className="w-3.5 h-3.5" />
-                  <span>Klicken zum Aufdecken</span>
-                </div>
               </div>
 
               {/* Back */}

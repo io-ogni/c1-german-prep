@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown, BookOpen, FileText, ClipboardCheck, Monitor, MessageCircle } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -32,6 +33,16 @@ export function Navbar() {
   const { user, profile, logout } = useRequiredAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
   const [hidden, setHidden] = useState(false);
   const lastScrollY = useRef(0);
 
@@ -95,8 +106,8 @@ export function Navbar() {
         <div className="hidden items-center gap-2 lg:flex">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-1 text-sm">
-                <span className="ph-no-capture">{profile?.display_name || user?.email?.split('@')[0] || ''}</span>
+              <Button variant="ghost" size="sm" className="gap-1 text-sm max-w-[150px]">
+                <span className="ph-no-capture truncate">{profile?.display_name || user?.email?.split('@')[0] || ''}</span>
                 <ChevronDown className="h-3.5 w-3.5" />
               </Button>
             </DropdownMenuTrigger>
@@ -135,8 +146,10 @@ export function Navbar() {
         </button>
       </div>
 
-      {mobileOpen && (
-        <div className="border-t border-border bg-card px-4 pb-4 pt-2 lg:hidden">
+      {mobileOpen && createPortal(
+        <>
+        <div className="fixed inset-0 top-14 z-[998] bg-black/50 lg:hidden" onClick={() => setMobileOpen(false)} />
+        <div className="fixed top-14 left-0 right-0 z-[999] border-t border-border bg-card px-4 pb-6 pt-2 shadow-xl lg:hidden max-h-[80vh] overflow-y-auto">
           <div className="flex flex-col gap-1">
             {examLinks.map((link) => (
               <Link
@@ -185,6 +198,8 @@ export function Navbar() {
             </button>
           </div>
         </div>
+        </>,
+        document.body
       )}
     </nav>
   );

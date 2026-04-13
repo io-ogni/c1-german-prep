@@ -270,7 +270,7 @@ export default function SettingsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+          <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} maxLength={30} />
           <Button onClick={handleSave} disabled={saving} size="sm">
             {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
             {t('common_save')}
