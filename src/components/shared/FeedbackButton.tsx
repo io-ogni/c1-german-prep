@@ -79,7 +79,7 @@ export function FeedbackButton() {
         onChange={(e) => setMessage(e.target.value)}
         placeholder="Schreib los..."
         maxLength={MAX_LENGTH}
-        className="min-h-[120px] resize-none bg-white dark:bg-card"
+        className="min-h-[120px] resize-none bg-white dark:bg-card ph-no-capture"
       />
       <div className="flex items-center justify-between">
         <span className="text-xs text-muted-foreground">{message.length}/{MAX_LENGTH}</span>

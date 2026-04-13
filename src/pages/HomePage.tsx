@@ -181,7 +181,7 @@ export default function HomePage() {
       {/* Welcome */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">
-          {t('home_welcome')}{displayName ? `, ${displayName}` : ''}
+          {t('home_welcome')}{displayName ? <span className="ph-no-capture">, {displayName}</span> : ''}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">{getTodaysSubtitle()}</p>
       </div>

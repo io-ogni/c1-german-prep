@@ -96,7 +96,7 @@ export function Navbar() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="gap-1 text-sm">
-                {profile?.display_name || user?.email?.split('@')[0] || ''}
+                <span className="ph-no-capture">{profile?.display_name || user?.email?.split('@')[0] || ''}</span>
                 <ChevronDown className="h-3.5 w-3.5" />
               </Button>
             </DropdownMenuTrigger>
