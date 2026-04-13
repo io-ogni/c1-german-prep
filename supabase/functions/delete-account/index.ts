@@ -55,6 +55,7 @@ Deno.serve(async (req) => {
       "reading_progress",
       "writing_submissions",
       "user_progress_cache",
+      "feedback",
     ];
 
     for (const table of tables) {

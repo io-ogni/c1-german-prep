@@ -90,11 +90,12 @@ export function ReviewCard({ dueCards, onCardReviewed, compact }: ReviewCardProp
     const nextReview = new Date();
     nextReview.setDate(nextReview.getDate() + daysUntilNext);
 
-    await supabase.from('personal_vocabulary').update({
+    const { error: updateError } = await supabase.from('personal_vocabulary').update({
       box_number: newBox,
       next_review_at: nextReview.toISOString(),
       review_count: card.review_count + 1,
     }).eq('id', card.id);
+    if (updateError) toast.error('Fortschritt konnte nicht gespeichert werden.');
 
     setTimeout(() => {
       setFlipped(false);
