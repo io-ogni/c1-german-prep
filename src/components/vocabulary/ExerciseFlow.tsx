@@ -279,15 +279,14 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
 
     switch (exercise.exercise_type) {
       case 'definition_match':
-        return <DefinitionMatch {...commonProps} />;
+        return <DefinitionMatch key={exercise.id} {...commonProps} />;
       case 'fill_in':
-        // Content with {original} is a transform-style exercise stored as fill_in
         if (content?.original) return <Transform key={exercise.id} {...commonProps} />;
-        return (content?.sentences || area === 'grammar') ? <GrammarFillIn {...commonProps} /> : <FillIn {...commonProps} />;
+        return (content?.sentences || area === 'grammar') ? <GrammarFillIn key={exercise.id} {...commonProps} /> : <FillIn key={exercise.id} {...commonProps} />;
       case 'synonym_match':
-        return <SynonymMatch {...commonProps} />;
+        return <SynonymMatch key={exercise.id} {...commonProps} />;
       case 'antonym_match':
-        return <AntonymMatch {...commonProps} />;
+        return <AntonymMatch key={exercise.id} {...commonProps} />;
       case 'error_correction':
         return <ErrorCorrection key={exercise.id} {...commonProps} />;
       case 'word_family':
@@ -297,9 +296,9 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
       case 'sentence_build':
         return <SentenceBuild key={exercise.id} {...commonProps} />;
       case 'multiple_choice':
-        return <MultipleChoice {...commonProps} />;
+        return <MultipleChoice key={exercise.id} {...commonProps} />;
       case 'match':
-        return <Match {...commonProps} />;
+        return <Match key={exercise.id} {...commonProps} />;
       case 'sprachbausteine':
         return <Sprachbausteine key={exercise.id} {...commonProps} />;
       default:

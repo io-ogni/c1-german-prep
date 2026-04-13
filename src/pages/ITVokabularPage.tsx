@@ -431,7 +431,15 @@ export default function ITVokabularPage() {
   const [workshopPhase, setWorkshopPhase] = useState('Alle');
   const [refinementCategory, setRefinementCategory] = useState('Alle');
   const [composureSituation, setComposureSituation] = useState('Alle');
-  const [starredOnly, setStarredOnly] = useState(false);
+  const [starredTabs, setStarredTabs] = useState<Record<string, boolean>>({});
+  const [activeTab, setActiveTab] = useState('nomen');
+  const starredOnly = starredTabs[activeTab] ?? false;
+  const setStarredOnly = (v: boolean | ((prev: boolean) => boolean)) => {
+    setStarredTabs(prev => ({
+      ...prev,
+      [activeTab]: typeof v === 'function' ? v(prev[activeTab] ?? false) : v,
+    }));
+  };
   const player = usePlayAll();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const currentTextRef = useRef<string | null>(null);
@@ -537,7 +545,7 @@ export default function ITVokabularPage() {
       <ITDeutschNav />
       <SelectionHint />
 
-      <Tabs defaultValue="nomen" onValueChange={() => stopAudio()}>
+      <Tabs defaultValue="nomen" onValueChange={(v) => { stopAudio(); setActiveTab(v); }}>
         <ScrollNav>
           <TabsList className={PILL_CONTAINER}>
             <TabsTrigger value="nomen" className={TAB_TRIGGER_FUCHSIA}><Languages className="h-3.5 w-3.5" /> Nomen</TabsTrigger>

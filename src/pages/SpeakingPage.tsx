@@ -317,7 +317,15 @@ export default function SpeakingPage() {
   const { lang } = useTranslation();
   const { customConnectors, addConnector, removeConnector } = useCustomPhrases('speaking-custom');
   const { isHighlighted, toggle: toggleHighlight } = useHighlightedPhrases('speaking-highlights');
-  const [starredOnly, setStarredOnly] = useState(false);
+  const [starredTabs, setStarredTabs] = useState<Record<string, boolean>>({});
+  const [activeSpeakingTab, setActiveSpeakingTab] = useState('redewendungen');
+  const starredOnly = starredTabs[activeSpeakingTab] ?? false;
+  const setStarredOnly = (v: boolean | ((prev: boolean) => boolean)) => {
+    setStarredTabs(prev => ({
+      ...prev,
+      [activeSpeakingTab]: typeof v === 'function' ? v(prev[activeSpeakingTab] ?? false) : v,
+    }));
+  };
   const [categoryFilter, setCategoryFilter] = useState<Record<string, string>>({});
   const player = usePlayAll();
 
@@ -397,7 +405,7 @@ export default function SpeakingPage() {
           Damit du im Meeting nicht nur nickst und 'ja genau' sagst.
         </p>
       </div>
-      <Tabs defaultValue="redewendungen">
+      <Tabs defaultValue="redewendungen" onValueChange={(v) => setActiveSpeakingTab(v)}>
         <ScrollNav>
           <TabsList className={`${NAV_CONTAINER} h-auto gap-1`}>
             <TabsTrigger value="redewendungen" className={`${TAB_TRIGGER_BLUE} gap-1.5`}><Drama className="h-4 w-4" />Redewendungen</TabsTrigger>
@@ -455,7 +463,7 @@ export default function SpeakingPage() {
                         onClick={() => handleToggle(row.de)}
                         className={`cursor-pointer transition-colors ${isNewGroup ? 'border-t-4 border-t-muted' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}
                       >
-                        <TableCell className={`px-1 py-2 border-l-4 ${BORDER_COLORS[row.subsectionKey] ?? 'border-l-transparent'}`}>
+                        <TableCell className={`border-l-4 ${BORDER_COLORS[row.subsectionKey] ?? 'border-l-transparent'}`}>
                           <span className={`text-xs font-normal ${BADGE_COLORS[row.subsectionKey] ?? ''}`}>
                             {row.subsectionLabel}
                           </span>

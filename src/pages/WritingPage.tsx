@@ -385,9 +385,16 @@ function flattenRedemittelSection(
 function RedemittelContent() {
   const { customConnectors, addConnector, removeConnector } = useCustomPhrases();
   const { isHighlighted, toggle: toggleHighlight } = useHighlightedPhrases('writing-tips-highlights');
-  const [starredOnly, setStarredOnly] = useState(false);
+  const [starredTabs, setStarredTabs] = useState<Record<string, boolean>>({});
   const [categoryFilter, setCategoryFilter] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState('einleitung');
+  const starredOnly = starredTabs[activeTab] ?? false;
+  const setStarredOnly = (v: boolean | ((prev: boolean) => boolean)) => {
+    setStarredTabs(prev => ({
+      ...prev,
+      [activeTab]: typeof v === 'function' ? v(prev[activeTab] ?? false) : v,
+    }));
+  };
   const player = usePlayAll();
 
   const speakingRef = useRef(false);
@@ -907,6 +914,22 @@ function WritingInterface({
               {t('writing_word_count')}: {wordCount}/{prompt.target_word_count}
             </span>
             <div className="flex items-center gap-2">
+              {hasApiKey && (
+                <Button
+                  onClick={handleSubmit}
+                  disabled={submitting || wordCount < 10}
+                  className="shrink-0"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {t('writing_evaluating')}
+                    </>
+                  ) : (
+                    t('writing_submit')
+                  )}
+                </Button>
+              )}
               <Button
                 variant="outline"
                 className="text-xs sm:text-sm"
@@ -924,22 +947,6 @@ function WritingInterface({
                   <><Copy className="mr-2 h-4 w-4 shrink-0" /><span className="truncate">{t('writing_copy_prompt')}</span></>
                 )}
               </Button>
-              {hasApiKey && (
-                <Button
-                  onClick={handleSubmit}
-                  disabled={submitting || wordCount < 10}
-                  className="shrink-0"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {t('writing_evaluating')}
-                    </>
-                  ) : (
-                    t('writing_submit')
-                  )}
-                </Button>
-              )}
             </div>
           </div>
         </>

@@ -72,10 +72,11 @@ function InlineGap({
     if (!dropdownOpen || !ref.current) return;
     const vw = window.innerWidth;
     if (vw < 640) {
-      // Bottom sheet: always anchored to bottom of screen, scrollable
-      setDropdownStyle({ position: 'fixed', left: 8, right: 8, bottom: 8, maxHeight: '60vh', overflowY: 'auto' });
+      // Mobile: bottom sheet, compact
+      setDropdownStyle({ position: 'fixed', left: 8, right: 8, bottom: 8, maxHeight: '40vh' });
     } else {
-      setDropdownStyle({ maxHeight: '16rem', overflowY: 'auto' });
+      // Desktop: simple absolute dropdown below the gap — like the original Lovable implementation
+      setDropdownStyle({});
     }
   }, [dropdownOpen]);
 
@@ -139,18 +140,18 @@ function InlineGap({
         <span
           ref={dropdownRef}
           className={cn(
-            'z-50 rounded-lg border bg-blue-50 dark:bg-blue-950 p-1 space-y-0.5 shadow-xl',
-            dropdownStyle.position === 'fixed' ? 'fixed' : 'absolute left-0 top-full mt-1 w-[min(28rem,85vw)]'
+            'z-50 rounded-lg bg-blue-100 dark:bg-blue-900 p-1 space-y-0.5 shadow-2xl scrollbar-visible overflow-y-auto overflow-x-hidden',
+            dropdownStyle.position === 'fixed' ? 'fixed' : 'absolute left-0 top-full mt-1 w-[min(28rem,85vw)] max-h-[320px]'
           )}
-          style={dropdownStyle}
+          style={dropdownStyle.position === 'fixed' ? dropdownStyle : undefined}
         >
           {options.map(opt => (
             <button
               key={opt.id}
-              className="w-full text-left rounded-md px-3 py-2 text-xs text-popover-foreground bg-white dark:bg-card hover:bg-accent transition-colors"
+              className="w-full text-left rounded-md px-3 py-1.5 text-sm text-popover-foreground bg-white dark:bg-card hover:bg-accent transition-colors break-words"
               onClick={(e) => { e.stopPropagation(); onSelect(opt.id); setDropdownOpen(false); }}
             >
-              <span className="line-clamp-2">{opt.text}</span>
+              <span className="line-clamp-3">{opt.text}</span>
             </button>
           ))}
           {options.length === 0 && (

@@ -133,19 +133,26 @@ export function ReviewCard({ dueCards, onCardReviewed, compact }: ReviewCardProp
     return (
       <div className="flex flex-col items-center gap-4 py-6">
         {total > 0 ? (
-          <>
-            <div className="relative mx-auto w-20 h-20">
-              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="42" fill="none" strokeWidth="8" className="stroke-secondary" />
-                <circle cx="50" cy="50" r="42" fill="none" strokeWidth="8" className="stroke-primary" strokeLinecap="round"
-                  strokeDasharray={`${pct * 2.64} ${264 - pct * 2.64}`}
-                  style={{ transition: 'stroke-dasharray 1s ease-out' }}
-                />
-              </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-lg font-bold text-foreground">{pct}%</span>
-            </div>
-            <p className="text-sm text-muted-foreground">{correct} / {total} {t('vocab_reviewed')}!</p>
-          </>
+          compact ? (
+            <>
+              <CheckCircle className="h-8 w-8 text-primary" />
+              <p className="text-foreground font-medium">{total} Wörter wiederholt — weiter so!</p>
+            </>
+          ) : (
+            <>
+              <div className="relative mx-auto w-20 h-20">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="42" fill="none" strokeWidth="8" className="stroke-secondary" />
+                  <circle cx="50" cy="50" r="42" fill="none" strokeWidth="8" className="stroke-primary" strokeLinecap="round"
+                    strokeDasharray={`${pct * 2.64} ${264 - pct * 2.64}`}
+                    style={{ transition: 'stroke-dasharray 1s ease-out' }}
+                  />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-lg font-bold text-foreground">{pct}%</span>
+              </div>
+              <p className="text-sm text-muted-foreground">{correct} / {total} {t('vocab_reviewed')}!</p>
+            </>
+          )
         ) : (
           <>
             <CheckCircle className={`${compact ? 'h-8 w-8' : 'h-10 w-10'} text-primary`} />
@@ -253,7 +260,7 @@ export function ReviewCard({ dueCards, onCardReviewed, compact }: ReviewCardProp
           </div>
         ) : (
           <div className="flex justify-center gap-3">
-            <Button onClick={() => handleReview(false)} variant="destructive" size={compact ? 'sm' : 'default'} className="gap-1">
+            <Button onClick={() => handleReview(false)} size={compact ? 'sm' : 'default'} className="gap-1 bg-orange-500 text-white hover:bg-orange-600">
               <XCircle className="h-4 w-4" /> {t('vocab_didnt_know')}
             </Button>
             <Button onClick={() => handleReview(true)} size={compact ? 'sm' : 'default'} className="gap-1">

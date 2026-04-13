@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown, BookOpen, FileText, ClipboardCheck, Monitor } from 'lucide-react';
+import { Menu, X, ChevronDown, BookOpen, FileText, ClipboardCheck, Monitor, MessageCircle } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useRequiredAuth } from '@/contexts/AuthContext';
 import {

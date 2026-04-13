@@ -716,7 +716,7 @@ export default function DailyPracticePage() {
               </div>
             ) : (
               <div className="flex justify-center gap-3">
-                <Button onClick={() => handleFlashcard(false)} variant="destructive" size="sm" className="gap-1">
+                <Button onClick={() => handleFlashcard(false)} size="sm" className="gap-1 bg-orange-500 text-white hover:bg-orange-600">
                   <XCircle className="h-4 w-4" /> {t('vocab_didnt_know')}
                 </Button>
                 <Button onClick={() => handleFlashcard(true)} size="sm" className="gap-1">
