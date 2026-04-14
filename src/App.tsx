@@ -33,6 +33,7 @@ import ITRedewendungenPage from "@/pages/ITRedewendungenPage";
 import ITVokabularPage from "@/pages/ITVokabularPage";
 import ITUebungenPage from "@/pages/ITUebungenPage";
 import FlashcardsPage from "@/pages/FlashcardsPage";
+import ITUserStoriesPage from "@/pages/ITUserStoriesPage";
 import WelcomePage from "@/pages/WelcomePage";
 import NotFound from "@/pages/NotFound";
 import { RootRoute } from "@/components/RootRoute";
@@ -82,6 +83,7 @@ const App = () => (
 
               <Route path="/it-deutsch/redewendungen" element={<ITRedewendungenPage />} />
               <Route path="/it-deutsch/vokabular" element={<ITVokabularPage />} />
+              <Route path="/it-deutsch/user-stories" element={<ITUserStoriesPage />} />
               <Route path="/flashcards" element={<FlashcardsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>

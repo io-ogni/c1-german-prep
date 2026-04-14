@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { LevelTabs } from '@/components/shared/LevelTabs';
 import { TopicCard } from '@/components/shared/TopicCard';
 import { ExerciseFlow } from '@/components/vocabulary/ExerciseFlow';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -7,8 +6,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Languages } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Languages, Link2, ArrowRightLeft } from 'lucide-react';
 import { TelcBadge } from '@/components/shared/TelcBadge';
+import { NAV_CONTAINER, TAB_TRIGGER_BLUE } from '@/components/shared/navStyles';
+import { ScrollNav } from '@/components/shared/ScrollNav';
+import { NVVerbindungenContent } from '@/pages/NVVerbindungenContent';
+import { PraepositionenContent } from '@/pages/PraepositionenContent';
 
 const TOPIC_NAMES: Record<string, string> = {
   alltag_gesellschaft: 'Alltag & Gesellschaft',
@@ -30,7 +34,7 @@ const TOPIC_NAMES: Record<string, string> = {
 };
 
 export default function VocabularyPage() {
-  const [level, setLevel] = useState<'b2' | 'c1'>('c1');
+  const [level, setLevel] = useState<'b2' | 'c1' | 'nv-verbindungen' | 'praepositionen'>('c1');
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const { t, lang } = useTranslation();
   const auth = useAuth();
@@ -101,9 +105,24 @@ export default function VocabularyPage() {
           Wörter sammeln wie Pokémon. Gotta catch 'em all.
         </p>
       </div>
-      <LevelTabs value={level} onValueChange={setLevel} />
+      <Tabs value={level} onValueChange={(v) => setLevel(v as typeof level)}>
+        <ScrollNav>
+          <TabsList className={`${NAV_CONTAINER} h-auto gap-1`}>
+            <TabsTrigger value="b2" className={TAB_TRIGGER_BLUE}>{t('level_b2_refresh')}</TabsTrigger>
+            <TabsTrigger value="c1" className={TAB_TRIGGER_BLUE}>{t('level_c1')}</TabsTrigger>
+            <TabsTrigger value="nv-verbindungen" className={`${TAB_TRIGGER_BLUE} gap-1.5`}>
+              <Link2 className="h-4 w-4" />
+              NV-Verbindungen
+            </TabsTrigger>
+            <TabsTrigger value="praepositionen" className={`${TAB_TRIGGER_BLUE} gap-1.5`}>
+              <ArrowRightLeft className="h-4 w-4" />
+              Präpositionen
+            </TabsTrigger>
+          </TabsList>
+        </ScrollNav>
+      </Tabs>
 
-      {isLoading ? (
+      {(level === 'b2' || level === 'c1') && (isLoading ? (
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-28 rounded-lg" />
@@ -123,6 +142,18 @@ export default function VocabularyPage() {
         </div>
       ) : (
         <p className="text-muted-foreground text-sm">{t('page_coming_soon')}</p>
+      ))}
+
+      {level === 'nv-verbindungen' && (
+        <div className="mt-4">
+          <NVVerbindungenContent />
+        </div>
+      )}
+
+      {level === 'praepositionen' && (
+        <div className="mt-4">
+          <PraepositionenContent />
+        </div>
       )}
     </div>
   );

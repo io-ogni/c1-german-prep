@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
-import { Languages, Zap, Link2, Presentation, GitBranch, Shield, AlertTriangle, Volume2, Filter, Monitor } from 'lucide-react';
+import { Languages, Zap, Link2, Presentation, GitBranch, Shield, AlertTriangle, Volume2, Filter, Monitor, FileText } from 'lucide-react';
+import { UserStoriesContent } from '@/pages/ITUserStoriesPage';
 import { StarredButton } from '@/components/shared/StarredButton';
 import { SelectionHint, markHintInteraction } from '@/components/shared/SelectionHint';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -555,6 +556,7 @@ export default function ITVokabularPage() {
             <TabsTrigger value="refinement" className={TAB_TRIGGER_FUCHSIA}><GitBranch className="h-3.5 w-3.5" /> Refinement</TabsTrigger>
             <TabsTrigger value="souveraenitaet" className={TAB_TRIGGER_FUCHSIA}><Shield className="h-3.5 w-3.5" /> Souveränität</TabsTrigger>
             <TabsTrigger value="krisen" className={TAB_TRIGGER_FUCHSIA}><AlertTriangle className="h-3.5 w-3.5" /> Notfall-Kit</TabsTrigger>
+            <TabsTrigger value="user-stories" className={TAB_TRIGGER_FUCHSIA}><FileText className="h-3.5 w-3.5" /> User Stories</TabsTrigger>
           </TabsList>
         </ScrollNav>
 
@@ -1060,6 +1062,11 @@ export default function ITVokabularPage() {
             })}
           </div>
           {filteredCrisis.length === 0 && emptyStarred}
+        </TabsContent>
+
+        {/* ── User Stories ── */}
+        <TabsContent value="user-stories">
+          <UserStoriesContent />
         </TabsContent>
 
       </Tabs>

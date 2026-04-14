@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Drama, Table2, Layers, Dumbbell, Play } from 'lucide-react';
+import { Drama, Table2, Layers, Dumbbell, Play, FileText } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { NAV_CONTAINER, navFuchsiaClasses } from '@/components/shared/navStyles';
 import { ScrollNav } from '@/components/shared/ScrollNav';

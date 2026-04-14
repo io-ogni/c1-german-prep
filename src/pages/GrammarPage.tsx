@@ -40,7 +40,7 @@ const TOPIC_NAMES: Record<string, { de: string; en: string; telc?: boolean }> = 
 };
 
 export default function GrammarPage() {
-  const [level, setLevel] = useState<'b2' | 'c1' | 'verbtabelle' | 'nv-verbindungen' | 'praepositionen'>('c1');
+  const [level, setLevel] = useState<'b2' | 'c1' | 'verbtabelle'>('c1');
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const { t, lang } = useTranslation();
   const auth = useAuth();
@@ -124,14 +124,6 @@ export default function GrammarPage() {
               <Table2 className="h-4 w-4" />
               {t('grammar_verb_table')}
             </TabsTrigger>
-            <TabsTrigger value="nv-verbindungen" className={`${TAB_TRIGGER_BLUE} gap-1.5`}>
-              <Link2 className="h-4 w-4" />
-              NV-Verbindungen
-            </TabsTrigger>
-            <TabsTrigger value="praepositionen" className={`${TAB_TRIGGER_BLUE} gap-1.5`}>
-              <ArrowRightLeft className="h-4 w-4" />
-              Präpositionen
-            </TabsTrigger>
           </TabsList>
         </ScrollNav>
 
@@ -168,17 +160,6 @@ export default function GrammarPage() {
           </div>
         )}
 
-        {level === 'nv-verbindungen' && (
-          <div className="mt-4">
-            <NVVerbindungenContent />
-          </div>
-        )}
-
-        {level === 'praepositionen' && (
-          <div className="mt-4">
-            <PraepositionenContent />
-          </div>
-        )}
       </Tabs>
     </div>
   );
