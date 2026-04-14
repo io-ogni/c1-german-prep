@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { TopicCard } from '@/components/shared/TopicCard';
 import { ExerciseFlow } from '@/components/vocabulary/ExerciseFlow';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -40,7 +41,9 @@ const TOPIC_NAMES: Record<string, { de: string; en: string; telc?: boolean }> = 
 };
 
 export default function GrammarPage() {
-  const [level, setLevel] = useState<'b2' | 'c1' | 'verbtabelle'>('c1');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const level = (searchParams.get('tab') || 'c1') as 'b2' | 'c1' | 'verbtabelle';
+  const setLevel = (v: string) => setSearchParams({ tab: v }, { replace: true });
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const { t, lang } = useTranslation();
   const auth = useAuth();

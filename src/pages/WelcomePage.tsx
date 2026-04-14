@@ -102,7 +102,7 @@ export default function WelcomePage() {
             className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto mb-14 leading-relaxed"
           >
             Interactive exercises, real-life examples and AI feedback —
-            everything you need from B2 to C1. And yes, your next Refinement meeting counts as practice.
+            everything you need from B2 to C1 to your next Refinement auf Deutsch. With AI writing feedback and 200+ IT-specific phrases.
           </motion.p>
 
           <motion.div
@@ -156,7 +156,7 @@ export default function WelcomePage() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              For B2 IT expats who want more than just pass the C1 exam.
+              For IT expats who don't just want to pass an exam, but actually be free in their everyday work in German.
             </h2>
             <p className="text-muted-foreground text-lg max-w-lg mx-auto">
               Four skills. One platform. Zero fluff. (Just dog hair.)
@@ -204,28 +204,43 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* Social proof */}
-      <section className="px-6 py-24 md:py-32 bg-muted/50">
-        <div className="max-w-3xl mx-auto text-center">
+      {/* App preview */}
+      <section className="px-6 py-16 md:py-24">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="rounded-2xl border border-border shadow-2xl shadow-primary/10 overflow-hidden"
+          >
+            <img src="/app-preview.png" alt="C1 Werkstatt — Homepage with progress tracking, verb flashcards, and vocabulary review" className="w-full" />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Numbers */}
+      <section className="px-6 py-20 md:py-28 bg-muted/50">
+        <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6 text-center"
           >
-            <p className="text-2xl md:text-3xl font-semibold leading-relaxed mb-8">
-              "This time, I don't want just to pass the exam, I want to be
-              <span className="text-primary"> freaking free</span>
-              {' '}in my everyday work in IT."
-            </p>
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-violet-500 flex items-center justify-center text-white font-bold text-sm">
-                I
+            {[
+              { num: '980+', label: 'Exercises' },
+              { num: '200+', label: 'IT phrases' },
+              { num: '120', label: 'User Stories from 12 industries' },
+              { num: '130', label: 'Verbs with full conjugations' },
+              { num: '500+', label: 'Audio files (Neural2 TTS)' },
+              { num: '100%', label: 'Free, no ads' },
+            ].map(s => (
+              <div key={s.label}>
+                <p className="text-3xl md:text-4xl font-extrabold text-primary">{s.num}</p>
+                <p className="text-xs text-muted-foreground mt-1 leading-tight">{s.label}</p>
               </div>
-              <div className="text-center">
-                <p className="font-semibold text-sm">Ioana, Product Manager</p>
-                <p className="text-xs text-muted-foreground">Was bored of all language tools and made this app instead</p>
-              </div>
-            </div>
+            ))}
           </motion.div>
         </div>
       </section>
@@ -242,7 +257,7 @@ export default function WelcomePage() {
             Ready to stop starting and start finishing?
           </h2>
           <p className="text-lg text-muted-foreground mb-10">
-            Join other expats who are actually having fun preparing for C1. 100% free, no ads, no costs — because Jerry 🐕 likes it this way.
+            Tired of starting C1 exercise books and never finishing them? This app is an interactive alternative to boring learning — and it's completely free, because Jerry 🐕 likes it that way.
           </p>
           <Button size="lg" className="text-base px-10 h-13 rounded-xl shadow-lg shadow-primary/25" asChild>
             <Link to="/signup">
@@ -254,16 +269,14 @@ export default function WelcomePage() {
 
       {/* Footer */}
       <footer className="border-t px-6 py-8">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground flex items-center gap-2">
-            <img src="/logo.png" alt="C1" className="h-5 w-5 rounded-sm" /> <span className="bg-gradient-to-r from-blue-600 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent">Werkstatt</span>
-          </span>
-          <div className="text-center">
+        <div className="max-w-5xl mx-auto text-center text-sm text-muted-foreground space-y-4">
+          <div>
             Built by <a href="https://ioana-ognibeni.eu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Ioana Ognibeni</a> with{' '}
             <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Claude</a> &{' '}
             <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Lovable</a>.
             {' '}Approved by Jerry the 🐕
           </div>
+          <a href="/about" className="text-xs text-primary hover:underline">About this app →</a>
         </div>
       </footer>
     </div>

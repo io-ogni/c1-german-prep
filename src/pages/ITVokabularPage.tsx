@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Languages, Zap, Link2, Presentation, GitBranch, Shield, AlertTriangle, Volume2, Filter, Monitor, FileText } from 'lucide-react';
 import { UserStoriesContent } from '@/pages/ITUserStoriesPage';
@@ -90,7 +91,195 @@ export const NOUNS = [
   { de: 'Die Belastungsspitze', en: 'Peak load / Stress period', example: 'Während der Black-Friday-Woche müssen wir auf extreme Belastungsspitzen vorbereitet sein.' },
   { de: 'Die Erwartungshaltung', en: 'Expectations / Mindset', example: 'Um Frust zu vermeiden, müssen wir die Erwartungshaltung der Stakeholder frühzeitig managen.' },
   { de: 'Die Hands-on-Mentalität', en: 'Hands-on mentality', example: 'In unserem Startup schätzen wir Entwickler mit einer ausgeprägten Hands-on-Mentalität.' },
+
+  // ─── Allgemeine IT- & Business-Begriffe (mit Artikel!) ───
+  { de: 'Die Funktion', en: 'Function / Feature', example: 'Diese Funktion ermöglicht es den Nutzern, ihre Daten in Echtzeit zu synchronisieren.' },
+  { de: 'Die URL', en: 'URL', example: 'Bitte überprüfen Sie die URL auf Tippfehler, bevor Sie den Link weitergeben.' },
+  { de: 'Die Idee(n)', en: 'Idea(s)', example: 'Im Brainstorming haben wir mehrere Ideen für das nächste Feature gesammelt.' },
+  { de: 'Die Umgebung', en: 'Environment', example: 'Die Staging-Umgebung bildet die Produktivumgebung so genau wie möglich ab.' },
+  { de: 'Die Taste', en: 'Key (keyboard)', example: 'Drücken Sie die Escape-Taste, um den Dialog zu schließen.' },
+  { de: 'Die Applikation', en: 'Application', example: 'Die Applikation ist sowohl als Web- als auch als Mobile-Version verfügbar.' },
+  { de: 'Die Website', en: 'Website', example: 'Die Website verzeichnet monatlich über 500.000 Besucher.' },
+  { de: 'Die Methode', en: 'Method', example: 'Wir verwenden die Scrum-Methode für unser Projektmanagement.' },
+  { de: 'Die Aufgabe', en: 'Task', example: 'Jede Aufgabe im Sprint-Backlog hat eine klare Akzeptanzkriterien.' },
+  { de: 'Die Struktur', en: 'Structure', example: 'Die Ordnerstruktur des Projekts muss dringend überarbeitet werden.' },
+  { de: 'Die Software', en: 'Software', example: 'Die Software wird alle zwei Wochen mit neuen Funktionen aktualisiert.' },
+  { de: 'Die Skizze', en: 'Sketch', example: 'Bevor wir den Prototyp bauen, erstellen wir eine grobe Skizze der Benutzeroberfläche.' },
+  { de: 'Die Energie', en: 'Energy', example: 'Das Team hat viel Energie in die Optimierung der Ladezeiten investiert.' },
+  { de: 'Die Garantie', en: 'Guarantee / Warranty', example: 'Wir geben keine Garantie für die Abwärtskompatibilität der API.' },
+  { de: 'Die Checkliste', en: 'Checklist', example: 'Vor jedem Release arbeiten wir eine Checkliste mit 20 Prüfpunkten ab.' },
+  { de: 'Die Erkenntnis', en: 'Insight / Finding', example: 'Die wichtigste Erkenntnis aus dem User Research: Einfachheit schlägt Features.' },
+  { de: 'Die Checkbox', en: 'Checkbox', example: 'Die Checkbox für die Datenschutzerklärung muss vom Nutzer aktiv gesetzt werden.' },
+  { de: 'Die Progress-Bar', en: 'Progress bar', example: 'Die Progress-Bar zeigt dem Nutzer, wie weit der Upload fortgeschritten ist.' },
+  { de: 'Die Reihenfolge', en: 'Order / Sequence', example: 'Die Reihenfolge der Onboarding-Schritte hat großen Einfluss auf die Conversion.' },
+  { de: 'Die Festplatte', en: 'Hard drive', example: 'Die Festplatte des Servers war zu 95 Prozent ausgelastet.' },
+  { de: 'Die Simulation', en: 'Simulation', example: 'Mithilfe einer Simulation konnten wir das Nutzerverhalten vorhersagen.' },
+  { de: 'Die Analyse', en: 'Analysis', example: 'Die Analyse der Nutzerdaten zeigt einen deutlichen Rückgang der Aktivität am Wochenende.' },
+  { de: 'Die Kettenreaktion', en: 'Chain reaction', example: 'Ein einziger fehlgeschlagener Microservice kann eine Kettenreaktion im gesamten System auslösen.' },
+  { de: 'Die Ursache', en: 'Cause / Root cause', example: 'Die eigentliche Ursache des Bugs lag in einer fehlerhaften Datumskonvertierung.' },
+  { de: 'Die Bedienplanung', en: 'Capacity planning', example: 'Die Bedienplanung für das Black-Friday-Event beginnt bereits im September.' },
+  { de: 'Die Priorität', en: 'Priority', example: 'Die Behebung dieses Sicherheitslücke hat höchste Priorität.' },
+  { de: 'Die Abnahme', en: 'Acceptance / Sign-off', example: 'Die formale Abnahme durch den Product Owner erfolgt am Ende jedes Sprints.' },
+  { de: 'Die Aktion', en: 'Action / Campaign', example: 'Die Marketing-Aktion hat innerhalb von 24 Stunden 10.000 neue Registrierungen generiert.' },
+  { de: 'Die Anfrage', en: 'Request / Inquiry', example: 'Jede API-Anfrage wird mit einem Zeitstempel und einer Request-ID protokolliert.' },
+  { de: 'Die Ansicht', en: 'View / Opinion', example: 'In der Kanban-Ansicht sieht man alle Aufgaben nach Status sortiert.' },
+  { de: 'Die Auflösung', en: 'Resolution', example: 'Die Auflösung des Bildschirms beeinflusst die Darstellung der Diagramme erheblich.' },
+  { de: 'Die Ausführung', en: 'Execution / Implementation', example: 'Die Ausführung des Migrationsskripts dauerte über drei Stunden.' },
+  { de: 'Die Auskunft', en: 'Information / Report', example: 'Der Helpdesk gibt telefonisch Auskunft zu technischen Problemen.' },
+  { de: 'Die Konstruktion', en: 'Construction / Design', example: 'Die Konstruktion der Datenbankarchitektur folgt dem Normalisierungsprinzip.' },
+  { de: 'Der Kontext', en: 'Context', example: 'Ohne den geschäftlichen Kontext ist es schwierig, die richtige technische Lösung zu wählen.' },
+  { de: 'Der Prozess', en: 'Process', example: 'Der CI/CD-Prozess läuft vollständig automatisiert ab.' },
+  { de: 'Der Task', en: 'Task', example: 'Jeder Task im Board hat einen Verantwortlichen und eine Deadline.' },
+  { de: 'Der Bug', en: 'Bug', example: 'Der Bug tritt nur auf, wenn der Nutzer den Browser im Inkognito-Modus verwendet.' },
+  { de: 'Der Knopf', en: 'Button (physical)', example: 'Der Power-Knopf am Gerät reagiert nicht mehr auf Druck.' },
+  { de: 'Der Button', en: 'Button (UI)', example: 'Der Button zum Absenden des Formulars ist auf Mobile kaum sichtbar.' },
+  { de: 'Der Manager', en: 'Manager', example: 'Der Product Manager priorisiert die Features für das nächste Quartal.' },
+  { de: 'Der Entwurf', en: 'Draft / Design', example: 'Der erste Entwurf der Landing Page wurde im Team diskutiert.' },
+  { de: 'Der Sortimentsbereich', en: 'Product range area', example: 'Der Sortimentsbereich für Elektronik wird im nächsten Quartal erweitert.' },
+  { de: 'Der Vertriebsweg', en: 'Distribution channel', example: 'Der digitale Vertriebsweg macht inzwischen 60 Prozent des Umsatzes aus.' },
+  { de: 'Der Vertriebskanal', en: 'Sales channel', example: 'Wir testen gerade einen neuen Vertriebskanal über Social Media.' },
+  { de: 'Der Markt', en: 'Market', example: 'Der europäische Markt reagiert anders auf Preiserhöhungen als der amerikanische.' },
+  { de: 'Der Schluss', en: 'Conclusion / End', example: 'Zum Schluss des Meetings fassen wir die Action Items zusammen.' },
+  { de: 'Der PC', en: 'PC', example: 'Der PC im Konferenzraum muss dringend aktualisiert werden.' },
+  { de: 'Der Fehler', en: 'Error / Mistake', example: 'Der Fehler lag nicht im Code, sondern in der Konfiguration der Datenbank.' },
+  { de: 'Der Schritt', en: 'Step', example: 'Der nächste Schritt ist die Integration der Zahlungsschnittstelle.' },
+  { de: 'Der Tab', en: 'Tab', example: 'Im zweiten Tab finden Sie die erweiterten Einstellungen.' },
+  { de: 'Der Lieferservice', en: 'Delivery service', example: 'Der Lieferservice garantiert eine Zustellung innerhalb von 24 Stunden.' },
+  { de: 'Der Server', en: 'Server', example: 'Der Server in Frankfurt hat eine Verfügbarkeit von 99,99 Prozent.' },
+  { de: 'Der Editor', en: 'Editor', example: 'Der Rich-Text-Editor unterstützt jetzt auch Tabellen und Bilder.' },
+  { de: 'Der Ablauf', en: 'Process / Workflow', example: 'Der gesamte Ablauf vom Onboarding bis zur ersten Bestellung dauert unter 5 Minuten.' },
+  { de: 'Der Konzern', en: 'Corporation / Group', example: 'Der Konzern hat weltweit über 50.000 Mitarbeiter.' },
+  { de: 'Der Render', en: 'Render', example: 'Der erste Render der Seite dauert auf Mobile noch zu lange.' },
+  { de: 'Der Faktor(-en)', en: 'Factor(s)', example: 'Der wichtigste Faktor für die Nutzerbindung ist die Ladegeschwindigkeit.' },
+  { de: 'Der Spezialist(-en)', en: 'Specialist(s)', example: 'Für die Cloud-Migration brauchen wir einen Spezialisten mit AWS-Erfahrung.' },
+  { de: 'Der Test', en: 'Test', example: 'Der A/B-Test zeigt eine um 15 Prozent höhere Conversion-Rate bei der neuen Variante.' },
+  { de: 'Der Algorithmus(-en)', en: 'Algorithm(s)', example: 'Der Empfehlungsalgorithmus basiert auf dem bisherigen Kaufverhalten.' },
+  { de: 'Der Aufbau', en: 'Structure / Setup', example: 'Der modulare Aufbau der Anwendung ermöglicht unabhängige Deployments.' },
+  { de: 'Der Ausbau', en: 'Expansion / Extension', example: 'Der Ausbau der API um GraphQL-Unterstützung ist für Q3 geplant.' },
+  { de: 'Der Austausch', en: 'Exchange', example: 'Der regelmäßige Austausch zwischen Design und Entwicklung verhindert Missverständnisse.' },
+  { de: 'Der Bedarf', en: 'Need / Demand', example: 'Es besteht ein hoher Bedarf an barrierefreien Webanwendungen.' },
+  { de: 'Der Beitrag', en: 'Contribution / Post', example: 'Jeder Beitrag im Wiki wird automatisch versioniert.' },
+  { de: 'Der Bereich', en: 'Area / Section', example: 'Im Admin-Bereich können Benutzerrechte konfiguriert werden.' },
+  { de: 'Der Teil', en: 'Part / Section', example: 'Der zweite Teil der Migration betrifft die Nutzerdaten.' },
+  { de: 'Das Feature', en: 'Feature', example: 'Das neue Feature wird zunächst nur für Beta-Nutzer freigeschaltet.' },
+  { de: 'Das System', en: 'System', example: 'Das System verarbeitet durchschnittlich 10.000 Transaktionen pro Minute.' },
+  { de: 'Das Produkt', en: 'Product', example: 'Das Produkt muss vor dem Launch eine ausführliche Testphase durchlaufen.' },
+  { de: 'Das Projekt', en: 'Project', example: 'Das Projekt ist im Zeitplan und liegt innerhalb des Budgets.' },
+  { de: 'Das Sortiment', en: 'Product range / Assortment', example: 'Das Online-Sortiment umfasst über 50.000 Artikel.' },
+  { de: 'Das Potenzial', en: 'Potential', example: 'Das Potenzial für Wachstum im asiatischen Markt ist enorm.' },
+  { de: 'Das Smart-TV', en: 'Smart TV', example: 'Das Smart-TV kann direkt mit der App über WLAN verbunden werden.' },
+  { de: 'Das Virus', en: 'Virus', example: 'Das Virus wurde durch einen Anhang in einer Phishing-Mail eingeschleust.' },
+  { de: 'Das Design', en: 'Design', example: 'Das neue Design wurde in enger Zusammenarbeit mit den Endnutzern entwickelt.' },
+  { de: 'Das Update', en: 'Update', example: 'Das Update behebt einen kritischen Sicherheitsfehler und sollte sofort installiert werden.' },
+  { de: 'Das Skript', en: 'Script', example: 'Das Skript für die Datenmigration muss vor dem Einsatz gründlich getestet werden.' },
+  { de: 'Das Dateiformat', en: 'File format', example: 'Das Dateiformat CSV wird von allen gängigen Tabellenkalkulationen unterstützt.' },
+  { de: 'Das Thema', en: 'Topic / Theme', example: 'Das Thema Datenschutz gewinnt bei unseren Kunden zunehmend an Bedeutung.' },
+  { de: 'Das Konzept', en: 'Concept', example: 'Das Konzept für den Relaunch steht, jetzt beginnt die Umsetzungsphase.' },
+  { de: 'Das Risiko(-en)', en: 'Risk(s)', example: 'Das größte Risiko bei der Migration ist der potenzielle Datenverlust.' },
+  { de: 'Das Bedürfnis', en: 'Need', example: 'Das zentrale Bedürfnis unserer Nutzer ist eine einfache und schnelle Bedienung.' },
+  { de: 'Das Pixel', en: 'Pixel', example: 'Jedes Pixel auf dem Retina-Display wird mit vierfacher Auflösung gerendert.' },
+  { de: 'Das Dokument', en: 'Document', example: 'Das technische Dokument beschreibt die API-Endpunkte im Detail.' },
+  { de: 'Das Datum', en: 'Date / Data point', example: 'Das Datum der letzten Anmeldung wird im Nutzerprofil angezeigt.' },
+  { de: 'Das Gerät', en: 'Device', example: 'Das Gerät muss sowohl mit iOS als auch mit Android kompatibel sein.' },
+  { de: 'Das Ergebnis', en: 'Result', example: 'Das Ergebnis des Lasttests zeigt, dass der Server 5.000 gleichzeitige Nutzer aushält.' },
+  { de: 'Das Gefüge', en: 'Structure / Framework', example: 'Jede Architekturänderung beeinflusst das gesamte Gefüge der Microservices.' },
+  { de: 'Das Grundprinzip', en: 'Basic principle', example: 'Das Grundprinzip von REST ist die zustandslose Kommunikation.' },
+  { de: 'Das Labor', en: 'Lab', example: 'Im UX-Labor beobachten wir Nutzer bei der Interaktion mit dem Prototyp.' },
+  { de: 'Das Lager', en: 'Warehouse / Storage', example: 'Das automatisierte Lager reduziert die Kommissionierungszeit um 40 Prozent.' },
+  { de: 'Das Kriterium(-en)', en: 'Criterion (Criteria)', example: 'Das wichtigste Kriterium bei der Toolauswahl ist die Integrationsfähigkeit.' },
+  { de: 'Das Material', en: 'Material', example: 'Das Schulungsmaterial ist als PDF im internen Wiki verfügbar.' },
+  { de: 'Das Merkmal', en: 'Characteristic / Feature', example: 'Ein entscheidendes Merkmal unserer Software ist die Offline-Fähigkeit.' },
+  { de: 'Das Mittel', en: 'Means / Resource', example: 'Mit welchen Mitteln können wir die Performance am schnellsten verbessern?' },
+  { de: 'Das Dropdown', en: 'Dropdown', example: 'Das Dropdown-Menü zeigt maximal 10 Einträge, der Rest ist scrollbar.' },
+  { de: 'Das Menü', en: 'Menu', example: 'Das Navigationsmenü muss auch mit der Tastatur bedienbar sein.' },
+  { de: 'Das Vollbild', en: 'Full screen', example: 'Im Vollbild-Modus wird die gesamte Werkzeugleiste ausgeblendet.' },
+  { de: 'Das Kontextmenü', en: 'Context menu', example: 'Per Rechtsklick öffnet sich das Kontextmenü mit zusätzlichen Optionen.' },
+  { de: 'Das Keyboard', en: 'Keyboard', example: 'Das virtuelle Keyboard sollte auf Mobile automatisch erscheinen.' },
+  { de: 'Die Teilnahme', en: 'Participation', example: 'Die Teilnahme am Beta-Programm ist freiwillig und kostenlos.' },
+  { de: 'Die Dauer', en: 'Duration', example: 'Die durchschnittliche Dauer einer Session beträgt 8 Minuten.' },
+  { de: 'Die Definition', en: 'Definition', example: 'Die Definition of Done legt fest, wann eine Story als abgeschlossen gilt.' },
+  { de: 'Die Ebene', en: 'Level / Layer', example: 'Auf der Datenbankebene haben wir eine zusätzliche Validierung eingebaut.' },
+  { de: 'Die Effizienz', en: 'Efficiency', example: 'Die Effizienz des Algorithmus konnte durch Caching um 70 Prozent gesteigert werden.' },
+  { de: 'Die Eigenschaft', en: 'Property / Attribute', example: 'Jede Komponente hat bestimmte Eigenschaften, die über Props konfiguriert werden.' },
+  { de: 'Die Gruppe', en: 'Group', example: 'Nutzer können in Gruppen organisiert werden, um Berechtigungen zu vereinfachen.' },
+  { de: 'Die Frequenz', en: 'Frequency', example: 'Die Frequenz der Deployments hat sich von monatlich auf wöchentlich erhöht.' },
+  { de: 'Die Gefahr', en: 'Danger / Risk', example: 'Die größte Gefahr bei einem ungetesteten Rollback ist der Datenverlust.' },
+  { de: 'Die Hardware', en: 'Hardware', example: 'Die Hardware der Testgeräte muss regelmäßig ausgetauscht werden.' },
+  { de: 'Die IP-Adresse', en: 'IP address', example: 'Die IP-Adresse des Nutzers wird aus Datenschutzgründen anonymisiert.' },
+  { de: 'Die Kette', en: 'Chain', example: 'In der Blockchain wird jede Transaktion als neues Glied in der Kette gespeichert.' },
+  { de: 'Die Konstruktion', en: 'Construction', example: 'Die Konstruktion der API folgt den RESTful-Prinzipien.' },
+  { de: 'Die Maschine', en: 'Machine', example: 'Die virtuelle Maschine wird für Lasttests automatisch hochskaliert.' },
+  { de: 'Die Maßnahme', en: 'Measure / Action', example: 'Welche Maßnahmen ergreifen wir, wenn der Service ausfällt?' },
+  { de: 'Die Menge', en: 'Quantity / Amount', example: 'Die Menge der verarbeiteten Datensätze hat sich im letzten Jahr verdreifacht.' },
+  { de: 'Die Nische', en: 'Niche', example: 'Mit unserem Produkt bedienen wir eine lukrative Nische im B2B-Bereich.' },
+  { de: 'Die Normung', en: 'Standardization', example: 'Die Normung der API-Schnittstellen erleichtert die Integration erheblich.' },
+  { de: 'Die Sortierung', en: 'Sorting', example: 'Die Sortierung der Ergebnisse kann nach Datum, Relevanz oder Preis erfolgen.' },
+  { de: 'Die Suche', en: 'Search', example: 'Die Suche unterstützt jetzt auch unscharfe Treffer und Synonyme.' },
+  { de: 'Die Lautstärke', en: 'Volume', example: 'Die Lautstärke der Benachrichtigungstöne kann in den Einstellungen angepasst werden.' },
+  { de: 'Die Toolbar', en: 'Toolbar', example: 'Die Toolbar am oberen Rand enthält die wichtigsten Formatierungsoptionen.' },
+  { de: 'Die Benachrichtigung', en: 'Notification', example: 'Die Push-Benachrichtigung informiert den Nutzer über neue Nachrichten.' },
+  { de: 'Die Tastatur', en: 'Keyboard', example: 'Die Tastaturkürzel beschleunigen die Arbeit im Editor erheblich.' },
+  { de: 'Die Komponente(-n)', en: 'Component(s)', example: 'Jede UI-Komponente ist einzeln testbar und wiederverwendbar.' },
+  { de: 'Die Präferenz(-en)', en: 'Preference(s)', example: 'Die persönlichen Präferenzen des Nutzers werden im Profil gespeichert.' },
+  { de: 'Die Prognose', en: 'Forecast / Prediction', example: 'Die KI-basierte Prognose sagt den Absatz für die nächsten 30 Tage voraus.' },
+  { de: 'Die Qualität', en: 'Quality', example: 'Die Codequalität wird durch automatische Linter und Reviews sichergestellt.' },
+  { de: 'Die Referenz', en: 'Reference', example: 'In der Dokumentation finden Sie eine vollständige API-Referenz.' },
+  { de: 'Die Regel(-n)', en: 'Rule(s)', example: 'Die Validierungsregeln werden zentral definiert und auf Client und Server angewendet.' },
+  { de: 'Die Richtlinie', en: 'Guideline / Policy', example: 'Unsere Coding-Richtlinien schreiben ESLint und Prettier als Standard vor.' },
+  { de: 'Die Schnittstelle', en: 'Interface / API', example: 'Die Schnittstelle zum Zahlungsanbieter muss PCI-DSS-konform sein.' },
+  { de: 'Die Statistik', en: 'Statistics', example: 'Die Statistik zeigt, dass 60 Prozent der Nutzer über Mobile zugreifen.' },
+  { de: 'Der Teilnehmer', en: 'Participant', example: 'Jeder Teilnehmer des Workshops erhält vorab die Agenda per E-Mail.' },
+  { de: 'Der Bildschirm', en: 'Screen', example: 'Auf dem kleinen Bildschirm wird die Navigation als Hamburger-Menü angezeigt.' },
+  { de: 'Der Betrieb', en: 'Operation / Business', example: 'Der IT-Betrieb wird rund um die Uhr von einem Bereitschaftsteam überwacht.' },
+  { de: 'Der Bildausschnitt', en: 'Crop / Frame', example: 'Der Bildausschnitt im Profilbild kann vom Nutzer individuell angepasst werden.' },
+  { de: 'Der Durchschnitt', en: 'Average', example: 'Im Durchschnitt verbringen unsere Nutzer 12 Minuten pro Session in der App.' },
+  { de: 'Der Kontakt', en: 'Contact', example: 'Jeder Kontakt im CRM hat eine vollständige Interaktionshistorie.' },
+  { de: 'Der Einsatz', en: 'Deployment / Use', example: 'Der Einsatz von Containerisierung hat die Deployment-Zeiten halbiert.' },
+  { de: 'Der Einflussfaktor', en: 'Influencing factor', example: 'Der wichtigste Einflussfaktor auf die Nutzerzufriedenheit ist die Ladezeit.' },
+  { de: 'Der Begriff', en: 'Term / Concept', example: 'Der Begriff "Sprint" wird in agilen Teams für einen festen Entwicklungszyklus verwendet.' },
+  { de: 'Der Hinweis', en: 'Hint / Note', example: 'Ein freundlicher Hinweis im UI erklärt dem Nutzer die nächsten Schritte.' },
+  { de: 'Der Wert', en: 'Value', example: 'Der Standardwert für das Timeout beträgt 30 Sekunden.' },
+  { de: 'Der Lieferschein', en: 'Delivery note', example: 'Der digitale Lieferschein wird automatisch an den Empfänger versendet.' },
+  { de: 'Der Filter', en: 'Filter', example: 'Der Filter ermöglicht die Eingrenzung der Suchergebnisse nach Kategorie und Preis.' },
+  { de: 'Der Radiobutton', en: 'Radio button', example: 'Der Radiobutton erlaubt die Auswahl genau einer Option aus der Gruppe.' },
+  { de: 'Der Menüeintrag', en: 'Menu item', example: 'Jeder Menüeintrag hat ein Icon und eine Kurzbeschreibung.' },
+  { de: 'Der Lautstärkeregler', en: 'Volume control', example: 'Der Lautstärkeregler reagiert sowohl auf Klick als auch auf Tastatureingabe.' },
+  { de: 'Der Ordner', en: 'Folder', example: 'Im Ordner "Assets" liegen alle Bilder und Icons des Projekts.' },
+  { de: 'Der Perspektivwechsel', en: 'Change of perspective', example: 'Ein Perspektivwechsel hilft oft, festgefahrene Diskussionen im Team aufzulösen.' },
+  { de: 'Der Prozessor', en: 'Processor', example: 'Der Prozessor des Servers ist für rechenintensive KI-Modelle optimiert.' },
+  { de: 'Der Schalter', en: 'Switch / Toggle', example: 'Mit dem Schalter kann der Dark Mode ein- und ausgeschaltet werden.' },
+  { de: 'Der Schutz', en: 'Protection', example: 'Der Schutz personenbezogener Daten hat für uns oberste Priorität.' },
+  { de: 'Der Strom', en: 'Electricity / Flow', example: 'Bei einem Stromausfall schaltet das System automatisch auf die USV um.' },
+  { de: 'Der Störfall', en: 'Incident / Malfunction', example: 'Beim letzten Störfall war der Service für 45 Minuten nicht erreichbar.' },
+  { de: 'Der Umsatz', en: 'Revenue / Turnover', example: 'Der monatliche Umsatz über die App hat sich im Jahresvergleich verdoppelt.' },
+  { de: 'Der Partner', en: 'Partner', example: 'Unser strategischer Partner stellt die Zahlungsinfrastruktur bereit.' },
+  { de: 'Der Artikel', en: 'Article / Item', example: 'Jeder Artikel im Shop hat eine eindeutige SKU-Nummer.' },
+  { de: 'Der Fortschritt', en: 'Progress', example: 'Der Fortschritt der Datenverarbeitung wird dem Nutzer in Prozent angezeigt.' },
+  { de: 'Der Import', en: 'Import', example: 'Der CSV-Import unterstützt bis zu 100.000 Datensätze pro Datei.' },
+  { de: 'Der Kalender', en: 'Calendar', example: 'Der integrierte Kalender synchronisiert sich automatisch mit Google und Outlook.' },
+  { de: 'Das Segment', en: 'Segment', example: 'Das Nutzersegment der Power-User macht nur 5 Prozent aus, generiert aber 40 Prozent des Umsatzes.' },
+  { de: 'Das Praktikum', en: 'Internship', example: 'Im Praktikum durchlaufen die Teilnehmer alle Abteilungen des Produktteams.' },
+  { de: 'Das Büro', en: 'Office', example: 'Das Büro wird zunehmend durch Remote-Arbeit und Co-Working-Spaces ersetzt.' },
+  { de: 'Das Profil', en: 'Profile', example: 'Das Nutzerprofil speichert persönliche Einstellungen und Präferenzen.' },
+  { de: 'Das Prozent', en: 'Percent', example: 'Die Conversion-Rate liegt derzeit bei 3,5 Prozent.' },
+  { de: 'Das Netzwerk', en: 'Network', example: 'Das interne Netzwerk ist durch eine Firewall vom Internet getrennt.' },
+  { de: 'Das Signal', en: 'Signal', example: 'Das GPS-Signal ist in Gebäuden oft zu schwach für eine präzise Ortung.' },
+  { de: 'Das Ziel', en: 'Goal / Target', example: 'Das Ziel für dieses Quartal ist eine Steigerung der Daily Active Users um 20 Prozent.' },
+  { de: 'Das Anliegen', en: 'Concern / Issue', example: 'Das Anliegen des Kunden wurde innerhalb von 24 Stunden bearbeitet.' },
+  { de: 'Das Detail(-s)', en: 'Detail(s)', example: 'In der Detailansicht sieht der Nutzer alle Informationen zum Produkt.' },
+  { de: 'Das Entgelt', en: 'Fee / Compensation', example: 'Für die Premium-Funktionen wird ein monatliches Entgelt erhoben.' },
+  { de: 'Das Formular', en: 'Form', example: 'Das Kontaktformular validiert alle Pflichtfelder in Echtzeit.' },
+  { de: 'Das Geschäft', en: 'Business / Store', example: 'Das Online-Geschäft wächst seit drei Jahren zweistellig.' },
+  { de: 'Das Helpdesk', en: 'Helpdesk', example: 'Das Helpdesk-Ticket wird automatisch dem zuständigen Team zugewiesen.' },
+  { de: 'Das Inventar', en: 'Inventory', example: 'Das digitale Inventar wird in Echtzeit mit dem physischen Lagerbestand abgeglichen.' },
+  { de: 'Das Hosting', en: 'Hosting', example: 'Das Hosting läuft über einen europäischen Cloud-Anbieter.' },
+  { de: 'Das Paket', en: 'Package / Plan', example: 'Das Enterprise-Paket enthält unbegrenzte API-Aufrufe und Premium-Support.' },
+  { de: 'Das Steuerjahr', en: 'Tax year', example: 'Am Ende des Steuerjahres erstellt das System automatisch einen Jahresbericht.' },
+  { de: 'Das Telefonat', en: 'Phone call', example: 'Jedes Telefonat mit dem Support wird im CRM als Aktivität dokumentiert.' },
+  { de: 'Die Organisation', en: 'Organization', example: 'Jede Organisation kann mehrere Teams und Projekte verwalten.' },
+  { de: 'Die Norm', en: 'Standard / Norm', example: 'Die ISO-Norm 27001 definiert die Anforderungen an ein Informationssicherheits-Managementsystem.' },
 ];
+
 
 // ─── 50 Power Verbs ───
 export const VERBS = [
@@ -433,7 +622,9 @@ export default function ITVokabularPage() {
   const [refinementCategory, setRefinementCategory] = useState('Alle');
   const [composureSituation, setComposureSituation] = useState('Alle');
   const [starredTabs, setStarredTabs] = useState<Record<string, boolean>>({});
-  const [activeTab, setActiveTab] = useState('nomen');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'nomen';
+  const setActiveTab = (v: string) => setSearchParams({ tab: v }, { replace: true });
   const starredOnly = starredTabs[activeTab] ?? false;
   const setStarredOnly = (v: boolean | ((prev: boolean) => boolean)) => {
     setStarredTabs(prev => ({
@@ -544,9 +735,9 @@ export default function ITVokabularPage() {
         <p className="text-sm text-muted-foreground mt-1">Damit 'Can you maybe look into this?' endlich auf Deutsch genauso passiv-aggressiv klingt.</p>
       </div>
       <ITDeutschNav />
-      <SelectionHint />
+      {activeTab !== 'user-stories' && <SelectionHint />}
 
-      <Tabs defaultValue="nomen" onValueChange={(v) => { stopAudio(); setActiveTab(v); }}>
+      <Tabs value={activeTab} onValueChange={(v) => { stopAudio(); setActiveTab(v); }}>
         <ScrollNav>
           <TabsList className={PILL_CONTAINER}>
             <TabsTrigger value="nomen" className={TAB_TRIGGER_FUCHSIA}><Languages className="h-3.5 w-3.5" /> Nomen</TabsTrigger>
@@ -554,9 +745,9 @@ export default function ITVokabularPage() {
             <TabsTrigger value="kollokationen" className={TAB_TRIGGER_FUCHSIA}><Link2 className="h-3.5 w-3.5" /> Kollokationen</TabsTrigger>
             <TabsTrigger value="workshop" className={TAB_TRIGGER_FUCHSIA}><Presentation className="h-3.5 w-3.5" /> Workshop</TabsTrigger>
             <TabsTrigger value="refinement" className={TAB_TRIGGER_FUCHSIA}><GitBranch className="h-3.5 w-3.5" /> Refinement</TabsTrigger>
+            <TabsTrigger value="user-stories" className={TAB_TRIGGER_FUCHSIA}><FileText className="h-3.5 w-3.5" /> User Stories</TabsTrigger>
             <TabsTrigger value="souveraenitaet" className={TAB_TRIGGER_FUCHSIA}><Shield className="h-3.5 w-3.5" /> Souveränität</TabsTrigger>
             <TabsTrigger value="krisen" className={TAB_TRIGGER_FUCHSIA}><AlertTriangle className="h-3.5 w-3.5" /> Notfall-Kit</TabsTrigger>
-            <TabsTrigger value="user-stories" className={TAB_TRIGGER_FUCHSIA}><FileText className="h-3.5 w-3.5" /> User Stories</TabsTrigger>
           </TabsList>
         </ScrollNav>
 

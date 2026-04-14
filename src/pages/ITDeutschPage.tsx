@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Play, Headphones, Video, Monitor, MessageSquareText } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { DialogueList, DialogueView } from '@/components/it-deutsch/DialogueReader';
 import { IT_DIALOGUES } from '@/data/itDialogues';
 import type { ITDialogue } from '@/data/itDialogues';
@@ -120,6 +121,9 @@ function AudioCard({ podcast, index }: { podcast: typeof PODCASTS[0]; index: num
 export default function ITDeutschPage() {
   const { t, lang } = useTranslation();
   const [selectedDialogue, setSelectedDialogue] = useState<ITDialogue | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const medienTab = searchParams.get('tab') || 'dialoge';
+  const setMedienTab = (v: string) => setSearchParams({ tab: v }, { replace: true });
 
   if (selectedDialogue) {
     return <DialogueView dialogue={selectedDialogue} onBack={() => setSelectedDialogue(null)} />;
@@ -136,7 +140,7 @@ export default function ITDeutschPage() {
       </div>
       <ITDeutschNav />
 
-      <Tabs defaultValue="dialoge">
+      <Tabs value={medienTab} onValueChange={setMedienTab}>
         <ScrollNav>
           <TabsList className={PILL_CONTAINER}>
             <TabsTrigger value="dialoge" className={TAB_TRIGGER_FUCHSIA}><MessageSquareText className="h-3.5 w-3.5" /> Dialoge</TabsTrigger>

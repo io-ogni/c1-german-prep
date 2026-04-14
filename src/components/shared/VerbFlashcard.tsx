@@ -216,10 +216,10 @@ export function VerbFlashcard({ verbs, compact }: VerbFlashcardProps) {
         ) : (
           <div className="flex justify-center gap-3">
             <Button onClick={() => answer(false)} size={compact ? 'sm' : 'default'} className="gap-1 bg-orange-500 text-white hover:bg-orange-600">
-              <XCircle className="h-4 w-4" /> Nicht gewusst
+              <XCircle className="h-4 w-4" /> Nochmal
             </Button>
             <Button onClick={() => answer(true)} size={compact ? 'sm' : 'default'} className="gap-1">
-              <CheckCircle className="h-4 w-4" /> Gewusst
+              <CheckCircle className="h-4 w-4" /> Einfach
             </Button>
           </div>
         )}

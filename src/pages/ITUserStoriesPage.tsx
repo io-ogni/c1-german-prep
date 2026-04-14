@@ -4,9 +4,7 @@ import { ITDeutschNav } from '@/components/layout/ITDeutschNav';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Monitor, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
-import { PILL_CONTAINER, TAB_TRIGGER_FUCHSIA } from '@/components/shared/navStyles';
-import { ScrollNav } from '@/components/shared/ScrollNav';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { USER_STORY_DOMAINS } from '@/data/userStories';
 import type { UserStory } from '@/data/userStories';
 
@@ -22,13 +20,13 @@ function StoryCard({ story, showEnglish }: { story: UserStory; showEnglish: bool
               <p className="text-sm text-foreground leading-relaxed">
                 <span className="font-bold text-primary">{story.role_de}</span>{' '}
                 {story.want_de},{' '}
-                <span className="italic">{story.why_de}.</span>
+                {story.why_de}.
               </p>
               {showEnglish && (
                 <p className="text-xs text-muted-foreground leading-relaxed mt-2">
                   <span className="font-medium">{story.role_en}</span>{' '}
                   {story.want_en},{' '}
-                  <span className="italic">{story.why_en}.</span>
+                  {story.why_en}.
                 </p>
               )}
             </div>
@@ -60,13 +58,29 @@ function StoryCard({ story, showEnglish }: { story: UserStory; showEnglish: bool
 export function UserStoriesContent() {
   const { lang } = useTranslation();
   const [showEnglish, setShowEnglish] = useState(false);
+  const [activeDomain, setActiveDomain] = useState(USER_STORY_DOMAINS[0].id);
+
+  const domain = USER_STORY_DOMAINS.find(d => d.id === activeDomain);
 
   return (
     <div className="space-y-4 mt-2">
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-between gap-2">
+        <Select value={activeDomain} onValueChange={setActiveDomain}>
+          <SelectTrigger className="w-auto min-w-[200px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {USER_STORY_DOMAINS.map(d => (
+              <SelectItem key={d.id} value={d.id}>
+                {d.icon} {d.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
         <button
           onClick={() => setShowEnglish(!showEnglish)}
-          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors shrink-0 ${
             showEnglish
               ? 'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/40 dark:text-fuchsia-300'
               : 'text-muted-foreground hover:text-foreground hover:bg-muted'
@@ -77,32 +91,17 @@ export function UserStoriesContent() {
         </button>
       </div>
 
-      <Tabs defaultValue={USER_STORY_DOMAINS[0].id}>
-        <ScrollNav>
-          <TabsList className={PILL_CONTAINER}>
-            {USER_STORY_DOMAINS.map(d => (
-              <TabsTrigger key={d.id} value={d.id} className={TAB_TRIGGER_FUCHSIA}>
-                <span>{d.icon}</span> {d.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </ScrollNav>
-
-        {USER_STORY_DOMAINS.map(domain => (
-          <TabsContent key={domain.id} value={domain.id} className="mt-4 space-y-4">
-            <p className="text-xs text-muted-foreground">
-              {lang === 'de' ? domain.description_de : domain.description_en}
-            </p>
-            {domain.stories.map(story => (
-              <div key={story.id} className="space-y-2">
-                <h3 className="text-sm font-semibold text-foreground">{story.title_de}</h3>
-                {showEnglish && <p className="text-xs text-muted-foreground">{story.title_en}</p>}
-                <StoryCard story={story} showEnglish={showEnglish} />
-              </div>
-            ))}
-          </TabsContent>
-        ))}
-      </Tabs>
+      {domain && (
+        <div className="space-y-4">
+          {domain.stories.map(story => (
+            <div key={story.id} className="space-y-2">
+              <h3 className="text-sm font-semibold text-foreground">{story.title_de}</h3>
+              {showEnglish && <p className="text-xs text-muted-foreground">{story.title_en}</p>}
+              <StoryCard story={story} showEnglish={showEnglish} />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

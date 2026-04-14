@@ -9,7 +9,7 @@ export function initPostHog() {
   if (!POSTHOG_KEY) return;
   posthog.init(POSTHOG_KEY, {
     api_host: 'https://eu.i.posthog.com',
-    persistence: 'memory', // cookieless — no consent banner needed
+    persistence: 'localStorage', // anonymous ID persists across sessions for retention tracking — no cookies
     capture_pageview: false, // we fire manually on route change
     capture_pageleave: true,
     autocapture: true,

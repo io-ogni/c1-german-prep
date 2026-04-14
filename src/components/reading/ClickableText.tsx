@@ -72,8 +72,8 @@ function InlineGap({
     if (!dropdownOpen || !ref.current) return;
     const vw = window.innerWidth;
     if (vw < 640) {
-      // Mobile: bottom sheet, compact
-      setDropdownStyle({ position: 'fixed', left: 8, right: 8, bottom: 8, maxHeight: '40vh' });
+      // Mobile: bottom sheet, flush to bottom edge — no page visible beneath
+      setDropdownStyle({ position: 'fixed', left: 0, right: 0, bottom: 0, maxHeight: '45vh', borderRadius: '12px 12px 0 0' });
     } else {
       // Desktop: simple absolute dropdown below the gap — like the original Lovable implementation
       setDropdownStyle({});
@@ -140,7 +140,7 @@ function InlineGap({
         <span
           ref={dropdownRef}
           className={cn(
-            'z-50 rounded-lg bg-blue-100 dark:bg-blue-900 p-1 space-y-0.5 shadow-2xl scrollbar-visible overflow-y-auto overflow-x-hidden',
+            'z-50 rounded-xl bg-blue-200 dark:bg-blue-900 p-0.5 space-y-0.5 shadow-2xl scrollbar-visible overflow-y-auto overflow-x-hidden',
             dropdownStyle.position === 'fixed' ? 'fixed' : 'absolute left-0 top-full mt-1 w-[min(28rem,85vw)] max-h-[320px]'
           )}
           style={dropdownStyle.position === 'fixed' ? dropdownStyle : undefined}
@@ -148,7 +148,7 @@ function InlineGap({
           {options.map(opt => (
             <button
               key={opt.id}
-              className="w-full text-left rounded-md px-3 py-1.5 text-sm text-popover-foreground bg-white dark:bg-card hover:bg-accent transition-colors break-words"
+              className="w-full text-left rounded-lg px-3 py-2 text-sm text-popover-foreground bg-white dark:bg-card hover:bg-accent transition-colors break-words"
               onClick={(e) => { e.stopPropagation(); onSelect(opt.id); setDropdownOpen(false); }}
             >
               <span className="line-clamp-3">{opt.text}</span>

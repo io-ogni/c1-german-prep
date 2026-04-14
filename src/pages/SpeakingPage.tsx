@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Trash2, Volume2, Mic } from 'lucide-react';
 import { TelcBadge } from '@/components/shared/TelcBadge';
@@ -318,7 +319,9 @@ export default function SpeakingPage() {
   const { customConnectors, addConnector, removeConnector } = useCustomPhrases('speaking-custom');
   const { isHighlighted, toggle: toggleHighlight } = useHighlightedPhrases('speaking-highlights');
   const [starredTabs, setStarredTabs] = useState<Record<string, boolean>>({});
-  const [activeSpeakingTab, setActiveSpeakingTab] = useState('redewendungen');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeSpeakingTab = searchParams.get('tab') || 'redewendungen';
+  const setActiveSpeakingTab = (v: string) => setSearchParams({ tab: v }, { replace: true });
   const starredOnly = starredTabs[activeSpeakingTab] ?? false;
   const setStarredOnly = (v: boolean | ((prev: boolean) => boolean)) => {
     setStarredTabs(prev => ({

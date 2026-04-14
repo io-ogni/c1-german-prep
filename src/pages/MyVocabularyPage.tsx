@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useRequiredAuth, useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
@@ -62,6 +62,9 @@ export default function MyVocabularyPage() {
   const { profile } = useRequiredAuth();
   const auth = useAuth();
   const userId = auth?.user?.id ?? 'anon';
+  const [searchParams, setSearchParams] = useSearchParams();
+  const vocabTab = searchParams.get('tab') || 'review';
+  const setVocabTab = (v: string) => setSearchParams({ tab: v }, { replace: true });
   const [dueCards, setDueCards] = useState<VocabWord[]>([]);
   const [allWords, setAllWords] = useState<VocabWord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -177,7 +180,7 @@ export default function MyVocabularyPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="review">
+      <Tabs value={vocabTab} onValueChange={setVocabTab}>
         <ScrollNav>
           <TabsList className={`${NAV_CONTAINER} h-auto gap-1`}>
             <TabsTrigger value="review" className={`${TAB_TRIGGER_BLUE} gap-1.5`}>{t('vocab_review_due')} ({dueCards.length})</TabsTrigger>

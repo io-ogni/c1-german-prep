@@ -133,6 +133,9 @@ export function Navbar() {
               <DropdownMenuItem asChild>
                 <Link to="/settings">{t('nav_settings')}</Link>
               </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/about">Über die App</Link>
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={logout}>{t('nav_logout')}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -192,6 +195,9 @@ export function Navbar() {
             </Link>
             <Link to="/settings" onClick={() => setMobileOpen(false)} className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
               {t('nav_settings')}
+            </Link>
+            <Link to="/about" onClick={() => setMobileOpen(false)} className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+              Über die App
             </Link>
             <button onClick={() => { logout(); setMobileOpen(false); }} className="rounded-md px-3 py-2 text-left text-sm font-medium text-destructive hover:bg-destructive/10">
               {t('nav_logout')}

@@ -108,7 +108,7 @@
   }
   .scrollbar-visible {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--primary) / 0.25) transparent;
+    scrollbar-color: hsl(var(--primary) / 0.6) transparent;
   }
   .scrollbar-visible::-webkit-scrollbar {
     width: 6px;
@@ -117,7 +117,7 @@
     background: transparent;
   }
   .scrollbar-visible::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary) / 0.25);
+    background: hsl(var(--primary) / 0.6);
     border-radius: 3px;
   }
 }

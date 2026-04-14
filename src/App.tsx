@@ -34,6 +34,7 @@ import ITVokabularPage from "@/pages/ITVokabularPage";
 import ITUebungenPage from "@/pages/ITUebungenPage";
 import FlashcardsPage from "@/pages/FlashcardsPage";
 import ITUserStoriesPage from "@/pages/ITUserStoriesPage";
+import AboutPage from "@/pages/AboutPage";
 import WelcomePage from "@/pages/WelcomePage";
 import NotFound from "@/pages/NotFound";
 import { RootRoute } from "@/components/RootRoute";
@@ -62,6 +63,7 @@ const App = () => (
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/about" element={<AboutPage />} />
 
             {/* Protected routes with layout */}
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>

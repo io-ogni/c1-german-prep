@@ -277,10 +277,10 @@ export default function FlashcardsPage() {
         ) : (
           <div className="flex justify-center gap-3">
             <Button size="sm" className="gap-1 bg-orange-500 text-white hover:bg-orange-600" onClick={() => goNext('wrong')}>
-              <XCircle className="h-4 w-4" /> Nicht gewusst
+              <XCircle className="h-4 w-4" /> Nochmal
             </Button>
             <Button size="sm" className="gap-1" onClick={() => goNext('correct')}>
-              <CheckCircle className="h-4 w-4" /> Gewusst
+              <CheckCircle className="h-4 w-4" /> Einfach
             </Button>
           </div>
         )}

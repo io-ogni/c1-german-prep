@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useRequiredAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
@@ -124,6 +125,9 @@ export default function ReadingPage() {
   const getProgress = (textId: string) => progress.find(p => p.reading_text_id === textId);
 
   const availableTypes = TYPE_ORDER.filter(type => texts.some(t => t.text_type === type));
+  const [searchParams, setSearchParams] = useSearchParams();
+  const readingTab = searchParams.get('tab') || availableTypes[0] || 'textrekonstruktion';
+  const setReadingTab = (v: string) => setSearchParams({ tab: v }, { replace: true });
 
   if (selectedText) {
     return (
@@ -154,7 +158,7 @@ export default function ReadingPage() {
           {language === 'de' ? 'Keine Lesetexte verfügbar.' : 'No reading texts available.'}
         </div>
       ) : (
-        <Tabs defaultValue={availableTypes[0]}>
+        <Tabs value={readingTab} onValueChange={setReadingTab}>
           <ScrollNav>
             <TabsList className={`${NAV_CONTAINER} h-auto gap-1`}>
               {availableTypes.map(type => {
