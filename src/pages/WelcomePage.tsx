@@ -61,7 +61,7 @@ function PreviewCarousel() {
                 key={current}
                 src={PREVIEW_IMAGES[current].src}
                 alt={PREVIEW_IMAGES[current].alt}
-                className="absolute inset-0 w-full h-full object-cover object-top"
+                className="absolute inset-0 w-full h-full object-cover object-left-top md:object-top"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -161,7 +161,7 @@ export default function WelcomePage() {
             transition={{ duration: 0.6, delay: 0.25 }}
             className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto mb-14 leading-relaxed"
           >
-            C1 prep built for tech professionals in Germany — from Refinement auf Deutsch to your telc exam. 980+ exercises, IT vocabulary, and AI writing feedback.
+            Free C1 prep built for tech professionals in Germany — from Refinement auf Deutsch to your telc exam. 980+ exercises, IT vocabulary, and AI writing feedback.
           </motion.p>
 
           <motion.div
