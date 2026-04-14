@@ -12,6 +12,12 @@ const PREVIEW_IMAGES = [
   { src: '/preview-reading.png', alt: 'Reading exercise — Textrekonstruktion with dropdown gap-fill' },
 ];
 
+const MOBILE_PREVIEW_IMAGES = [
+  { src: '/preview-mobile-home.png', alt: 'Mobile homepage — progress tracking, flashcards, vocabulary review' },
+  { src: '/preview-mobile-practice.png', alt: 'Daily practice — spaced repetition flashcard on mobile' },
+  { src: '/preview-mobile-grammar.png', alt: 'Grammar exercise — Relativsatz to Partizipialgruppe on mobile' },
+];
+
 
 const floatingEmojis = ['🇩🇪', '✍️', '📚', '🎧', '💬', '🎯', '⚡', '🏆'];
 
@@ -36,10 +42,21 @@ const features = [
 ];
 
 function PreviewCarousel() {
-  const [current, setCurrent] = useState(0);
-  const len = PREVIEW_IMAGES.length;
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
-  const next = useCallback(() => setCurrent(i => (i + 1) % len), [len]);
+  const images = isMobile ? MOBILE_PREVIEW_IMAGES : PREVIEW_IMAGES;
+  const [current, setCurrent] = useState(0);
+
+  // Reset index when switching between mobile/desktop image sets
+  useEffect(() => { setCurrent(0); }, [isMobile]);
+
+  const next = useCallback(() => setCurrent(i => (i + 1) % images.length), [images.length]);
 
   useEffect(() => {
     const id = setInterval(next, 5000);
@@ -55,13 +72,13 @@ function PreviewCarousel() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <div className="relative rounded-2xl border border-border shadow-2xl shadow-primary/10 overflow-hidden h-[60vh] md:h-[70vh]">
+          <div className="relative rounded-2xl border border-border shadow-2xl shadow-primary/10 overflow-hidden h-[70vh] md:h-[70vh]">
             <AnimatePresence mode="wait">
               <motion.img
-                key={current}
-                src={PREVIEW_IMAGES[current].src}
-                alt={PREVIEW_IMAGES[current].alt}
-                className="absolute inset-0 w-full h-full object-cover object-left-top md:object-top"
+                key={images[current].src}
+                src={images[current].src}
+                alt={images[current].alt}
+                className="absolute inset-0 w-full h-full object-cover object-top"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -72,7 +89,7 @@ function PreviewCarousel() {
           </div>
           {/* Dots */}
           <div className="flex justify-center gap-2 mt-4">
-            {PREVIEW_IMAGES.map((_, i) => (
+            {images.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setCurrent(i)}
