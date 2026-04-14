@@ -113,6 +113,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     track('logout');
     resetUser();
+    // Clear non-user-scoped localStorage to prevent starred items leaking to next account
+    localStorage.removeItem('it-redewendungen-highlights');
+    localStorage.removeItem('speaking-highlights');
+    localStorage.removeItem('writing-tips-highlights');
     await supabase.auth.signOut();
     setProfile(null);
   };

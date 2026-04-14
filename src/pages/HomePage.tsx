@@ -288,18 +288,18 @@ export default function HomePage() {
             </Link>
           )}
         </div>
-        {dueLoading ? (
+        {dueLoading && loading ? (
           <Card><CardContent className="py-6 text-center"><Skeleton className="h-5 w-40 mx-auto" /></CardContent></Card>
         ) : homeDueCards.length > 0 ? (
           <ReviewCard dueCards={homeDueCards} compact onCardReviewed={() => {}} />
-        ) : !loading && data && data.vocabCount > 0 ? (
+        ) : data && data.vocabCount > 0 ? (
           <Card>
             <CardContent className="py-6 text-center space-y-1">
               <p className="text-foreground font-medium">Alles wiederholt — gut gemacht!</p>
               <p className="text-sm text-muted-foreground">{data.vocabCount} Wörter & Sätze insgesamt</p>
             </CardContent>
           </Card>
-        ) : !loading && data ? (
+        ) : (
           <Card>
             <CardContent className="py-10 text-center space-y-3">
               <Languages className="h-10 w-10 mx-auto text-muted-foreground/30" />
@@ -308,7 +308,7 @@ export default function HomePage() {
               <Link to="/it-deutsch/vokabular" className="inline-block text-xs text-primary hover:underline mt-1">Jetzt starten →</Link>
             </CardContent>
           </Card>
-        ) : null}
+        )}
       </div>
 
       {/* Stats */}

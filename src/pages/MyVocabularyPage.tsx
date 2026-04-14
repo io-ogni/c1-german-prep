@@ -191,6 +191,12 @@ export default function MyVocabularyPage() {
         <TabsContent value="review" className="mt-4">
           {loading ? (
             <p className="text-muted-foreground">{t('common_loading')}</p>
+          ) : allWords.length === 0 ? (
+            <div className="text-center py-8 space-y-3">
+              <Languages className="h-10 w-10 mx-auto text-muted-foreground/30" />
+              <p className="text-sm text-muted-foreground">Noch keine Wörter gesammelt</p>
+              <p className="text-xs text-muted-foreground/70">Markiere Wörter in <Link to="/it-deutsch/vokabular" className="text-primary hover:underline">IT-Vokabular</Link>, <Link to="/speaking" className="text-primary hover:underline">Sprechen</Link> oder tippe auf ein Wort in einem <Link to="/reading" className="text-primary hover:underline">Lesetext</Link>.</p>
+            </div>
           ) : (
             <ReviewCard dueCards={dueCards} />
           )}
