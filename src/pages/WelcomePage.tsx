@@ -101,8 +101,7 @@ export default function WelcomePage() {
             transition={{ duration: 0.6, delay: 0.25 }}
             className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto mb-14 leading-relaxed"
           >
-            Interactive exercises, real-life examples and AI feedback —
-            everything you need from B2 to C1 to your next Refinement auf Deutsch. With AI writing feedback and 200+ IT-specific phrases.
+            C1 prep built for tech professionals in Germany — from Refinement auf Deutsch to your telc exam. 980+ exercises, IT vocabulary, and AI writing feedback.
           </motion.p>
 
           <motion.div
