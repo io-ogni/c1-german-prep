@@ -79,7 +79,7 @@ export function VerbTableContent() {
       ) : (
       <>
       <div className="flex items-center justify-between gap-2 -mt-2">
-        <SelectionHint />
+        <SelectionHint hintKey="verben" />
       </div>
       <div className="flex items-center justify-end">
         <StarredButton active={starredOnly} onClick={() => setStarredOnly(prev => !prev)} />
@@ -134,7 +134,7 @@ export function VerbTableContent() {
                   <TableRow
                     key={v.id}
                     className={cn('cursor-pointer', isHighlighted(v.infinitiv) && 'bg-yellow-50 dark:bg-yellow-900/20')}
-                    onClick={() => { markHintInteraction('table'); toggle(v.infinitiv); }}
+                    onClick={() => { markHintInteraction('verben'); toggle(v.infinitiv); }}
                   >
                     <TableCell className={cn('font-medium', v.is_irregular && 'text-primary')}>
                       {v.infinitiv}
@@ -176,7 +176,7 @@ export function VerbTableContent() {
             {filtered.map((v) => (
               <div
                 key={v.id}
-                onClick={() => { markHintInteraction('table'); toggle(v.infinitiv); }}
+                onClick={() => { markHintInteraction('verben'); toggle(v.infinitiv); }}
                 className={cn(
                   'rounded-lg border p-3 space-y-2 cursor-pointer transition-colors',
                   isHighlighted(v.infinitiv) ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200' : 'bg-card'

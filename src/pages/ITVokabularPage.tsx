@@ -679,7 +679,7 @@ export default function ITVokabularPage() {
   useEffect(() => { saveHighlights(userId, selectedRows); }, [userId, selectedRows]);
 
   const toggleRow = useCallback((key: string) => {
-    markHintInteraction('table');
+    markHintInteraction('it-vokabular');
     setSelectedRows(prev => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key); else next.add(key);
@@ -735,7 +735,7 @@ export default function ITVokabularPage() {
         <p className="text-sm text-muted-foreground mt-1">Damit 'Can you maybe look into this?' endlich auf Deutsch genauso passiv-aggressiv klingt.</p>
       </div>
       <ITDeutschNav />
-      {activeTab !== 'user-stories' && <SelectionHint />}
+      {activeTab !== 'user-stories' && <SelectionHint hintKey="it-vokabular" />}
 
       <Tabs value={activeTab} onValueChange={(v) => { stopAudio(); setActiveTab(v); }}>
         <ScrollNav>

@@ -84,14 +84,14 @@ export function PraepositionenContent() {
   }, [category, starredOnly, isHighlighted]);
 
   const handleToggle = (item: PraepItem) => {
-    markHintInteraction('table');
+    markHintInteraction('praepositionen');
     toggle(item.verb_or_adj);
   };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <SelectionHint />
+        <SelectionHint hintKey="praepositionen" />
         <StarredButton active={starredOnly} onClick={() => setStarredOnly(prev => !prev)} />
       </div>
 

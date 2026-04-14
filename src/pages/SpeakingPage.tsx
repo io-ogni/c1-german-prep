@@ -390,7 +390,7 @@ export default function SpeakingPage() {
   }, [starredOnly, isHighlighted, categoryFilter]);
 
   const handleToggle = useCallback((de: string) => {
-    markHintInteraction('table');
+    markHintInteraction('speaking');
     toggleHighlight(de);
   }, [toggleHighlight]);
 
@@ -423,7 +423,7 @@ export default function SpeakingPage() {
         {/* Phrase tabs */}
         {SECTIONS.map(section => (
           <TabsContent key={section.tab} value={section.tab} className="mt-4 space-y-4">
-            <SelectionHint />
+            <SelectionHint hintKey="speaking" />
             <div className="mb-4 flex items-center justify-end gap-2 -mt-2">{starredBtn}<PlayAllButton color="blue" player={player} getUrls={() => { const audio = TAB_TO_AUDIO[section.tab]; return (flatSections[section.tab] ?? []).map(r => audio ? getTtsUrl(audio, r.idx) : undefined).filter(Boolean) as string[]; }} /></div>
 
             {/* Desktop table */}
@@ -584,7 +584,7 @@ export default function SpeakingPage() {
 
         {/* Redewendungen */}
         <TabsContent value="redewendungen" className="mt-4 space-y-4">
-          <SelectionHint type="card" />
+          <SelectionHint hintKey="speaking-cards" variant="card" />
           <div className="flex items-center justify-end gap-2 -mt-2">
             {starredBtn}
             <PlayAllButton color="blue" player={player} getUrls={() => filteredExpressions.map(e => getTtsUrl('expressions', e.id - 1)).filter(Boolean) as string[]} />
@@ -597,7 +597,7 @@ export default function SpeakingPage() {
               const isPlaying = speakingRef.current && speakingUrl === ttsUrl;
               return (
                 <div key={expr.id}
-                  onClick={() => { markHintInteraction('card'); toggleHighlight(expr.german); }}
+                  onClick={() => { markHintInteraction('speaking-cards'); toggleHighlight(expr.german); }}
                   className={cn('relative rounded-xl border border-border bg-card p-4 transition-all hover:shadow-md cursor-pointer', starred && 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800')}>
                   <div>
                     {image && (

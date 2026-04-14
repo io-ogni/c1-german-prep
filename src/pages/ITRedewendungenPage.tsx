@@ -75,7 +75,7 @@ export default function ITRedewendungenPage() {
       </div>
       <ITDeutschNav />
 
-      <SelectionHint type="card" />
+      <SelectionHint hintKey="it-redewendungen" variant="card" />
       <div className="flex items-center justify-end gap-2 -mt-3">
         <StarredButton active={starredOnly} onClick={() => setStarredOnly(prev => !prev)} />
         <PlayAllButton player={player} getUrls={getUrls} />
@@ -90,7 +90,7 @@ export default function ITRedewendungenPage() {
           return (
             <div
               key={idiom.id}
-              onClick={() => { toggleHighlight(idiom.german); markHintInteraction('card'); }}
+              onClick={() => { toggleHighlight(idiom.german); markHintInteraction('it-redewendungen'); }}
               className={cn(
                 'relative rounded-xl border border-border bg-card p-4 transition-all hover:shadow-md cursor-pointer',
                 starred && 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'

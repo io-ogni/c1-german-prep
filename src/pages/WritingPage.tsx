@@ -457,7 +457,7 @@ function RedemittelContent() {
   return (
     <div className="space-y-4">
       <TertiaryNav items={navItems} activeValue={activeTab} onChange={setActiveTab} color="blue" />
-      <SelectionHint />
+      <SelectionHint hintKey="writing" />
 
       {/* Phrase section content */}
       {activeSection && (
@@ -500,7 +500,7 @@ function RedemittelContent() {
                   return (
                     <TableRow
                       key={`${row.subsectionKey}-${row.idx}`}
-                      onClick={() => { markHintInteraction('table'); toggleHighlight(row.de); }}
+                      onClick={() => { markHintInteraction('writing'); toggleHighlight(row.de); }}
                       className={`cursor-pointer transition-colors ${isNewGroup ? 'border-t-4 border-t-muted' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}
                     >
                       <TableCell className={`border-l-4 ${REDEMITTEL_BORDER_COLORS[row.subsectionKey] ?? 'border-l-transparent'}`}>
@@ -552,7 +552,7 @@ function RedemittelContent() {
               return (
                 <div
                   key={`${row.subsectionKey}-${row.idx}`}
-                  onClick={() => { markHintInteraction('table'); toggleHighlight(row.de); }}
+                  onClick={() => { markHintInteraction('writing'); toggleHighlight(row.de); }}
                   className={`relative rounded-lg border border-l-4 ${REDEMITTEL_BORDER_COLORS[row.subsectionKey] ?? ''} p-4 space-y-2 cursor-pointer transition-colors ${isNewGroup ? 'mt-6' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-card'}`}
                 >
                   <span className={`text-xs font-normal whitespace-nowrap ${REDEMITTEL_BADGE_COLORS[row.subsectionKey] ?? ''}`}>

@@ -253,7 +253,7 @@ export function ReadingInterface({ text, onBack }: Props) {
         <div className="flex justify-end">
           <Timer />
         </div>
-        <SelectionHint type="reading" />
+        <SelectionHint hintKey="reading" variant="reading" />
       </div>
 
       {/* Text content */}

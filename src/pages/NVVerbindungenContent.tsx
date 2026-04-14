@@ -67,14 +67,14 @@ export function NVVerbindungenContent() {
   }, [category, starredOnly, isHighlighted]);
 
   const handleToggle = (item: NVVerbindung) => {
-    markHintInteraction('table');
+    markHintInteraction('nv-verbindungen');
     toggle(item.de);
   };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <SelectionHint />
+        <SelectionHint hintKey="nv-verbindungen" />
         <StarredButton active={starredOnly} onClick={() => setStarredOnly(prev => !prev)} />
       </div>
 
