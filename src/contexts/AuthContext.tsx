@@ -75,6 +75,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
+        // Reset non-user-scoped localStorage when a different user signs in
+        const prevUserId = localStorage.getItem('last-auth-uid');
+        if (prevUserId && prevUserId !== s.user.id) {
+          localStorage.removeItem('selection-hint-dismissed');
+          localStorage.removeItem('it-redewendungen-highlights');
+          localStorage.removeItem('speaking-highlights');
+          localStorage.removeItem('writing-tips-highlights');
+        }
+        localStorage.setItem('last-auth-uid', s.user.id);
         fetchProfile(s.user.id).then(setProfile);
       } else {
         setProfile(null);
@@ -117,6 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('it-redewendungen-highlights');
     localStorage.removeItem('speaking-highlights');
     localStorage.removeItem('writing-tips-highlights');
+    localStorage.removeItem('selection-hint-dismissed');
     await supabase.auth.signOut();
     setProfile(null);
   };

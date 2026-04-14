@@ -6,6 +6,7 @@ export function PostHogPageTracker() {
   const location = useLocation();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     trackPageView(location.pathname);
     updateRecordingForPage(location.pathname);
   }, [location.pathname]);

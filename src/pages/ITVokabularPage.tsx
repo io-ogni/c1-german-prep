@@ -1067,7 +1067,7 @@ export default function ITVokabularPage() {
                   const isNewGroup = prevCat !== null && prevCat !== p.category;
                   return (
                     <TableRow key={p._i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${isNewGroup ? 'border-t-4 border-t-muted' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
-                      <TableCell className={`text-xs text-muted-foreground border-l-4 ${BORDER_COLORS[p.category] ?? 'border-l-transparent'}`}>{p._i + 1}</TableCell>
+                      <TableCell className={`w-8 border-l-4 ${BORDER_COLORS[p.category] ?? 'border-l-transparent'}`} />
                       <TableCell><span className={`text-xs font-normal whitespace-nowrap ${PHASE_COLORS[p.category] ?? ''}`}>{LABEL_DE[p.category] || p.category}</span></TableCell>
                       <TableCell className="text-sm font-medium text-foreground">{p.de}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">{p.en}</TableCell>
@@ -1160,7 +1160,7 @@ export default function ITVokabularPage() {
                   const isNewGroup = prevSit !== null && prevSit !== p.situation;
                   return (
                     <TableRow key={p._i} onClick={() => toggleRow(key)} className={`cursor-pointer transition-colors ${isNewGroup ? 'border-t-4 border-t-muted' : ''} ${sel ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
-                      <TableCell className={`text-xs text-muted-foreground border-l-4 ${BORDER_COLORS[p.situation] ?? 'border-l-transparent'}`}>{p._i + 1}</TableCell>
+                      <TableCell className={`w-8 border-l-4 ${BORDER_COLORS[p.situation] ?? 'border-l-transparent'}`} />
                       <TableCell><span className={`text-xs font-normal whitespace-nowrap ${PHASE_COLORS[p.situation] ?? ''}`}>{p.situation}</span></TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
