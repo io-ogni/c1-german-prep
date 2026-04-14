@@ -1,7 +1,16 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, BookOpen, PenTool, Headphones, MessageCircle, ArrowRight, Zap, Target, Code } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
+const PREVIEW_IMAGES = [
+  { src: '/app-preview.png', alt: 'Homepage with progress tracking and vocabulary review' },
+  { src: '/preview-grammar.png', alt: 'Grammar exercises — match Funktionsverbgefüge to verbs' },
+  { src: '/preview-vocabulary.png', alt: 'Spaced repetition flashcards for your personal vocabulary' },
+  { src: '/preview-it-deutsch.png', alt: 'IT Deutsch — Souveränität phrases for tech meetings' },
+  { src: '/preview-reading.png', alt: 'Reading exercise — Textrekonstruktion with dropdown gap-fill' },
+];
 
 
 const floatingEmojis = ['🇩🇪', '✍️', '📚', '🎧', '💬', '🎯', '⚡', '🏆'];
@@ -25,6 +34,57 @@ const features = [
   { icon: Headphones, title: 'Train your ear', desc: 'C1 listening exercises, realistic recorded meetings, and text-to-speech for every German sentence in the app.', color: 'from-amber-500 to-orange-400' },
   { icon: MessageCircle, title: 'Speak confidently', desc: 'Workshop phrases, presentation skills, and expressions for every situation — including how to save face in German when you didn\'t catch what was said.', color: 'from-emerald-500 to-green-400' },
 ];
+
+function PreviewCarousel() {
+  const [current, setCurrent] = useState(0);
+  const len = PREVIEW_IMAGES.length;
+
+  const next = useCallback(() => setCurrent(i => (i + 1) % len), [len]);
+
+  useEffect(() => {
+    const id = setInterval(next, 5000);
+    return () => clearInterval(id);
+  }, [next]);
+
+  return (
+    <section className="px-6 py-16 md:py-24 bg-muted/30">
+      <div className="max-w-5xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="relative rounded-2xl border border-border shadow-2xl shadow-primary/10 overflow-hidden h-[60vh] md:h-[70vh]">
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={current}
+                src={PREVIEW_IMAGES[current].src}
+                alt={PREVIEW_IMAGES[current].alt}
+                className="absolute inset-0 w-full h-full object-cover object-top"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+              />
+            </AnimatePresence>
+            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-muted/80 to-transparent pointer-events-none" />
+          </div>
+          {/* Dots */}
+          <div className="flex justify-center gap-2 mt-4">
+            {PREVIEW_IMAGES.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrent(i)}
+                className={`w-2.5 h-2.5 rounded-full transition-colors ${i === current ? 'bg-primary' : 'bg-muted-foreground/25'}`}
+              />
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
 
 export default function WelcomePage() {
   return (
@@ -203,20 +263,8 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* App preview */}
-      <section className="px-6 py-16 md:py-24">
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="rounded-2xl border border-border shadow-2xl shadow-primary/10 overflow-hidden"
-          >
-            <img src="/app-preview.png" alt="C1 Werkstatt — Homepage with progress tracking, verb flashcards, and vocabulary review" className="w-full" />
-          </motion.div>
-        </div>
-      </section>
+      {/* App preview carousel */}
+      <PreviewCarousel />
 
       {/* Numbers */}
       <section className="px-6 py-20 md:py-28 bg-muted/50">

@@ -213,9 +213,8 @@ export default function HomePage() {
             {TIME_OPTIONS.map((min) => (
               <Button
                 key={min}
-                variant="outline"
                 size="sm"
-                className="min-w-[2.5rem] h-8 text-xs bg-white dark:bg-card border-2 border-primary/50 text-primary hover:bg-primary/5"
+                className="min-w-[2.5rem] h-8 text-xs"
                 onClick={() => navigate(`/daily-practice?minutes=${min}`)}
               >
                 {min} min
@@ -239,7 +238,7 @@ export default function HomePage() {
 
             return (
               <Link key={area.path} to={area.path}>
-                <Card className="transition-shadow hover:shadow-md cursor-pointer h-full">
+                <Card className="transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer h-full">
                   <CardContent className="p-5 space-y-3">
                     <div className="flex items-center gap-3">
                       <Icon className={`h-6 w-6 ${area.fuchsia ? 'text-fuchsia-500' : 'text-primary'}`} />
