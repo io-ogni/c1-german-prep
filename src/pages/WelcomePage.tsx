@@ -20,10 +20,10 @@ function FloatingEmoji({ emoji, delay, x, y }: { emoji: string; delay: number; x
 }
 
 const features = [
-  { icon: BookOpen, title: 'Read real texts', desc: 'Newspaper articles, essays & exam formats', color: 'from-blue-500 to-cyan-400' },
-  { icon: PenTool, title: 'Write with AI feedback', desc: 'Get instant corrections on your essays', color: 'from-violet-500 to-purple-400' },
-  { icon: Headphones, title: 'Train your ear', desc: 'Listening exercises at C1 level', color: 'from-amber-500 to-orange-400' },
-  { icon: MessageCircle, title: 'Speak confidently', desc: 'Workshop phrases & presentation skills', color: 'from-emerald-500 to-green-400' },
+  { icon: BookOpen, title: 'Read real texts', desc: 'Newspaper articles, essays & exam formats. Select any word from the text to add it to your vocabulary, and rehearse as often as you want.', color: 'from-blue-500 to-cyan-400' },
+  { icon: PenTool, title: 'Write with AI feedback', desc: 'Get instant corrections on your essays. No API key? No problem — you\'ll get a perfectly shaped prompt to assess your essay in your own LLM.', color: 'from-violet-500 to-purple-400' },
+  { icon: Headphones, title: 'Train your ear', desc: 'C1 listening exercises, realistic recorded meetings, and text-to-speech for every German sentence in the app.', color: 'from-amber-500 to-orange-400' },
+  { icon: MessageCircle, title: 'Speak confidently', desc: 'Workshop phrases, presentation skills, and expressions for every situation — including how to save face in German when you didn\'t catch what was said.', color: 'from-emerald-500 to-green-400' },
 ];
 
 export default function WelcomePage() {
@@ -112,7 +112,7 @@ export default function WelcomePage() {
           >
             <Button size="lg" className="text-base px-8 h-12 rounded-xl shadow-lg shadow-primary/25" asChild>
               <Link to="/signup">
-                Start learning for free
+                Start learning (all free)
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
@@ -196,8 +196,8 @@ export default function WelcomePage() {
             <div className="block w-fit px-2.5 py-0.5 rounded-md bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-xs font-mono font-bold tracking-wider uppercase mb-3">
               Deutsch für IT-ler
             </div>
-            <h3 className="text-xl font-bold mb-2">IT vocabulary to express complex thoughts</h3>
-            <p className="text-muted-foreground">From standup updates to architecture discussions — finally say what you actually mean.</p>
+            <h3 className="text-xl font-bold mb-2">From standup updates to architecture discussions — finally say what you actually mean.</h3>
+            <p className="text-muted-foreground">120 user stories from 12 industries, podcasts, and expressions for your daily work. Plus 235 nouns with that gender you always mess up.</p>
             <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full bg-primary/10 blur-2xl" />
           </motion.div>
         </div>
@@ -229,7 +229,7 @@ export default function WelcomePage() {
           >
             {[
               { num: '980+', label: 'Exercises' },
-              { num: '200+', label: 'IT phrases' },
+              { num: '235+', label: 'IT nouns' },
               { num: '120', label: 'User Stories from 12 industries' },
               { num: '130', label: 'Verbs with full conjugations' },
               { num: '500+', label: 'Audio files (Neural2 TTS)' },
