@@ -5,6 +5,7 @@ import { Flame, BookOpen, Star, Monitor, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useRequiredAuth } from '@/contexts/AuthContext';
+import { track } from '@/lib/posthog';
 import { cn } from '@/lib/utils';
 
 const INFO_SLIDES = [
@@ -84,7 +85,7 @@ const FOCUS_CHOICES = [
 
 export function OnboardingOverlay() {
   const navigate = useNavigate();
-  const { profile } = useRequiredAuth();
+  const { profile, refreshProfile } = useRequiredAuth();
   const [step, setStep] = useState(0);
   const [dismissed, setDismissed] = useState(false);
   const touchStartX = useRef(0);
@@ -96,14 +97,15 @@ export function OnboardingOverlay() {
   const dismiss = useCallback(async (path: string) => {
     setDismissed(true);
     if (profile) {
-      supabase
+      await supabase
         .from('profiles')
         .update({ onboarding_completed_at: new Date().toISOString() })
-        .eq('user_id', profile.user_id)
-        .then();
+        .eq('user_id', profile.user_id);
+      await refreshProfile();
+      track('onboarding_completed', { focus: path });
     }
     navigate(path);
-  }, [profile, navigate]);
+  }, [profile, refreshProfile, navigate]);
 
   const next = () => setStep(s => Math.min(s + 1, totalSteps - 1));
   const prev = () => setStep(s => Math.max(s - 1, 0));
