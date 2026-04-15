@@ -35,6 +35,7 @@ import ITUebungenPage from "@/pages/ITUebungenPage";
 import FlashcardsPage from "@/pages/FlashcardsPage";
 import ITUserStoriesPage from "@/pages/ITUserStoriesPage";
 import AboutPage from "@/pages/AboutPage";
+import DatenschutzPage from "@/pages/DatenschutzPage";
 import WelcomePage from "@/pages/WelcomePage";
 import NotFound from "@/pages/NotFound";
 import { RootRoute } from "@/components/RootRoute";
@@ -64,6 +65,7 @@ const App = () => (
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/datenschutz" element={<DatenschutzPage />} />
 
             {/* Protected routes with layout */}
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>

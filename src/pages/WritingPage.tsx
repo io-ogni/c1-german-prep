@@ -1092,6 +1092,9 @@ export default function WritingPage() {
         <p className="text-sm text-muted-foreground mt-1">
           Erörterungen schreiben, die dein Prüfer nicht vergisst.
         </p>
+        <p className="text-xs text-muted-foreground/60 mt-2 italic">
+          AI feedback is a learning tool, not a certified assessment. Scores may differ from official telc grading.
+        </p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>

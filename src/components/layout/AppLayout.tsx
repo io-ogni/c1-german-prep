@@ -15,6 +15,11 @@ export function AppLayout() {
         <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Claude</a> &{' '}
         <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Lovable</a>.
         {' '}Approved by Jerry the 🐕</p>
+        <p className="space-x-3">
+          <a href="/datenschutz" className="hover:underline">Datenschutz</a>
+          <span className="text-muted-foreground/30">·</span>
+          <a href="https://ioana-ognibeni.eu/impressum/" target="_blank" rel="noopener noreferrer" className="hover:underline">Impressum</a>
+        </p>
         <p className="text-muted-foreground/60 italic">telc is a registered trademark of telc gGmbH. This app is not affiliated with or endorsed by telc gGmbH.</p>
       </footer>
     </div>
