@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, BookOpen, PenTool, Headphones, MessageCircle, ArrowRight, Zap, Target, Code } from 'lucide-react';
+import { Sparkles, BookOpen, PenLine, Headphones, Monitor, Mic, Brain, ArrowRight, Zap, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const PREVIEW_IMAGES = [
@@ -35,10 +35,12 @@ function FloatingEmoji({ emoji, delay, x, y }: { emoji: string; delay: number; x
 }
 
 const features = [
-  { icon: BookOpen, title: 'Read real texts', desc: 'Newspaper articles, essays & exam formats. Select any word from the text to add it to your vocabulary, and rehearse as often as you want.', color: 'from-blue-500 to-cyan-400' },
-  { icon: PenTool, title: 'Write with AI feedback', desc: 'Get instant corrections on your essays. No API key? No problem — you\'ll get a perfectly shaped prompt to assess your essay in your own LLM.', color: 'from-violet-500 to-purple-400' },
-  { icon: Headphones, title: 'Train your ear', desc: 'C1 listening exercises, realistic recorded meetings, and text-to-speech for every German sentence in the app.', color: 'from-amber-500 to-orange-400' },
-  { icon: MessageCircle, title: 'Speak confidently', desc: 'Workshop phrases, presentation skills, and expressions for every situation — including how to save face in German when you didn\'t catch what was said.', color: 'from-emerald-500 to-green-400' },
+  { icon: BookOpen, title: 'telc C1 Prüfungsvorbereitung', desc: 'Reading, listening, writing, speaking — all exam sections with 980+ exercises.', color: 'from-blue-500 to-cyan-400' },
+  { icon: PenLine, title: 'Schreiben mit KI-Feedback', desc: 'Write essays and get them evaluated by Claude using telc grading criteria. No API key? You get a prompt for your own LLM.', color: 'from-violet-500 to-purple-400' },
+  { icon: Monitor, title: 'IT Deutsch', desc: '235+ nouns with articles, verbs, collocations, idioms, dialogues, podcasts, and user stories from 12 industries.', color: 'from-fuchsia-500 to-pink-400' },
+  { icon: Mic, title: 'Audio für alles', desc: 'Every example sentence voiced with Google Cloud Neural2 TTS — no robot voice.', color: 'from-amber-500 to-orange-400' },
+  { icon: Brain, title: 'Spaced Repetition Lernkarten', desc: 'Mark any word or phrase — it lands in your personal vocabulary and gets reviewed on a Leitner schedule.', color: 'from-emerald-500 to-green-400' },
+  { icon: Headphones, title: 'IT Podcasts & Dialoge', desc: 'Discovery sessions, refinements, Slack chats — real scenarios from your actual workday.', color: 'from-rose-500 to-red-400' },
 ];
 
 function PreviewCarousel() {
@@ -235,11 +237,11 @@ export default function WelcomePage() {
               For IT expats who don't just want to pass an exam, but actually be free in their everyday work in German.
             </h2>
             <p className="text-muted-foreground text-lg max-w-lg mx-auto">
-              Four skills. One platform. Zero fluff. (Just dog hair.)
+              Six reasons to give it a try. Zero fluff. (Just dog hair.)
             </p>
           </motion.div>
 
-          <div className="grid sm:grid-cols-2 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((f, i) => (
               <motion.div
                 key={f.title}
@@ -252,31 +254,21 @@ export default function WelcomePage() {
                 <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${f.color} mb-5`}>
                   <f.icon className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">{f.title}</h3>
-                <p className="text-muted-foreground">{f.desc}</p>
+                <h3 className="text-lg font-bold mb-2">{f.title}</h3>
+                <p className="text-muted-foreground text-sm">{f.desc}</p>
                 <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-gradient-to-br opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
               </motion.div>
             ))}
           </div>
 
-          {/* IT Deutsch card */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.5 }}
-            className="mt-6 relative rounded-2xl border-2 border-dashed border-pink-500/40 bg-gradient-to-br from-pink-500/10 via-fuchsia-500/10 to-violet-500/5 p-8 overflow-hidden"
+            className="text-center text-base md:text-lg text-muted-foreground mt-10"
           >
-            <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-pink-500 to-fuchsia-600 text-white mb-5">
-              <Code className="h-6 w-6" />
-            </div>
-            <div className="block w-fit px-2.5 py-0.5 rounded-md bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-xs font-mono font-bold tracking-wider uppercase mb-3">
-              Deutsch für IT-ler
-            </div>
-            <h3 className="text-xl font-bold mb-2">From standup updates to architecture discussions — finally say what you actually mean.</h3>
-            <p className="text-muted-foreground">120 user stories from 12 industries, podcasts, and expressions for your daily work. Plus 235 nouns with that gender you always mess up.</p>
-            <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full bg-primary/10 blur-2xl" />
-          </motion.div>
+            100% free. No ads. This is a personal project opened for the community.
+          </motion.p>
         </div>
       </section>
 
