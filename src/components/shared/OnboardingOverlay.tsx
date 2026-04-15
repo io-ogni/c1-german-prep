@@ -131,6 +131,12 @@ export function OnboardingOverlay() {
         transition={{ delay: 0.1 }}
         className="w-full max-w-md space-y-4"
       >
+        {/* Welcome header */}
+        <div className="text-center">
+          <h1 className="text-xl font-bold text-foreground">Welcome to C1 Werkstatt</h1>
+          <p className="text-sm text-muted-foreground">Here's what you can do.</p>
+        </div>
+
         {/* Dots */}
         <div className="flex justify-center gap-2">
           {Array.from({ length: totalSteps }).map((_, i) => (
