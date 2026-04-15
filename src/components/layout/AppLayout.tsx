@@ -15,7 +15,7 @@ export function AppLayout() {
         <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Claude</a> &{' '}
         <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Lovable</a>.
         {' '}Approved by Jerry the 🐕</p>
-        <p className="text-muted-foreground/60">telc is a registered trademark of telc gGmbH. This app is not affiliated with or endorsed by telc gGmbH.</p>
+        <p className="text-muted-foreground/60 italic">telc is a registered trademark of telc gGmbH. This app is not affiliated with or endorsed by telc gGmbH.</p>
       </footer>
     </div>
   );

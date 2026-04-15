@@ -333,7 +333,7 @@ export default function WelcomePage() {
             {' '}Approved by Jerry the 🐕
           </div>
           <a href="/about" className="text-xs text-primary hover:underline">About this app →</a>
-          <p className="text-xs text-muted-foreground/60">telc is a registered trademark of telc gGmbH. This app is not affiliated with or endorsed by telc gGmbH.</p>
+          <p className="text-xs text-muted-foreground/60 italic">telc is a registered trademark of telc gGmbH. This app is not affiliated with or endorsed by telc gGmbH.</p>
         </div>
       </footer>
     </div>
