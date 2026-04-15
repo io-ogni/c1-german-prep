@@ -37,7 +37,7 @@ function FloatingEmoji({ emoji, delay, x, y }: { emoji: string; delay: number; x
 const features = [
   { icon: BookOpen, title: 'telc C1 Prüfungsvorbereitung', desc: 'Reading, listening, writing, speaking — all exam sections with 980+ exercises.', color: 'from-blue-500 to-cyan-400' },
   { icon: PenLine, title: 'Schreiben mit KI-Feedback', desc: 'Write essays and get them evaluated by Claude using telc grading criteria. No API key? You get a prompt for your own LLM.', color: 'from-violet-500 to-purple-400' },
-  { icon: Monitor, title: 'IT Deutsch', desc: '235+ nouns with articles, verbs, collocations, idioms, dialogues, podcasts, and user stories from 12 industries.', color: 'from-fuchsia-500 to-pink-400' },
+  { icon: Monitor, title: 'IT Deutsch', desc: '235+ nouns with articles, verbs, collocations, idioms, and user stories from 12 industries.', color: 'from-fuchsia-500 to-pink-400' },
   { icon: Mic, title: 'Audio für alles', desc: 'Every example sentence voiced with Google Cloud Neural2 TTS — no robot voice.', color: 'from-amber-500 to-orange-400' },
   { icon: Brain, title: 'Spaced Repetition Lernkarten', desc: 'Mark any word or phrase — it lands in your personal vocabulary and gets reviewed on a Leitner schedule.', color: 'from-emerald-500 to-green-400' },
   { icon: Headphones, title: 'IT Podcasts & Dialoge', desc: 'Discovery sessions, refinements, Slack chats — real scenarios from your actual workday.', color: 'from-rose-500 to-red-400' },
