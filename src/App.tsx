@@ -31,6 +31,7 @@ import ExamPrepPage from "@/pages/ExamPrepPage";
 import DailyPracticePage from "@/pages/DailyPracticePage";
 import SettingsPage from "@/pages/SettingsPage";
 import FlashcardsPage from "@/pages/FlashcardsPage";
+import GuidePage from "@/pages/GuidePage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -71,6 +72,7 @@ const App = () => (
               <Route path="/daily-practice" element={<DailyPracticePage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/flashcards" element={<FlashcardsPage />} />
+              <Route path="/guide" element={<GuidePage />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
