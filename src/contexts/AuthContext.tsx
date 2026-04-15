@@ -13,6 +13,7 @@ interface Profile {
   api_key_encrypted: string | null;
   current_streak: number;
   last_practice_date: string | null;
+  onboarding_completed_at: string | null;
 }
 
 interface AuthContextType {

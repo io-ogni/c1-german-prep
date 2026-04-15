@@ -10,6 +10,7 @@ import { ProgressBar } from '@/components/shared/ProgressBar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ReviewCard } from '@/components/shared/ReviewCard';
 import { VerbFlashcard } from '@/components/shared/VerbFlashcard';
+import { OnboardingOverlay } from '@/components/shared/OnboardingOverlay';
 import type { Tables } from '@/integrations/supabase/types';
 
 interface AreaProgress {
@@ -178,6 +179,7 @@ export default function HomePage() {
 
   return (
     <div className="space-y-8">
+      {profile && !profile.onboarding_completed_at && <OnboardingOverlay />}
       {/* Welcome */}
       <div>
         <h1 className="text-2xl font-bold text-foreground truncate">
