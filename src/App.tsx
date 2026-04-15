@@ -72,6 +72,7 @@ const App = () => (
               <Route path="/daily-practice" element={<DailyPracticePage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/flashcards" element={<FlashcardsPage />} />
+              <Route path="/guide" element={<GuidePage />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
