@@ -217,14 +217,16 @@ export function DialogueView({ dialogue, onBack }: DialogueViewProps) {
             >
               <CardContent className="px-4 py-3">
                 <div className="flex items-center gap-2 mb-1">
-                  <p className={cn('text-sm font-bold', color.text)}>{line.speaker}</p>
-                  {hasAudio && (
+                  {hasAudio ? (
                     <button
                       onClick={(e) => { e.stopPropagation(); toggleLineAudio(idx); }}
-                      className="transition-colors"
+                      className="flex items-center gap-2 transition-colors"
                     >
+                      <span className={cn('text-sm font-bold', color.text)}>{line.speaker}</span>
                       <Volume2 className={cn('h-3.5 w-3.5 text-muted-foreground hover:text-foreground', isPlaying && 'text-fuchsia-500')} />
                     </button>
+                  ) : (
+                    <p className={cn('text-sm font-bold', color.text)}>{line.speaker}</p>
                   )}
                 </div>
                 <p className="text-sm text-foreground leading-relaxed">{line.de}</p>
