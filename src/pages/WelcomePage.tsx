@@ -234,10 +234,10 @@ export default function WelcomePage() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              For IT expats who don't just want to pass an exam, but actually be free in their everyday work in German.
+              For IT expats who don't just want to pass an exam, but also communicate freely in their everyday work in German.
             </h2>
             <p className="text-muted-foreground text-lg max-w-lg mx-auto">
-              Six reasons to give it a try. Zero fluff. (Just dog hair.)
+              Six reasons to give it a try. Zero fluff. (Just dog hair. 🐕)
             </p>
           </motion.div>
 
