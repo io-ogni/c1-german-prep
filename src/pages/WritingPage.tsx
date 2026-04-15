@@ -91,10 +91,9 @@ interface EvaluationResponse {
 
 // ─── Tab config ──────────────────────────────────────
 
-const LEVEL_TABS: { value: WritingLevel; label_de: string; label_en: string; subtitle_de: string; subtitle_en: string }[] = [
-  { value: 'rusty', label_de: 'Eingerostet', label_en: 'Rusty', subtitle_de: 'Kurze Mikro-Übungen (30–80 Wörter)', subtitle_en: 'Short micro-exercises (30-80 words)' },
-  { value: 'solid_b2', label_de: 'Solides B2', label_en: 'Solid B2', subtitle_de: 'Absatz-Antworten (100–180 Wörter)', subtitle_en: 'Paragraph responses (100-180 words)' },
-  { value: 'almost_c1', label_de: 'C1 Prüfung', label_en: 'C1 Exam', subtitle_de: 'Vollständige Texte im telc-Format (~350 Wörter)', subtitle_en: 'Full texts in telc format (~350 words)' },
+const LEVEL_TABS: { value: string; levels: WritingLevel[]; label_de: string; label_en: string; subtitle_de: string; subtitle_en: string }[] = [
+  { value: 'b1_b2', levels: ['rusty', 'solid_b2'], label_de: 'B1-B2 Übungen', label_en: 'B1-B2 Exercises', subtitle_de: 'Kurze Übungen und Absatz-Antworten (30–180 Wörter)', subtitle_en: 'Short exercises and paragraph responses (30-180 words)' },
+  { value: 'almost_c1', levels: ['almost_c1'], label_de: 'C1 Übungen', label_en: 'C1 Exercises', subtitle_de: 'Vollständige Texte im telc-Format (~350 Wörter)', subtitle_en: 'Full texts in telc format (~350 words)' },
 ];
 
 // ─── Build clipboard prompt ──────────────────────────
@@ -969,11 +968,11 @@ function WritingInterface({
 // ─── Prompt List (for each level tab) ────────────────
 
 function LevelPromptList({
-  level,
+  levels,
   hasApiKey,
   onSelectPrompt,
 }: {
-  level: WritingLevel;
+  levels: WritingLevel[];
   hasApiKey: boolean;
   onSelectPrompt: (prompt: WritingPrompt) => void;
 }) {
@@ -993,7 +992,7 @@ function LevelPromptList({
     setLoading(true);
 
     Promise.all([
-      supabase.from('writing_prompts').select('*').eq('level', level).order('sort_order'),
+      supabase.from('writing_prompts').select('*').in('level', levels).order('sort_order'),
       supabase.from('writing_submissions').select('*').eq('user_id', user.id),
     ]).then(([promptsRes, subsRes]) => {
       if (cancelled) return;
@@ -1005,7 +1004,7 @@ function LevelPromptList({
     });
 
     return () => { cancelled = true; };
-  }, [user, level]);
+  }, [user, levels]);
 
   if (loading) {
     return <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
@@ -1122,7 +1121,7 @@ export default function WritingPage() {
               {lang === 'de' ? tab.subtitle_de : tab.subtitle_en}
             </p>
             <LevelPromptList
-              level={tab.value}
+              levels={tab.levels}
               hasApiKey={hasApiKey}
               onSelectPrompt={setSelectedPrompt}
             />

@@ -202,8 +202,8 @@ export default function HomePage() {
                   </>
                 ) : (
                   <>
-                    <p className="font-bold text-foreground leading-tight">Starte deine Serie!</p>
-                    <p className="text-xs text-muted-foreground">5 min = gefährlich gut. 30 min = unstoppable.</p>
+                    <p className="font-bold text-foreground leading-tight">Tägliches Training</p>
+                    <p className="text-xs text-muted-foreground">Wähle eine Dauer und starte eine Übungsrunde — Grammatik, Wortschatz und mehr, zufällig gemischt.</p>
                   </>
                 )}
               </div>

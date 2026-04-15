@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
 import { track, identifyUser, resetUser } from '@/lib/posthog';
+import { queryClient } from '@/App';
 
 interface Profile {
   id: string;
@@ -82,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.removeItem('it-redewendungen-highlights');
           localStorage.removeItem('speaking-highlights');
           localStorage.removeItem('writing-tips-highlights');
+          queryClient.clear();
         }
         localStorage.setItem('last-auth-uid', s.user.id);
         fetchProfile(s.user.id).then(setProfile);
@@ -127,6 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('speaking-highlights');
     localStorage.removeItem('writing-tips-highlights');
     localStorage.removeItem('selection-hint-dismissed');
+    queryClient.clear();
     await supabase.auth.signOut();
     setProfile(null);
   };

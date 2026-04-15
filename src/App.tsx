@@ -42,7 +42,7 @@ import { initPostHog } from "@/lib/posthog";
 
 initPostHog();
 
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
 
 const App = () => (
   <ErrorBoundary>

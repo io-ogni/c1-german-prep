@@ -48,9 +48,9 @@ export const translations = {
     home_days_active: "Tage aktiv",
 
     // Level tabs
-    level_b2_refresh: "B2 Auffrischung",
+    level_b2_refresh: "B2 Übungen",
     level_c1_new: "C1 Neu",
-    level_c1: "C1 Prüfung",
+    level_c1: "C1 Übungen",
 
     // Exercise types
     exercise_definition_match: "Definitionszuordnung",

@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from '@/i18n/useTranslation';
-import { Trash2, Volume2, Mic } from 'lucide-react';
+import { Volume2, Mic } from 'lucide-react';
 import { TelcBadge } from '@/components/shared/TelcBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -9,9 +9,7 @@ import {
 } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Filter, Presentation, MessageSquare, FileText, MessagesSquare, Zap, Drama } from 'lucide-react';
-import { useCustomPhrases } from '@/hooks/useCustomPhrases';
 import { useHighlightedPhrases } from '@/hooks/useHighlightedPhrases';
-import { AddConnectorInput } from '@/components/writing-tips/AddConnectorInput';
 import { cn } from '@/lib/utils';
 import { NAV_CONTAINER, TAB_TRIGGER_BLUE } from '@/components/shared/navStyles';
 import { ScrollNav } from '@/components/shared/ScrollNav';
@@ -316,7 +314,6 @@ function flattenSection(
 
 export default function SpeakingPage() {
   const { lang } = useTranslation();
-  const { customConnectors, addConnector, removeConnector } = useCustomPhrases('speaking-custom');
   const { isHighlighted, toggle: toggleHighlight } = useHighlightedPhrases('speaking-highlights');
   const [starredTabs, setStarredTabs] = useState<Record<string, boolean>>({});
   const [searchParams, setSearchParams] = useSearchParams();
@@ -562,24 +559,9 @@ export default function SpeakingPage() {
                     <TableCell />
                   </TableRow>
                 ))}
-                {customConnectors.map((c, i) => (
-                  <TableRow key={`custom-${i}`} className="group">
-                    <TableCell className="font-medium text-foreground text-sm">{c.fn}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{c.items}</TableCell>
-                    <TableCell>
-                      <button
-                        onClick={() => removeConnector(i)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                ))}
               </TableBody>
             </Table>
           </div>
-          <AddConnectorInput onAdd={addConnector} />
         </TabsContent>
 
         {/* Redewendungen */}

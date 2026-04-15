@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Filter, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PlayAllButton } from '@/components/PlayAllButton';
+import { usePlayAll } from '@/hooks/usePlayAll';
 import { PRAEPOSITIONEN, PRAEP_CATEGORIES } from '@/data/praepositionen';
 
 const ttsAudio: Record<string, string> = import.meta.glob('/src/assets/audio/praepositionen/*.mp3', { eager: true, import: 'default' }) as Record<string, string>;
@@ -63,6 +65,7 @@ export function PraepositionenContent() {
   const [category, setCategory] = useState('Alle');
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playingIdx, setPlayingIdx] = useState<number | null>(null);
+  const player = usePlayAll();
 
   const speak = useCallback((idx: number) => {
     if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
@@ -92,7 +95,10 @@ export function PraepositionenContent() {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
         <SelectionHint hintKey="praepositionen" />
-        <StarredButton active={starredOnly} onClick={() => setStarredOnly(prev => !prev)} />
+        <div className="flex items-center gap-2">
+          <StarredButton active={starredOnly} onClick={() => setStarredOnly(prev => !prev)} />
+          <PlayAllButton color="blue" player={player} getUrls={() => filtered.map(item => getTtsUrl(item._i)).filter(Boolean) as string[]} />
+        </div>
       </div>
 
       {/* Desktop */}

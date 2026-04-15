@@ -5,6 +5,8 @@ import { SECTIONS } from '@/pages/SpeakingPage';
 import { REDEMITTEL_SECTIONS } from '@/pages/WritingPage';
 import { c1Expressions } from '@/data/c1Expressions';
 import { techIdioms } from '@/data/techIdioms';
+import { PRAEPOSITIONEN } from '@/data/praepositionen';
+import { NV_VERBINDUNGEN } from '@/data/nvVerbindungen';
 
 interface StarredItem {
   de: string;
@@ -82,6 +84,22 @@ export function getAllStarredItems(userId: string): StarredItem[] {
           items.push({ de: phrase.de, en: phrase.en, source: `schreiben-${section.tab}` });
         }
       }
+    }
+  }
+
+  // Präpositionen (keyed by verb_or_adj)
+  const praepHighlights = loadSet(`praepositionen-highlights-${userId}`);
+  for (const item of PRAEPOSITIONEN) {
+    if (praepHighlights.has(item.verb_or_adj)) {
+      items.push({ de: `${item.verb_or_adj} ${item.preposition}`, en: item.en, example: item.example, source: 'praepositionen' });
+    }
+  }
+
+  // NV-Verbindungen (keyed by de)
+  const nvHighlights = loadSet(`nv-verbindungen-highlights-${userId}`);
+  for (const item of NV_VERBINDUNGEN) {
+    if (nvHighlights.has(item.de)) {
+      items.push({ de: item.de, en: item.en, example: item.example, source: 'nv-verbindungen' });
     }
   }
 

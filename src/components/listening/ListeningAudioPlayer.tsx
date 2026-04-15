@@ -126,9 +126,6 @@ export function ListeningAudioPlayer({ audioFile, audioUrl, className }: Props) 
               <span className="text-xs text-muted-foreground tabular-nums w-20 text-right shrink-0">
                 {formatTime(currentTime)} / {formatTime(duration)}
               </span>
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => setMuted(!muted)}>
-                {muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
-              </Button>
             </div>
           </>
         )}
