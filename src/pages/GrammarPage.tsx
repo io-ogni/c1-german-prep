@@ -80,7 +80,13 @@ export default function GrammarPage() {
       }
 
       return Array.from(topicMap.entries())
-        .sort((a, b) => a[1].minSort - b[1].minSort)
+        .sort((a, b) => {
+          // Sprachbausteine always on top
+          const aIsSpb = a[1].area === 'sprachbausteine' ? 0 : 1;
+          const bIsSpb = b[1].area === 'sprachbausteine' ? 0 : 1;
+          if (aIsSpb !== bIsSpb) return aIsSpb - bIsSpb;
+          return a[1].minSort - b[1].minSort;
+        })
         .map(([slug, data]) => ({
           slug,
           area: data.area,
