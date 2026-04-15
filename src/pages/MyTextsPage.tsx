@@ -4,7 +4,8 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { FileText, PenTool, ChevronDown, ChevronUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface Submission {
   id: string;
@@ -65,8 +66,10 @@ export default function MyTextsPage() {
       {loading ? (
         <p className="text-muted-foreground">{t('common_loading')}</p>
       ) : submissions.length === 0 ? (
-        <Card><CardContent className="py-8 text-center text-muted-foreground">
-          {lang === 'de' ? 'Noch keine Texte eingereicht.' : 'No texts submitted yet.'}
+        <Card><CardContent className="py-10 text-center space-y-3">
+          <PenTool className="h-10 w-10 mx-auto text-muted-foreground/30" />
+          <p className="text-sm text-muted-foreground">Hier erscheinen deine Texte, nachdem du eine Schreibübung abgeschlossen hast.</p>
+          <Link to="/writing" className="inline-block text-sm text-primary hover:underline">Schreibübung starten →</Link>
         </CardContent></Card>
       ) : (
         <div className="space-y-3">
