@@ -17,7 +17,7 @@ const TECH = [
   { name: 'React + TypeScript + Tailwind', role: 'Frontend' },
   { name: 'Supabase (PostgreSQL, Auth, Edge Functions)', role: 'Backend & database' },
   { name: 'Claude by Anthropic', role: 'AI writing evaluation + content creation + development' },
-  { name: 'Gemini by Google', role: 'Content creation' },
+  { name: 'Gemini by Google', role: 'Partial content creation' },
   { name: 'Claude Code + Lovable', role: 'Development' },
   { name: 'Google Cloud TTS (Neural2)', role: 'Audio generation' },
   { name: 'NotebookLM', role: 'Podcast generation' },
