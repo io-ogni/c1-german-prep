@@ -34,19 +34,27 @@ interface Props {
   onAnswer: (correct: boolean) => void;
 }
 
-const TRANSFORM_EXAMPLES: Record<string, { input: string; output: string }> = {
-  'nominalisieren': { input: 'Die Mitarbeiter arbeiten zusammen.', output: 'Die Zusammenarbeit der Mitarbeiter.' },
-  'partizip': { input: 'Das Buch, das viel diskutiert wird,', output: 'Das viel diskutierte Buch' },
-  'passiv': { input: 'Man tanzt auf der Party.', output: 'Auf der Party wird getanzt.' },
-  'indirekte': { input: 'Er sagte: "Ich bin krank."', output: 'Er sagte, er sei krank.' },
-  'konjunktiv ii': { input: 'Ich habe ein Auto.', output: 'Wenn ich ein Auto hätte, ...' },
-  'konjunktiv i': { input: 'Sie sagt: "Ich habe keine Zeit."', output: 'Sie sagt, sie habe keine Zeit.' },
-  'passiversatz': { input: 'Das kann gemacht werden.', output: 'Das lässt sich machen.' },
-};
+// Order matters: more specific keys must come before less specific ones
+// (e.g. "sich lassen" before "passiv", "konjunktiv ii" before "konjunktiv i")
+const TRANSFORM_EXAMPLES: [string, { input: string; output: string }][] = [
+  ['nominalisieren', { input: 'Die Mitarbeiter arbeiten zusammen.', output: 'Die Zusammenarbeit der Mitarbeiter.' }],
+  ['partizip', { input: 'Das Buch, das viel diskutiert wird,', output: 'Das viel diskutierte Buch' }],
+  ['sich lassen', { input: 'Das kann gemacht werden.', output: 'Das lässt sich machen.' }],
+  ['zustandspassiv', { input: 'Man hat die Tür geschlossen.', output: 'Die Tür ist geschlossen.' }],
+  ['vorgangspassiv', { input: 'Man tanzt auf der Party.', output: 'Auf der Party wird getanzt.' }],
+  ['subjektlosen passiv', { input: 'Man tanzt auf der Party.', output: 'Auf der Party wird getanzt.' }],
+  ['ins passiv', { input: 'Man repariert das Auto.', output: 'Das Auto wird repariert.' }],
+  ['im aktiv', { input: 'Das Buch wird gelesen.', output: 'Man liest das Buch.' }],
+  ['sein + zu', { input: 'Das muss erledigt werden.', output: 'Das ist zu erledigen.' }],
+  ['passiv', { input: 'Man repariert das Auto.', output: 'Das Auto wird repariert.' }],
+  ['indirekte', { input: 'Er sagte: "Ich bin krank."', output: 'Er sagte, er sei krank.' }],
+  ['konjunktiv ii', { input: 'Ich habe ein Auto.', output: 'Wenn ich ein Auto hätte, ...' }],
+  ['konjunktiv i', { input: 'Sie sagt: "Ich habe keine Zeit."', output: 'Sie sagt, sie habe keine Zeit.' }],
+];
 
 function getExample(instructions: string): { input: string; output: string } | null {
   const lower = instructions.toLowerCase();
-  for (const [key, example] of Object.entries(TRANSFORM_EXAMPLES)) {
+  for (const [key, example] of TRANSFORM_EXAMPLES) {
     if (lower.includes(key)) return example;
   }
   return null;
