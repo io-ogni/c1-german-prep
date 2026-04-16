@@ -10,8 +10,8 @@ type NavItem = { value: string; icon?: LucideIcon; label: string; labelKey?: str
 const NAV_ITEMS: NavItem[] = [
   { value: '/it-deutsch/uebungen', label: 'Übungen' },
   { value: '/it-deutsch/vokabular', icon: Table2, label: 'IT-Vokabular' },
-  { value: '/it-deutsch/redewendungen', icon: Drama, labelKey: 'it_redewendungen', label: '' },
   { value: '/it-deutsch', icon: Play, label: 'Medien' },
+  { value: '/it-deutsch/redewendungen', icon: Drama, labelKey: 'it_redewendungen', label: '' },
 ];
 
 export function ITDeutschNav() {

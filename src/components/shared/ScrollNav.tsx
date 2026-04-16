@@ -34,7 +34,7 @@ export function ScrollNav({ children }: { children: ReactNode }) {
           {children}
         </div>
         {showFade && (
-          <div className="pointer-events-none absolute inset-y-0 -right-4 w-14 bg-gradient-to-l from-background to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 -right-4 w-20 bg-gradient-to-l from-background via-background/80 to-transparent" />
         )}
       </div>
       {/* Desktop: passthrough */}
