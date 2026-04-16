@@ -179,7 +179,7 @@ export const translations = {
 
     // Listening
     listening_title: "Hörverstehen",
-    listening_subtitle: "Zuhören wie ein Profi. Verstehen wie ein Muttersprachler. Fast.",
+    listening_subtitle: "Zuhören wie ein Profi. Verstehen wie ein Muttersprachler.",
     listening_set: "Set",
     listening_teil: "Teil",
     listening_completed: "abgeschlossen",

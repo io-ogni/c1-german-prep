@@ -105,15 +105,15 @@ export function FeedbackButton() {
       {/* Mobile: static bar at bottom of page */}
       <button
         onClick={() => setOpen(true)}
-        className="lg:hidden flex items-center justify-center gap-2 w-full py-3 border-t border-border text-sm text-muted-foreground hover:text-primary transition-colors"
+        className="lg:hidden flex items-center justify-center gap-2 w-full py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
       >
-        <MessageCircle className="h-4 w-4" />
+        <MessageCircle className="h-4 w-4 text-primary" />
         Give feedback
       </button>
 
       {isMobile ? (
         <Drawer open={open} onOpenChange={setOpen}>
-          <DrawerContent className="px-4 pb-8">
+          <DrawerContent className="px-4 pb-8 min-h-[60vh]">
             <DrawerTitle className="text-lg font-semibold mb-4">Feedback</DrawerTitle>
             {form}
           </DrawerContent>

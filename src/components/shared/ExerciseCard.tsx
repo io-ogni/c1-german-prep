@@ -10,7 +10,7 @@ interface ExerciseCardProps {
 
 export function ExerciseCard({ question, children, feedback, className }: ExerciseCardProps) {
   return (
-    <Card className={cn('w-full', className)}>
+    <Card className={cn('w-full overflow-hidden', className)}>
       <CardHeader className="p-3 md:p-6 pb-2 md:pb-3">
         <CardTitle className="text-base font-medium leading-relaxed">{question}</CardTitle>
       </CardHeader>

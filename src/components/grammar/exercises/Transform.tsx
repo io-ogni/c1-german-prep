@@ -161,8 +161,8 @@ export function Transform({ content, solution, instructions, explanation, answer
                 <div className="flex items-start gap-2">
                   <span className="text-xs font-medium text-muted-foreground mt-1">{idx + 1}.</span>
                   <div className="flex-1 space-y-2">
-                    <div className="rounded-md bg-muted p-3">
-                      <SelectableText text={item.given} className="text-sm" />
+                    <div className="rounded-md bg-muted p-3 overflow-hidden">
+                      <SelectableText text={item.given} className="text-sm break-words" />
                     </div>
                     <span className="text-xs text-muted-foreground italic">→ {item.transform_to}</span>
                     <Textarea
@@ -216,8 +216,8 @@ export function Transform({ content, solution, instructions, explanation, answer
       {(content as SingleContent).instruction && (
         <p className="text-sm font-medium text-primary">{(content as SingleContent).instruction}</p>
       )}
-      <div className="rounded-md bg-muted p-3">
-        <SelectableText text={(content as SingleContent).original} className="text-sm" />
+      <div className="rounded-md bg-muted p-3 overflow-hidden">
+        <SelectableText text={(content as SingleContent).original} className="text-sm break-words" />
       </div>
       <Textarea
         value={values[0]}

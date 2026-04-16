@@ -402,7 +402,7 @@ export default function SpeakingPage() {
           <TelcBadge className="ml-1" />
         </h1>
         <p className="text-sm text-muted-foreground">
-          Damit du im Meeting nicht nur nickst und 'ja genau' sagst.
+          Redemittel für Präsentation, Diskussion und Zusammenfassung — damit dich in der mündlichen Prüfung nichts überrascht.
         </p>
       </div>
       <Tabs defaultValue="redewendungen" onValueChange={(v) => setActiveSpeakingTab(v)}>

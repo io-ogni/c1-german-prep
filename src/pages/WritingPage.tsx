@@ -16,7 +16,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, PenLine, AlertCircle, Copy, CheckCheck, Trash2, Filter, MessagesSquare, PlayCircle, AlignLeft, CheckCircle, Braces, Link2, Volume2 } from 'lucide-react';
+import { Loader2, PenLine, AlertCircle, Copy, CheckCheck, Filter, MessagesSquare, PlayCircle, AlignLeft, CheckCircle, Braces, Link2, Volume2 } from 'lucide-react';
 import { usePlayAll } from '@/hooks/usePlayAll';
 import { PlayAllButton } from '@/components/PlayAllButton';
 import { toast } from '@/hooks/use-toast';
@@ -25,8 +25,6 @@ import {
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { useHighlightedPhrases } from '@/hooks/useHighlightedPhrases';
-import { useCustomPhrases } from '@/hooks/useCustomPhrases';
-import { AddConnectorInput } from '@/components/writing-tips/AddConnectorInput';
 import { StarredButton } from '@/components/shared/StarredButton';
 import { SelectionHint, markHintInteraction } from '@/components/shared/SelectionHint';
 import { TertiaryNav } from '@/components/shared/TertiaryNav';
@@ -382,7 +380,6 @@ function flattenRedemittelSection(
 // ─── Redemittel Tab Content ──────────────────────────
 
 function RedemittelContent() {
-  const { customConnectors, addConnector, removeConnector } = useCustomPhrases();
   const { isHighlighted, toggle: toggleHighlight } = useHighlightedPhrases('writing-tips-highlights');
   const [starredTabs, setStarredTabs] = useState<Record<string, boolean>>({});
   const [categoryFilter, setCategoryFilter] = useState<Record<string, string>>({});
@@ -456,7 +453,7 @@ function RedemittelContent() {
   return (
     <div className="space-y-4">
       <TertiaryNav items={navItems} activeValue={activeTab} onChange={setActiveTab} color="blue" />
-      <SelectionHint hintKey="writing" />
+      {activeTab !== 'konnektoren' && <SelectionHint hintKey="writing" />}
 
       {/* Phrase section content */}
       {activeSection && (
@@ -598,24 +595,9 @@ function RedemittelContent() {
                     <TableCell />
                   </TableRow>
                 ))}
-                {customConnectors.map((c, i) => (
-                  <TableRow key={`custom-${i}`} className="group">
-                    <TableCell className="font-medium text-foreground text-sm">{c.fn}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{c.items}</TableCell>
-                    <TableCell>
-                      <button
-                        onClick={() => removeConnector(i)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                ))}
               </TableBody>
             </Table>
           </div>
-          <AddConnectorInput onAdd={addConnector} />
         </div>
       )}
     </div>

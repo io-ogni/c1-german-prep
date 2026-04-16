@@ -261,14 +261,15 @@ export default function WelcomePage() {
             ))}
           </div>
 
-          <motion.p
+          <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="text-center text-base md:text-lg text-muted-foreground mt-10"
+            className="mt-12 rounded-xl border bg-primary/5 px-6 py-5 text-center"
           >
-            100% free. No ads. This is a personal project opened for the community.
-          </motion.p>
+            <p className="text-lg md:text-xl font-bold text-foreground">100% free. No ads. No premium tier.</p>
+            <p className="text-sm text-muted-foreground mt-1">This is a personal project opened for the community.</p>
+          </motion.div>
         </div>
       </section>
 
@@ -321,7 +322,7 @@ export default function WelcomePage() {
             </Link>
           </Button>
           <p className="text-sm text-muted-foreground/60 mt-8">
-            This app is a work in progress — it grows and improves based on your feedback. Built to help you learn and practice, not to replace a classroom or guarantee exam results.
+            This app is a companion to your C1 preparation — not a replacement for textbooks or courses. It grows based on your feedback, and it's built to make practice actually enjoyable.
           </p>
         </motion.div>
       </section>
@@ -338,9 +339,9 @@ export default function WelcomePage() {
           <div className="text-xs space-x-3">
             <a href="/about" className="text-primary hover:underline">About this app</a>
             <span className="text-muted-foreground/30">·</span>
-            <a href="/datenschutz" className="hover:underline">Datenschutz</a>
+            <a href="/datenschutz" className="text-primary hover:underline">Datenschutz</a>
             <span className="text-muted-foreground/30">·</span>
-            <a href="https://ioana-ognibeni.eu/impressum/" target="_blank" rel="noopener noreferrer" className="hover:underline">Impressum</a>
+            <a href="https://ioana-ognibeni.eu/impressum/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Impressum</a>
           </div>
           <p className="text-xs text-muted-foreground/60 italic">telc is a registered trademark of telc gGmbH. This app is not affiliated with or endorsed by telc gGmbH.</p>
         </div>

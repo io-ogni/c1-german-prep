@@ -34,14 +34,31 @@ export function Navbar() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Lock body scroll when mobile menu is open
+  // Lock body scroll when mobile menu is open (iOS needs position:fixed)
   useEffect(() => {
     if (mobileOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
       document.body.style.overflow = 'hidden';
     } else {
+      const scrollY = Math.abs(parseInt(document.body.style.top || '0', 10));
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
       document.body.style.overflow = '';
+      window.scrollTo(0, scrollY);
     }
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.overflow = '';
+    };
   }, [mobileOpen]);
   const [hidden, setHidden] = useState(false);
   const lastScrollY = useRef(0);
@@ -133,9 +150,6 @@ export function Navbar() {
               <DropdownMenuItem asChild>
                 <Link to="/settings">{t('nav_settings')}</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/about">Über die App</Link>
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={logout}>{t('nav_logout')}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -195,9 +209,6 @@ export function Navbar() {
             </Link>
             <Link to="/settings" onClick={() => setMobileOpen(false)} className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
               {t('nav_settings')}
-            </Link>
-            <Link to="/about" onClick={() => setMobileOpen(false)} className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
-              Über die App
             </Link>
             <button onClick={() => { logout(); setMobileOpen(false); }} className="rounded-md px-3 py-2 text-left text-sm font-medium text-destructive hover:bg-destructive/10">
               {t('nav_logout')}

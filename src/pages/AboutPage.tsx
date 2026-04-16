@@ -52,6 +52,9 @@ export default function AboutPage() {
         <p className="text-muted-foreground max-w-2xl mx-auto">
           Interactive telc C1 exam prep with IT-specific German — built by a Product Manager who needed it herself.
         </p>
+        <p className="text-sm text-muted-foreground/70 max-w-2xl mx-auto">
+          A companion to your C1 preparation, not a replacement for textbooks or courses. 100% free, no ads.
+        </p>
       </div>
 
       {/* What it does */}
