@@ -87,7 +87,6 @@ function SingleSentenceFillIn({ content, solution, instructions, explanation, an
   const allowsEmpty = allAccepted.includes('');
 
   const handleCheck = () => {
-    if (!value.trim() && !allowsEmpty) return;
     onAnswer(isCorrect);
   };
 
