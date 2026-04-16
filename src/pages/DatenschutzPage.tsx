@@ -38,7 +38,7 @@ export default function DatenschutzPage() {
             <li><strong>Registrierung:</strong> E-Mail-Adresse, Anzeigename (optional), Passwort (verschlüsselt gespeichert, nie im Klartext)</li>
             <li><strong>Lernfortschritt:</strong> Übungsergebnisse, abgeschlossene Aufgaben, Wiederholungsintervalle für Vokabeln, Streak-Daten</li>
             <li><strong>Geschriebene Texte:</strong> Von Ihnen im Schreibbereich eingereichte Texte sowie die KI-gestützte Bewertung</li>
-            <li><strong>Einstellungen:</strong> Sprachpräferenz (de/en), Textgröße</li>
+            <li><strong>Einstellungen:</strong> Textgröße</li>
           </ul>
         </section>
 
@@ -51,7 +51,7 @@ export default function DatenschutzPage() {
             <li>Keine Cookies — die anonyme ID wird in localStorage gespeichert</li>
             <li>Keine Weitergabe an Dritte</li>
             <li>Keine Aufzeichnung von Tastatureingaben oder persönlichen Daten</li>
-            <li>Session Recording ist auf sensiblen Seiten (Login, Registrierung, Einstellungen, Passwort) deaktiviert</li>
+            <li>Session Recording ist auf sensiblen Seiten (Login, Registrierung, Einstellungen, Passwort, Schreiben) deaktiviert</li>
             <li>Alle Eingabefelder sind von der Aufzeichnung ausgeschlossen</li>
           </ul>
         </section>
