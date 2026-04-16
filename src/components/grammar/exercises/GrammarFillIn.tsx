@@ -81,10 +81,13 @@ function SingleSentenceFillIn({ content, solution, instructions, explanation, an
   } else {
     correctAnswer = String(rawCorrect);
   }
-  const isCorrect = value.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
+  const acceptAlso: string[] = solution?.accept_also ?? [];
+  const allAccepted = [correctAnswer, ...acceptAlso].map(a => a.trim().toLowerCase());
+  const isCorrect = allAccepted.includes(value.trim().toLowerCase());
+  const allowsEmpty = allAccepted.includes('');
 
   const handleCheck = () => {
-    if (!value.trim()) return;
+    if (!value.trim() && !allowsEmpty) return;
     onAnswer(isCorrect);
   };
 
@@ -97,7 +100,7 @@ function SingleSentenceFillIn({ content, solution, instructions, explanation, an
               correct: isCorrect,
               message: isCorrect
                 ? t('exercise_correct')
-                : `${t('exercise_correct_answer')}: ${solution.full_answer ?? correctAnswer}${explanation ? ` — ${explanation}` : ''}`,
+                : `${t('exercise_correct_answer')}: ${solution.full_answer ?? (allowsEmpty ? 'keine Endung' : correctAnswer)}${explanation ? ` — ${explanation}` : ''}`,
             }
           : null
       }
@@ -121,7 +124,7 @@ function SingleSentenceFillIn({ content, solution, instructions, explanation, an
           autoFocus
         />
         {!answered && (
-          <Button onClick={handleCheck} disabled={!value.trim()}>
+          <Button onClick={handleCheck} disabled={!value.trim() && !allowsEmpty}>
             {t('exercise_check')}
           </Button>
         )}
