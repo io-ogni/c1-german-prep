@@ -124,7 +124,7 @@ function SingleSentenceFillIn({ content, solution, instructions, explanation, an
           autoFocus
         />
         {!answered && (
-          <Button onClick={handleCheck} disabled={!value.trim() && !allowsEmpty}>
+          <Button onClick={handleCheck} disabled={false}>
             {t('exercise_check')}
           </Button>
         )}
