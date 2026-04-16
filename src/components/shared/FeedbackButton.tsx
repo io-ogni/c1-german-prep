@@ -112,8 +112,8 @@ export function FeedbackButton() {
       </button>
 
       {isMobile ? (
-        <Drawer open={open} onOpenChange={setOpen}>
-          <DrawerContent className="px-4 pb-8 min-h-[60vh]">
+        <Drawer open={open} onOpenChange={setOpen} preventScrollRestoration>
+          <DrawerContent className="px-4 pb-6">
             <DrawerTitle className="text-lg font-semibold mb-4">Feedback</DrawerTitle>
             {form}
           </DrawerContent>
