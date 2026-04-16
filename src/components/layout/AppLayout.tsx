@@ -10,7 +10,7 @@ export function AppLayout() {
         <Outlet />
       </main>
       <footer className="border-t border-border mt-2">
-        <div className="container mx-auto px-4 max-w-6xl py-3 space-y-2">
+        <div className="container mx-auto px-4 max-w-6xl py-2 space-y-2">
           <FeedbackButton />
           <hr className="border-border lg:hidden" />
           <nav className="flex flex-wrap justify-center gap-x-5 gap-y-1.5 text-xs">
