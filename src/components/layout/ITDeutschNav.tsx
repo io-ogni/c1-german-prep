@@ -27,7 +27,7 @@ export function ITDeutschNav() {
 
   return (
     <ScrollNav>
-      <div className={`${NAV_CONTAINER} !gap-0.5`}>
+      <div className={NAV_CONTAINER}>
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const label = item.labelKey ? (t(item.labelKey as any) as string) : item.label;
