@@ -9,7 +9,7 @@ export function AppLayout() {
       <main className="container mx-auto px-4 py-6 max-w-6xl flex-1">
         <Outlet />
       </main>
-      <footer className="border-t border-border mt-6">
+      <footer className="border-t border-border mt-2">
         <div className="container mx-auto px-4 max-w-6xl py-3 space-y-2">
           <FeedbackButton />
           <hr className="border-border lg:hidden" />
