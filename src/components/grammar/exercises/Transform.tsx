@@ -39,7 +39,8 @@ const TRANSFORM_EXAMPLES: Record<string, { input: string; output: string }> = {
   'partizip': { input: 'Das Buch, das viel diskutiert wird,', output: 'Das viel diskutierte Buch' },
   'passiv': { input: 'Man tanzt auf der Party.', output: 'Auf der Party wird getanzt.' },
   'indirekte': { input: 'Er sagte: "Ich bin krank."', output: 'Er sagte, er sei krank.' },
-  'konjunktiv': { input: 'Sie sagt: "Ich habe keine Zeit."', output: 'Sie sagt, sie habe keine Zeit.' },
+  'konjunktiv ii': { input: 'Ich habe ein Auto.', output: 'Wenn ich ein Auto hätte, ...' },
+  'konjunktiv i': { input: 'Sie sagt: "Ich habe keine Zeit."', output: 'Sie sagt, sie habe keine Zeit.' },
   'passiversatz': { input: 'Das kann gemacht werden.', output: 'Das lässt sich machen.' },
 };
 
