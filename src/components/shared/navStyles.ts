@@ -7,7 +7,7 @@
 /* ── Secondary nav (bar style) ─────────────────────────────────── */
 
 /** Container: muted background with border, items sit tight together */
-export const NAV_CONTAINER = 'inline-flex items-center flex-nowrap lg:flex-wrap bg-muted/80 border border-border p-1 gap-0 lg:gap-1 rounded-lg';
+export const NAV_CONTAINER = 'inline-flex items-center flex-nowrap lg:flex-wrap bg-muted border border-border p-1 gap-0 lg:gap-1 rounded-lg';
 
 /** Tab trigger for blue secondary nav — Radix TabsTrigger */
 export const TAB_TRIGGER_BLUE =
