@@ -157,6 +157,7 @@ export function ExerciseFlow({ area = 'vocabulary', topic, level, topicTitle, on
     // query — the queue must stay stable during the session
     queryClient.invalidateQueries({ queryKey: ['grammar-topics'] });
     queryClient.invalidateQueries({ queryKey: ['vocabulary-topics'] });
+    queryClient.invalidateQueries({ queryKey: ['it-deutsch-topics'] });
   };
 
   const handleNext = useCallback(() => {
