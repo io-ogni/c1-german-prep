@@ -22,6 +22,8 @@ interface Props {
   checked?: boolean;
   onGapSelect?: (gapNumber: string, optionId: string) => void;
   onGapClear?: (gapNumber: string) => void;
+  sourceType?: string;
+  highlightKeys?: Set<string>;
 }
 
 function stripPunctuation(word: string): string {
@@ -219,6 +221,8 @@ export function ClickableText({
   checked,
   onGapSelect,
   onGapClear,
+  sourceType = 'reading',
+  highlightKeys,
 }: Props) {
   const { t } = useTranslation();
   const { profile } = useRequiredAuth();
@@ -287,7 +291,7 @@ export function ClickableText({
       user_id: profile.user_id,
       word_de: annotation.de,
       translation_en: annotation.en,
-      source_type: 'reading',
+      source_type: sourceType,
       source_id: textId,
       example_sentence: sentence,
       box_number: 1,
@@ -296,8 +300,8 @@ export function ClickableText({
     if (error) {
       toast.error(error.message);
     } else {
-      markHintInteraction('reading');
-      track('vocab_saved', { word_de: annotation.de, source_type: 'reading', source_page: 'reading' });
+      markHintInteraction(sourceType);
+      track('vocab_saved', { word_de: annotation.de, source_type: sourceType, source_page: sourceType });
       toast.success(t('word_added'));
       clearSelection();
     }
@@ -378,6 +382,7 @@ export function ClickableText({
                       const key: WordKey = `${pIdx}-${partIdx}-${wIdx}`;
                       const selected = selectedKey === key;
                       const hasAnnotation = hasAnnotations && !!wordAnnotations[clean.toLowerCase()];
+                      const isHighlighted = highlightKeys?.has(`${pIdx}-0-${wIdx}`);
 
                       return (
                         <span
@@ -387,11 +392,13 @@ export function ClickableText({
                             hasAnnotations && 'cursor-pointer',
                             selected
                               ? 'bg-primary/20 text-primary ring-1 ring-primary/40'
-                              : hasAnnotation
-                                ? 'hover:bg-accent hover:text-accent-foreground'
-                                : hasAnnotations
-                                  ? 'hover:bg-muted/50'
-                                  : ''
+                              : isHighlighted
+                                ? 'bg-fuchsia-100 dark:bg-fuchsia-900/30 hover:bg-fuchsia-200 dark:hover:bg-fuchsia-900/50'
+                                : hasAnnotation
+                                  ? 'hover:bg-accent hover:text-accent-foreground'
+                                  : hasAnnotations
+                                    ? 'hover:bg-muted/50'
+                                    : ''
                           )}
                           onClick={hasAnnotations ? (e) => {
                             e.stopPropagation();

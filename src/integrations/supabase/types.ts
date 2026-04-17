@@ -422,6 +422,7 @@ export type Database = {
           exam_format: string | null
           id: string
           level: string
+          model_answers: Json | null
           prompt_type: string
           sort_order: number
           starter_quotes: Json | null
@@ -437,6 +438,7 @@ export type Database = {
           exam_format?: string | null
           id?: string
           level: string
+          model_answers?: Json | null
           prompt_type: string
           sort_order?: number
           starter_quotes?: Json | null
@@ -452,6 +454,7 @@ export type Database = {
           exam_format?: string | null
           id?: string
           level?: string
+          model_answers?: Json | null
           prompt_type?: string
           sort_order?: number
           starter_quotes?: Json | null

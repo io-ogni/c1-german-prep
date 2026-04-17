@@ -30,6 +30,9 @@ import { SelectionHint, markHintInteraction } from '@/components/shared/Selectio
 import { TertiaryNav } from '@/components/shared/TertiaryNav';
 import type { TertiaryNavItem } from '@/components/shared/TertiaryNav';
 import type { Tables } from '@/integrations/supabase/types';
+import { ClickableText } from '@/components/reading/ClickableText';
+import { findRedemittelHighlights } from '@/lib/highlightRedemittel';
+import { ChevronDown as ChevronDownIcon, BookOpen, PenLine as PenLineIcon } from 'lucide-react';
 
 // ─── TTS Audio ───
 
@@ -752,6 +755,96 @@ function EvaluationDisplay({ evaluation }: { evaluation: EvaluationResponse }) {
 
 // ─── Writing Interface ────────────────────────────────
 
+type ModelAnswer = { de: string; en: string };
+
+function BeispieleTab({ prompt, lang }: { prompt: WritingPrompt; lang: string }) {
+  const modelAnswers = (prompt.model_answers as unknown as ModelAnswer[]) ?? [];
+  const [activeExample, setActiveExample] = useState(0);
+  const [showTranslation, setShowTranslation] = useState(false);
+  const { t } = useTranslation();
+
+  const exampleNav: TertiaryNavItem[] = modelAnswers.map((_, i) => ({
+    value: String(i),
+    label: `Nr. ${i + 1}`,
+  }));
+
+  const current = modelAnswers[activeExample];
+  if (!current) return null;
+
+  const highlightKeys = useMemo(
+    () => findRedemittelHighlights(current.de),
+    [current.de]
+  );
+
+  // Fetch dictionary annotations for the text
+  const [annotations, setAnnotations] = useState<Record<string, { de: string; en: string }>>({});
+  useEffect(() => {
+    const words = new Set(
+      current.de
+        .split(/[\s\n]+/)
+        .map(w => w.replace(/^[^\wäöüÄÖÜß]+|[^\wäöüÄÖÜß]+$/g, '').toLowerCase())
+        .filter(w => w.length > 1)
+    );
+    if (words.size === 0) return;
+
+    supabase
+      .from('dictionary')
+      .select('word_de, article, translation_en')
+      .in('word_de', [...words])
+      .then(({ data }) => {
+        if (!data) return;
+        const map: Record<string, { de: string; en: string }> = {};
+        for (const row of data) {
+          const key = row.word_de.toLowerCase();
+          map[key] = {
+            de: row.article ? `${row.article} ${row.word_de}` : row.word_de,
+            en: row.translation_en,
+          };
+        }
+        setAnnotations(map);
+      });
+  }, [current.de]);
+
+  return (
+    <div className="space-y-4">
+      <TertiaryNav
+        items={exampleNav}
+        activeValue={String(activeExample)}
+        onChange={(v) => { setActiveExample(Number(v)); setShowTranslation(false); }}
+        color="fuchsia"
+      />
+
+      <div className="select-none" onCopy={(e) => e.preventDefault()}>
+        <ClickableText
+          content={current.de}
+          textId={prompt.id}
+          textType="general"
+          wordAnnotations={annotations}
+          sourceType="schreiben-beispiel"
+          highlightKeys={highlightKeys}
+        />
+      </div>
+
+      <button
+        onClick={() => setShowTranslation(!showTranslation)}
+        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ChevronDownIcon className={cn('h-4 w-4 transition-transform', showTranslation && 'rotate-180')} />
+        {showTranslation
+          ? (lang === 'de' ? 'Übersetzung ausblenden' : 'Hide translation')
+          : (lang === 'de' ? 'Übersetzung anzeigen' : 'Show translation')
+        }
+      </button>
+
+      {showTranslation && (
+        <div className="select-none rounded-lg bg-muted/50 border border-border p-4" onCopy={(e) => e.preventDefault()}>
+          <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{current.en}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function WritingInterface({
   prompt,
   existingSubmission,
@@ -775,6 +868,9 @@ function WritingInterface({
   const [submitting, setSubmitting] = useState(false);
   const [evaluation, setEvaluation] = useState<EvaluationResponse | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const hasModelAnswers = Array.isArray(prompt.model_answers) && (prompt.model_answers as unknown[]).length > 0;
+  const [activeTab, setActiveTab] = useState<'beispiele' | 'schreiben'>(hasModelAnswers ? 'beispiele' : 'schreiben');
 
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
   const context = lang === 'de' ? prompt.context_de : prompt.context_en;
@@ -874,74 +970,114 @@ function WritingInterface({
         </div>
       )}
 
-      {/* Target info */}
-      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-        <span>{t('writing_target')}: ~{prompt.target_word_count} {t('writing_word_count')}</span>
-        {hasApiKey && <span>{t('writing_cost_note')}</span>}
-      </div>
-
-      {/* Textarea */}
-      {!evaluation && (
-        <>
-          <Textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={lang === 'de' ? 'Schreibe hier deinen Text...' : 'Write your text here...'}
-            className="min-h-[200px] resize-y text-base bg-white dark:bg-card"
-          />
-
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <span className="text-sm text-muted-foreground">
-              {t('writing_word_count')}: {wordCount}/{prompt.target_word_count}
-            </span>
-            <div className="flex items-center gap-2">
-              {hasApiKey && (
-                <Button
-                  onClick={handleSubmit}
-                  disabled={submitting || wordCount < 10}
-                  className="shrink-0"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {t('writing_evaluating')}
-                    </>
-                  ) : (
-                    t('writing_submit')
-                  )}
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                className="text-xs sm:text-sm"
-                onClick={() => {
-                  navigator.clipboard.writeText(buildCopyPrompt(prompt, text));
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 2000);
-                  toast({ title: t('writing_copied') });
-                }}
-                disabled={wordCount < 10}
-              >
-                {copied ? (
-                  <><CheckCheck className="mr-2 h-4 w-4" />{t('writing_copied')}</>
-                ) : (
-                  <><Copy className="mr-2 h-4 w-4 shrink-0" /><span className="truncate">{t('writing_copy_prompt')}</span></>
-                )}
-              </Button>
-            </div>
-          </div>
-        </>
+      {/* Beispiele / Schreiben tabs */}
+      {hasModelAnswers && (
+        <div className="flex gap-1 border-b border-border pb-0">
+          <button
+            onClick={() => setActiveTab('beispiele')}
+            className={cn(
+              'flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px',
+              activeTab === 'beispiele'
+                ? 'border-fuchsia-500 text-fuchsia-700 dark:text-fuchsia-300'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <BookOpen className="h-4 w-4" />
+            {lang === 'de' ? 'Beispiele' : 'Examples'}
+          </button>
+          <button
+            onClick={() => setActiveTab('schreiben')}
+            className={cn(
+              'flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px',
+              activeTab === 'schreiben'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <PenLine className="h-4 w-4" />
+            {lang === 'de' ? 'Schreiben' : 'Write'}
+          </button>
+        </div>
       )}
 
-      {/* Results */}
-      {evaluation && <EvaluationDisplay evaluation={evaluation} />}
+      {/* Beispiele tab */}
+      {hasModelAnswers && activeTab === 'beispiele' && (
+        <BeispieleTab prompt={prompt} lang={lang} />
+      )}
 
-      {evaluation && (
-        <div className="flex gap-3">
-          <Button variant="outline" onClick={() => { setEvaluation(null); setText(''); }}>
-            {t('exercise_try_again')}
-          </Button>
-        </div>
+      {/* Schreiben tab (or always shown if no model answers) */}
+      {(activeTab === 'schreiben' || !hasModelAnswers) && (
+        <>
+          {/* Target info */}
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span>{t('writing_target')}: ~{prompt.target_word_count} {t('writing_word_count')}</span>
+            {hasApiKey && <span>{t('writing_cost_note')}</span>}
+          </div>
+
+          {/* Textarea */}
+          {!evaluation && (
+            <>
+              <Textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder={lang === 'de' ? 'Schreibe hier deinen Text...' : 'Write your text here...'}
+                className="min-h-[200px] resize-y text-base bg-white dark:bg-card"
+              />
+
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <span className="text-sm text-muted-foreground">
+                  {t('writing_word_count')}: {wordCount}/{prompt.target_word_count}
+                </span>
+                <div className="flex items-center gap-2">
+                  {hasApiKey && (
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={submitting || wordCount < 10}
+                      className="shrink-0"
+                    >
+                      {submitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          {t('writing_evaluating')}
+                        </>
+                      ) : (
+                        t('writing_submit')
+                      )}
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    className="text-xs sm:text-sm"
+                    onClick={() => {
+                      navigator.clipboard.writeText(buildCopyPrompt(prompt, text));
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                      toast({ title: t('writing_copied') });
+                    }}
+                    disabled={wordCount < 10}
+                  >
+                    {copied ? (
+                      <><CheckCheck className="mr-2 h-4 w-4" />{t('writing_copied')}</>
+                    ) : (
+                      <><Copy className="mr-2 h-4 w-4 shrink-0" /><span className="truncate">{t('writing_copy_prompt')}</span></>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Results */}
+          {evaluation && <EvaluationDisplay evaluation={evaluation} />}
+
+          {evaluation && (
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => { setEvaluation(null); setText(''); }}>
+                {t('exercise_try_again')}
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
