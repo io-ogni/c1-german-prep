@@ -3,7 +3,7 @@ import { useRequiredAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
 import { track } from '@/lib/posthog';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +16,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, PenLine, AlertCircle, Copy, CheckCheck, Filter, MessagesSquare, PlayCircle, AlignLeft, CheckCircle, Braces, Link2, Volume2 } from 'lucide-react';
+import { Loader2, PenLine, AlertCircle, Copy, CheckCheck, Filter, MessagesSquare, PlayCircle, AlignLeft, CheckCircle, Braces, Link2, Volume2, ArrowLeft, Play, Pause, Square } from 'lucide-react';
 import { usePlayAll } from '@/hooks/usePlayAll';
 import { PlayAllButton } from '@/components/PlayAllButton';
 import { toast } from '@/hooks/use-toast';
@@ -31,10 +31,14 @@ import { TertiaryNav } from '@/components/shared/TertiaryNav';
 import type { TertiaryNavItem } from '@/components/shared/TertiaryNav';
 import type { Tables } from '@/integrations/supabase/types';
 import { ClickableText } from '@/components/reading/ClickableText';
-import { findRedemittelHighlights } from '@/lib/highlightRedemittel';
-import { ChevronDown as ChevronDownIcon, BookOpen, PenLine as PenLineIcon } from 'lucide-react';
+import beispielAnnotations from '@/data/schreiben-beispiel-annotations.json';
+
+import { BookOpen } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 // ─── TTS Audio ───
+
+const beispielAudio = import.meta.glob('/src/assets/audio/schreiben-beispiele/*.mp3', { eager: true, import: 'default' }) as Record<string, string>;
 
 const ttsAudio: Record<string, Record<string, string>> = {
   'schreiben-einleitung': import.meta.glob('/src/assets/audio/schreiben-einleitung/*.mp3', { eager: true, import: 'default' }) as Record<string, string>,
@@ -432,6 +436,7 @@ function RedemittelContent() {
   };
 
   const navItems: TertiaryNavItem[] = [
+    { value: 'aufbau', label: 'Textaufbau', icon: AlignLeft },
     ...REDEMITTEL_SECTIONS.map(s => ({ value: s.tab, label: s.label, icon: TERTIARY_ICONS[s.tab] })),
     { value: 'konnektoren', label: 'Konnektoren', icon: Link2 },
   ];
@@ -456,7 +461,96 @@ function RedemittelContent() {
   return (
     <div className="space-y-4">
       <TertiaryNav items={navItems} activeValue={activeTab} onChange={setActiveTab} color="blue" />
-      {activeTab !== 'konnektoren' && <SelectionHint hintKey="writing" />}
+      {activeTab !== 'konnektoren' && activeTab !== 'aufbau' && <SelectionHint hintKey="writing" />}
+
+      {/* Textaufbau — blueprint tab */}
+      {activeTab === 'aufbau' && (
+        <div className="space-y-6 mt-2">
+          <p className="text-sm text-muted-foreground">
+            So baust du einen C1-Text auf, der in allen Bewertungskategorien punktet.
+          </p>
+
+          {/* Structure diagram */}
+          <div className="space-y-3">
+            {[
+              {
+                nr: '1',
+                title: 'Einleitung',
+                words: '2–3 Sätze',
+                color: 'border-emerald-400 bg-emerald-50 dark:bg-emerald-950/30',
+                content: 'Thema einführen und Aktualität herstellen. Zum Hauptteil überleiten.',
+                example: '„In der heutigen Gesellschaft ist das Thema X zu einer wichtigen Frage geworden. Im Folgenden sollen die Argumente beider Seiten dargelegt werden."',
+              },
+              {
+                nr: '2',
+                title: 'Bezugnahme auf die Lesermeinungen',
+                words: '2–3 Sätze',
+                color: 'border-blue-400 bg-blue-50 dark:bg-blue-950/30',
+                content: 'Beide Zitate zusammenfassen — mit Konjunktiv I (indirekte Rede). Zeigt dem Prüfer sofort C1-Niveau.',
+                example: '„Während Frau K. der Ansicht sei, dass ..., gibt Herr W. zu bedenken, dass ..."',
+              },
+              {
+                nr: '3',
+                title: 'Hauptteil — Argumente',
+                words: '150–200 Wörter',
+                color: 'border-amber-400 bg-amber-50 dark:bg-amber-950/30',
+                content: 'Pro und Kontra strukturiert darlegen. Jeden Punkt mit Beispiel oder Erklärung stützen. Konnektoren für Übergänge nutzen.',
+                example: '„Zunächst ist festzuhalten, dass ... Darüber hinaus ist zu beachten ... Dem steht jedoch gegenüber, dass ..."',
+              },
+              {
+                nr: '4',
+                title: 'Eigene Meinung',
+                words: '2–3 Sätze',
+                color: 'border-purple-400 bg-purple-50 dark:bg-purple-950/30',
+                content: 'Klar Position beziehen. Nicht vage bleiben — der Prüfer will deine Meinung sehen.',
+                example: '„Meines Erachtens überwiegen die Argumente für ..., da ..."',
+              },
+              {
+                nr: '5',
+                title: 'Schluss',
+                words: '1–2 Sätze',
+                color: 'border-rose-400 bg-rose-50 dark:bg-rose-950/30',
+                content: 'Fazit ziehen. Optional: Ausblick oder Appell.',
+                example: '„Es bleibt abzuwarten, wie sich ... entwickeln wird. Entscheidend wird sein, ob ..."',
+              },
+            ].map((block) => (
+              <div key={block.nr} className={`rounded-lg border-l-4 ${block.color} p-4`}>
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="text-xs font-bold text-muted-foreground">{block.nr}</span>
+                  <span className="font-semibold text-sm text-foreground">{block.title}</span>
+                  <span className="text-xs text-muted-foreground ml-auto">{block.words}</span>
+                </div>
+                <p className="text-sm text-foreground">{block.content}</p>
+                <p className="text-xs text-muted-foreground mt-2 italic">{block.example}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Scoring tips */}
+          <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-2">
+            <p className="text-sm font-semibold text-foreground">Bewertungskriterien — worauf die Prüfer achten:</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+              <div><span className="font-medium text-foreground">Aufgabengerechtheit:</span> Alle Punkte der Aufgabe behandelt? Beide Zitate einbezogen?</div>
+              <div><span className="font-medium text-foreground">Korrektheit:</span> Grammatik, Kasus, Verbposition, Kommas.</div>
+              <div><span className="font-medium text-foreground">Repertoire:</span> Konjunktiv II, Partizipialkonstruktionen, Nominalisierungen, Passiv-Ersatzformen.</div>
+              <div><span className="font-medium text-foreground">Kommunikative Gestaltung:</span> Roter Faden, Konnektoren, logische Übergänge.</div>
+            </div>
+          </div>
+
+          {/* Common mistakes */}
+          <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-2">
+            <p className="text-sm font-semibold text-foreground">Häufige Fehler:</p>
+            <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
+              <li>Nur Pro ODER nur Kontra — C1 verlangt Abwägung beider Seiten.</li>
+              <li>Lesermeinungen ignoriert statt darauf Bezug zu nehmen.</li>
+              <li>Argumente ohne Beispiele oder Erklärungen.</li>
+              <li>Fehlende Übergänge zwischen Absätzen — Konnektoren nutzen!</li>
+              <li>Zu kurzer oder fehlender Schluss.</li>
+              <li>Umgangssprache statt Schriftsprache.</li>
+            </ul>
+          </div>
+        </div>
+      )}
 
       {/* Phrase section content */}
       {activeSection && (
@@ -759,88 +853,124 @@ type ModelAnswer = { de: string; en: string };
 
 function BeispieleTab({ prompt, lang }: { prompt: WritingPrompt; lang: string }) {
   const modelAnswers = (prompt.model_answers as unknown as ModelAnswer[]) ?? [];
-  const [activeExample, setActiveExample] = useState(0);
-  const [showTranslation, setShowTranslation] = useState(false);
-  const { t } = useTranslation();
+  const [activeExample, setActiveExample] = useState('0');
 
-  const exampleNav: TertiaryNavItem[] = modelAnswers.map((_, i) => ({
-    value: String(i),
-    label: `Nr. ${i + 1}`,
-  }));
-
-  const current = modelAnswers[activeExample];
+  const current = modelAnswers[Number(activeExample)];
   if (!current) return null;
 
-  const highlightKeys = useMemo(
-    () => findRedemittelHighlights(current.de),
-    [current.de]
-  );
+  // Use pre-generated annotations (same approach as Lesen)
+  const annotations = beispielAnnotations as Record<string, { de: string; en: string }>;
 
-  // Fetch dictionary annotations for the text
-  const [annotations, setAnnotations] = useState<Record<string, { de: string; en: string }>>({});
+  // Audio playback — Google Cloud TTS MP3s
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const audioUrl = useMemo(() => {
+    const padded = String(prompt.sort_order).padStart(2, '0');
+    const key = `/src/assets/audio/schreiben-beispiele/beispiel-${padded}-${Number(activeExample) + 1}.mp3`;
+    return beispielAudio[key];
+  }, [prompt.sort_order, activeExample]);
+
+  const toggleAudio = useCallback(() => {
+    if (isPlaying && audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+      return;
+    }
+    if (audioRef.current && audioRef.current.currentTime > 0) {
+      audioRef.current.play();
+      setIsPlaying(true);
+      return;
+    }
+    if (!audioUrl) return;
+    const audio = new Audio(audioUrl);
+    audioRef.current = audio;
+    audio.onended = () => setIsPlaying(false);
+    audio.play();
+    setIsPlaying(true);
+  }, [isPlaying, audioUrl]);
+
+  const stopAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setIsPlaying(false);
+    }
+  }, []);
+
+  // Stop audio when switching examples
   useEffect(() => {
-    const words = new Set(
-      current.de
-        .split(/[\s\n]+/)
-        .map(w => w.replace(/^[^\wäöüÄÖÜß]+|[^\wäöüÄÖÜß]+$/g, '').toLowerCase())
-        .filter(w => w.length > 1)
-    );
-    if (words.size === 0) return;
-
-    supabase
-      .from('dictionary')
-      .select('word_de, article, translation_en')
-      .in('word_de', [...words])
-      .then(({ data }) => {
-        if (!data) return;
-        const map: Record<string, { de: string; en: string }> = {};
-        for (const row of data) {
-          const key = row.word_de.toLowerCase();
-          map[key] = {
-            de: row.article ? `${row.article} ${row.word_de}` : row.word_de,
-            en: row.translation_en,
-          };
-        }
-        setAnnotations(map);
-      });
-  }, [current.de]);
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    };
+  }, [activeExample]);
 
   return (
     <div className="space-y-4">
-      <TertiaryNav
-        items={exampleNav}
-        activeValue={String(activeExample)}
-        onChange={(v) => { setActiveExample(Number(v)); setShowTranslation(false); }}
-        color="fuchsia"
-      />
+      {/* Example selector — dropdown like IT filter */}
+      <Select value={activeExample} onValueChange={(v) => { stopAudio(); setActiveExample(v); }}>
+        <SelectTrigger className="w-auto min-w-[180px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {modelAnswers.map((_, i) => (
+            <SelectItem key={i} value={String(i)}>
+              {lang === 'de' ? `Beispiel ${i + 1}` : `Example ${i + 1}`}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
-      <div className="select-none" onCopy={(e) => e.preventDefault()}>
-        <ClickableText
-          content={current.de}
-          textId={prompt.id}
-          textType="general"
-          wordAnnotations={annotations}
-          sourceType="schreiben-beispiel"
-          highlightKeys={highlightKeys}
-        />
-      </div>
+      <SelectionHint hintKey="schreiben-beispiel" variant="table" />
 
-      <button
-        onClick={() => setShowTranslation(!showTranslation)}
-        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <ChevronDownIcon className={cn('h-4 w-4 transition-transform', showTranslation && 'rotate-180')} />
-        {showTranslation
-          ? (lang === 'de' ? 'Übersetzung ausblenden' : 'Hide translation')
-          : (lang === 'de' ? 'Übersetzung anzeigen' : 'Show translation')
-        }
-      </button>
+      {/* Text in Card — same look as Lesen */}
+      <Card>
+        <CardContent className="p-6">
+          {/* Audio button — same pattern as Lesen */}
+          {audioUrl && (
+            <div className="mb-4 flex justify-end">
+              <div className="inline-flex items-center gap-1">
+                <button
+                  onClick={toggleAudio}
+                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                    isPlaying
+                      ? 'bg-primary/10 text-primary dark:bg-primary/20'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  }`}
+                >
+                  {isPlaying
+                    ? <Pause className="h-3 w-3 fill-primary text-primary" />
+                    : <Play className="h-3 w-3 fill-primary text-primary" />}
+                  {isPlaying
+                    ? 'Pause'
+                    : (lang === 'de' ? 'Text anhören' : 'Listen to text')}
+                </button>
+                {isPlaying && (
+                  <button
+                    onClick={stopAudio}
+                    className="inline-flex items-center rounded-full p-1 text-primary hover:bg-muted transition-colors"
+                  >
+                    <Square className="h-3 w-3 fill-primary text-primary" />
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
-      {showTranslation && (
-        <div className="select-none rounded-lg bg-muted/50 border border-border p-4" onCopy={(e) => e.preventDefault()}>
-          <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{current.en}</p>
-        </div>
-      )}
+          <div className="select-none" onCopy={(e) => e.preventDefault()}>
+            <ClickableText
+              content={current.de}
+              textId={prompt.id}
+              textType="general"
+              wordAnnotations={annotations}
+              sourceType="schreiben-beispiel"
+            />
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -927,77 +1057,72 @@ function WritingInterface({
     }
   };
 
+  const TEXT_TYPE_LABELS: Record<string, string> = {
+    eroerterung: 'Erörterung', stellungnahme: 'Stellungnahme',
+    beschwerde: 'Beschwerde', formeller_brief: 'Formeller Brief',
+    micro_exercise: 'Micro',
+  };
+
+  const tabItems: TertiaryNavItem[] = [
+    { value: 'beispiele', label: lang === 'de' ? 'Beispiele' : 'Examples', icon: BookOpen },
+    { value: 'schreiben', label: lang === 'de' ? 'Schreiben' : 'Write', icon: PenLine },
+  ];
+
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="space-y-1">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink className="cursor-pointer" onClick={onBack}>
-                {t('page_writing')}
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>{lang === 'de' ? prompt.title_de : prompt.title_en}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-        <div className="flex items-center gap-2">
-          <h2 className="text-xl font-bold text-foreground">
-            {lang === 'de' ? prompt.title_de : prompt.title_en}
-          </h2>
-          {prompt.exam_format === 'telc' && <TelcBadge />}
+    <div className="space-y-6">
+      {/* Header — Lesen pattern */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={onBack} className="shrink-0">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-base sm:text-xl font-bold text-foreground">
+              {lang === 'de' ? prompt.title_de : prompt.title_en}
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              {TEXT_TYPE_LABELS[prompt.text_type] || prompt.text_type}
+              {prompt.exam_format === 'telc' && <> | telc</>}
+              {' | ~'}{prompt.target_word_count} {t('reading_words')}
+            </p>
+          </div>
         </div>
       </div>
 
+      {/* API key banner */}
       {!hasApiKey && <ApiKeyBanner />}
 
-      {/* Context box */}
-      <div className="rounded-lg bg-primary/5 border border-primary/20 p-4">
-        <p className="text-sm text-foreground whitespace-pre-wrap">{context}</p>
-      </div>
-
-      {/* Starter quotes */}
-      {starterQuotes.length > 0 && (
-        <div className="space-y-2 rounded-lg border border-border bg-muted/50 p-4">
-          {starterQuotes.map((q, i) => (
-            <blockquote key={i} className="border-l-2 border-primary pl-3 text-sm italic text-foreground">
-              „{q.text}" — <span className="not-italic text-muted-foreground">{q.source}</span>
-            </blockquote>
-          ))}
+      {/* Context/task box */}
+      {hasApiKey && (
+        <div className="rounded-lg bg-primary/5 border border-primary/20 p-4">
+          <p className="text-sm text-foreground whitespace-pre-wrap">{context}</p>
+          {starterQuotes.length > 0 && (
+            <div className="mt-3 space-y-2">
+              {starterQuotes.map((q, i) => (
+                <blockquote key={i} className="border-l-2 border-primary pl-3 text-sm italic text-foreground">
+                  „{q.text}" — <span className="not-italic text-muted-foreground">{q.source}</span>
+                </blockquote>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
-      {/* Beispiele / Schreiben tabs */}
-      {hasModelAnswers && (
-        <div className="flex gap-1 border-b border-border pb-0">
-          <button
-            onClick={() => setActiveTab('beispiele')}
-            className={cn(
-              'flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px',
-              activeTab === 'beispiele'
-                ? 'border-fuchsia-500 text-fuchsia-700 dark:text-fuchsia-300'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <BookOpen className="h-4 w-4" />
-            {lang === 'de' ? 'Beispiele' : 'Examples'}
-          </button>
-          <button
-            onClick={() => setActiveTab('schreiben')}
-            className={cn(
-              'flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px',
-              activeTab === 'schreiben'
-                ? 'border-primary text-primary'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <PenLine className="h-4 w-4" />
-            {lang === 'de' ? 'Schreiben' : 'Write'}
-          </button>
+      {/* B1/B2: target info + cost */}
+      {!hasModelAnswers && hasApiKey && (
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <span>{t('writing_target')}: ~{prompt.target_word_count} {t('reading_words')}</span>
+          <span>{t('writing_cost_note')}</span>
         </div>
+      )}
+
+      {/* C1: TertiaryNav tabs */}
+      {hasModelAnswers && (
+        <TertiaryNav
+          items={tabItems}
+          activeValue={activeTab}
+          onChange={(v) => setActiveTab(v as 'beispiele' | 'schreiben')}
+        />
       )}
 
       {/* Beispiele tab */}
@@ -1008,12 +1133,6 @@ function WritingInterface({
       {/* Schreiben tab (or always shown if no model answers) */}
       {(activeTab === 'schreiben' || !hasModelAnswers) && (
         <>
-          {/* Target info */}
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>{t('writing_target')}: ~{prompt.target_word_count} {t('writing_word_count')}</span>
-            {hasApiKey && <span>{t('writing_cost_note')}</span>}
-          </div>
-
           {/* Textarea */}
           {!evaluation && (
             <>
@@ -1244,7 +1363,7 @@ export default function WritingPage() {
             <LevelPromptList
               levels={tab.levels}
               hasApiKey={hasApiKey}
-              onSelectPrompt={setSelectedPrompt}
+              onSelectPrompt={(p) => { setSelectedPrompt(p); window.scrollTo(0, 0); }}
             />
           </TabsContent>
         ))}
