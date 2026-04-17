@@ -159,7 +159,7 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
                 onClick={() => handleLeftClick(idx)}
                 disabled={answered}
               >
-                {!isMobile && <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{idx + 1}</kbd>}
+                {!isMobile && <span className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold w-5 h-5 shrink-0 mr-2">{idx + 1}</span>}
                 <span lang="de" style={{ hyphens: 'auto' }}>{item.text}</span>
                 {!isMobile && matched && shuffledRight[matches.get(idx)!] && (
                   <span className="ml-auto text-xs text-muted-foreground">
@@ -187,7 +187,7 @@ export function SynonymMatch({ content, solution, instructions, explanation, ans
                 onClick={() => handleRightClick(idx)}
                 disabled={answered || isMatched}
               >
-                {!isMobile && <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{RIGHT_LABELS[idx]}</kbd>}
+                {!isMobile && <span className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold w-5 h-5 shrink-0 mr-2">{RIGHT_LABELS[idx]}</span>}
                 <span lang="de" style={{ hyphens: 'auto' }}>{item.text}</span>
               </Button>
             );

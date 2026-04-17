@@ -2,26 +2,28 @@ import { type ReactNode, useRef, useEffect, useState, useCallback } from 'react'
 
 /**
  * Below lg (<1024px): horizontal scroll wrapper that bleeds to screen edges.
- * Shows a right-edge fade when there's more content to scroll.
+ * Shows left/right edge fades when there's more content to scroll in that direction.
  * On desktop (>=1024px): renders children as-is.
  */
 export function ScrollNav({ children }: { children: ReactNode }) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [showFade, setShowFade] = useState(false);
+  const [fadeLeft, setFadeLeft] = useState(false);
+  const [fadeRight, setFadeRight] = useState(false);
 
-  const checkFade = useCallback(() => {
+  const checkFades = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
-    setShowFade(el.scrollWidth - el.scrollLeft - el.clientWidth > 4);
+    setFadeLeft(el.scrollLeft > 4);
+    setFadeRight(el.scrollWidth - el.scrollLeft - el.clientWidth > 4);
   }, []);
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    checkFade();
-    el.addEventListener('scroll', checkFade, { passive: true });
-    return () => el.removeEventListener('scroll', checkFade);
-  }, [checkFade]);
+    checkFades();
+    el.addEventListener('scroll', checkFades, { passive: true });
+    return () => el.removeEventListener('scroll', checkFades);
+  }, [checkFades]);
 
   return (
     <>
@@ -33,7 +35,10 @@ export function ScrollNav({ children }: { children: ReactNode }) {
         >
           {children}
         </div>
-        {showFade && (
+        {fadeLeft && (
+          <div className="pointer-events-none absolute inset-y-0 -left-4 w-14 bg-gradient-to-r from-background to-transparent" />
+        )}
+        {fadeRight && (
           <div className="pointer-events-none absolute inset-y-0 -right-4 w-14 bg-gradient-to-l from-background to-transparent" />
         )}
       </div>

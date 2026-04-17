@@ -4,13 +4,13 @@ import { FeedbackButton } from '@/components/shared/FeedbackButton';
 
 export function AppLayout() {
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden flex flex-col">
+    <div className="min-h-dvh bg-background overflow-x-hidden flex flex-col">
       <Navbar />
       <main className="container mx-auto px-4 py-6 max-w-6xl flex-1">
         <Outlet />
       </main>
       <footer className="border-t border-border mt-2">
-        <div className="container mx-auto px-4 max-w-6xl py-2 space-y-2">
+        <div className="container mx-auto px-4 max-w-6xl py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] space-y-2">
           <FeedbackButton />
           <hr className="border-border lg:hidden" />
           <nav className="flex flex-wrap justify-center gap-x-5 gap-y-1.5 text-xs">

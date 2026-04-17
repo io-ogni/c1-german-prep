@@ -16,7 +16,7 @@ const TOPIC_NAMES: Record<string, { de: string; en: string }> = {
   workshop_phrasen: { de: 'Workshop-Moderation', en: 'Workshop Facilitation' },
   refinement_phrasen: { de: 'Refinement & Planning', en: 'Refinement & Planning' },
   redewendungen: { de: 'Redewendungen', en: 'Idioms' },
-  krisen_simulator: { de: 'Krisen-Simulator', en: 'Crisis Simulator' },
+  krisen_simulator: { de: 'Notfallkit', en: 'Emergency Kit' },
 };
 
 export default function ITUebungenPage() {

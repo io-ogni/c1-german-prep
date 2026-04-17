@@ -35,7 +35,7 @@ function FloatingEmoji({ emoji, delay, x, y }: { emoji: string; delay: number; x
 }
 
 const features = [
-  { icon: BookOpen, title: 'telc C1 Prüfungsvorbereitung', desc: 'Reading, listening, writing, speaking — all exam sections with 980+ exercises.', color: 'from-blue-500 to-cyan-400' },
+  { icon: BookOpen, title: 'telc C1 Prüfungsvorbereitung', desc: 'Reading, listening, writing, speaking — all exam sections with 1100+ exercises.', color: 'from-blue-500 to-cyan-400' },
   { icon: PenLine, title: 'Schreiben mit KI-Feedback', desc: 'Write essays and get them evaluated by Claude using telc grading criteria. No API key? You get a prompt for your own LLM.', color: 'from-violet-500 to-purple-400' },
   { icon: Monitor, title: 'IT Deutsch', desc: '235+ nouns with articles, verbs, collocations, idioms, and user stories from 12 industries.', color: 'from-fuchsia-500 to-pink-400' },
   { icon: Mic, title: 'Audio für alles', desc: 'Every example sentence voiced with Google Cloud Neural2 TTS — no robot voice.', color: 'from-amber-500 to-orange-400' },
@@ -180,7 +180,7 @@ export default function WelcomePage() {
             transition={{ duration: 0.6, delay: 0.25 }}
             className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto mb-14 leading-relaxed"
           >
-            Free C1 prep built for tech professionals in Germany — from Refinement auf Deutsch to your telc exam. 980+ exercises, IT vocabulary, and AI writing feedback.
+            Free C1 prep built for tech professionals in Germany — from Refinement auf Deutsch to your telc exam. 1100+ exercises, IT vocabulary, and AI writing feedback.
           </motion.p>
 
           <motion.div
@@ -267,7 +267,7 @@ export default function WelcomePage() {
             viewport={{ once: true }}
             className="mt-12 rounded-xl border bg-primary/5 px-6 py-5 text-center"
           >
-            <p className="text-lg md:text-xl font-bold text-foreground">100% free. No ads. No premium tier.</p>
+            <p className="text-lg md:text-xl font-bold text-foreground">100% free. No ads.</p>
             <p className="text-sm text-muted-foreground mt-1">This is a personal project opened for the community.</p>
           </motion.div>
         </div>
@@ -286,7 +286,7 @@ export default function WelcomePage() {
             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6 text-center"
           >
             {[
-              { num: '980+', label: 'Exercises' },
+              { num: '1100+', label: 'Exercises' },
               { num: '235+', label: 'IT nouns' },
               { num: '120', label: 'User Stories from 12 industries' },
               { num: '130', label: 'Verbs with full conjugations' },
@@ -311,7 +311,7 @@ export default function WelcomePage() {
           className="max-w-2xl mx-auto text-center"
         >
           <h2 className="text-3xl md:text-5xl font-extrabold mb-6">
-            Ready to stop starting and start finishing?
+            Stop starting. Jetzt wird durchgezogen!
           </h2>
           <p className="text-lg text-muted-foreground mb-10">
             Tired of starting C1 exercise books and never finishing them? This app is an interactive alternative to boring learning — and it's completely free, because Jerry 🐕 likes it that way.

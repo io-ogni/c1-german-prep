@@ -150,7 +150,8 @@ export function Sprachbausteine({ content, solution, instructions, explanation, 
                 onClick={() => handleSelect(idx)}
                 disabled={subAnswered || parentAnswered || eliminated.has(idx)}
               >
-                <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0 hidden md:inline">{idx + 1}</kbd> {opt.text}
+                <span className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold w-5 h-5 shrink-0 mr-2 hidden md:inline-flex">{idx + 1}</span>
+                {opt.text}
               </Button>
             ))}
           </div>

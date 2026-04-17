@@ -81,7 +81,7 @@ export default function LoginPage() {
           >
             {[
               { num: '7', label: 'Bereiche' },
-              { num: '980+', label: 'Übungen' },
+              { num: '1100+', label: 'Übungen' },
               { num: 'AI', label: 'Feedback' },
             ].map((s) => (
               <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3">

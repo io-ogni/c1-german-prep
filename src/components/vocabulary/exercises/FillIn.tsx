@@ -51,14 +51,15 @@ export function FillIn({ content, solution, instructions, explanation, answered,
             key={idx}
             variant="outline"
             className={cn(
-              'justify-start text-left h-auto py-3',
+              'justify-start text-left h-auto py-3 hover:border-primary/40 hover:bg-primary/5',
               answered && idx === solution.correct && 'border-primary bg-primary/10 text-primary',
               answered && selected === idx && idx !== solution.correct && 'border-destructive bg-destructive/10 text-destructive'
             )}
             onClick={() => handleSelect(idx)}
             disabled={answered}
           >
-            <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0 hidden md:inline">{idx + 1}</kbd> {opt}
+            <span className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold w-5 h-5 shrink-0 mr-2">{idx + 1}</span>
+            {opt}
           </Button>
         ))}
       </div>

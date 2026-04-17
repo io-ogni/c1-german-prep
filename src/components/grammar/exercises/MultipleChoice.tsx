@@ -87,7 +87,7 @@ function SingleMC({ content, solution, instructions, explanation, answered, onAn
       }
     >
       {(content?.context || content?.sentence || content?.expression) && (
-        <div className="bg-muted rounded-md p-3">
+        <div className="bg-muted/50 rounded-md p-3">
           <SelectableText text={content.context ?? content.sentence ?? content.expression} className={content?.expression && !content?.context && !content?.sentence ? "text-lg font-semibold text-center" : "text-sm"} />
         </div>
       )}
@@ -97,14 +97,15 @@ function SingleMC({ content, solution, instructions, explanation, answered, onAn
             key={idx}
             variant="outline"
             className={cn(
-              'justify-start text-left h-auto py-3 whitespace-normal',
+              'justify-start text-left h-auto py-3 whitespace-normal bg-white dark:bg-card hover:border-primary/40 hover:bg-primary/5',
               answered && idx === shuffled.correctIdx && 'border-primary bg-primary/10 text-primary',
               answered && selected === idx && idx !== shuffled.correctIdx && 'border-destructive bg-destructive/10 text-destructive'
             )}
             onClick={() => handleSelect(idx)}
             disabled={answered}
           >
-            <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0 hidden md:inline">{idx + 1}</kbd> {opt.text}
+            <span className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold w-5 h-5 shrink-0 mr-2">{idx + 1}</span>
+            {opt.text}
           </Button>
         ))}
       </div>
@@ -181,7 +182,7 @@ function MultiStepMC({
             key={idx}
             variant="outline"
             className={cn(
-              'justify-start text-left h-auto py-3 whitespace-normal',
+              'justify-start text-left h-auto py-3 whitespace-normal hover:border-primary/40 hover:bg-primary/5',
               subAnswered && opt.toLowerCase() === correctAnswer.toLowerCase() && 'border-primary bg-primary/10 text-primary',
               eliminated.has(idx) && 'opacity-40 pointer-events-none border-destructive/50',
               !subAnswered && selected === idx && opt.toLowerCase() !== correctAnswer.toLowerCase() && 'border-destructive bg-destructive/10 text-destructive'
@@ -189,7 +190,8 @@ function MultiStepMC({
             onClick={() => handleSelect(idx)}
             disabled={subAnswered || parentAnswered || eliminated.has(idx)}
           >
-            <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0 hidden md:inline">{idx + 1}</kbd> {opt}
+            <span className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold w-5 h-5 shrink-0 mr-2">{idx + 1}</span>
+            {opt}
           </Button>
         ))}
       </div>

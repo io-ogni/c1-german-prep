@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { BookOpen, Mic, PenLine, Headphones, Monitor, Brain, Shield, Code, ArrowLeft } from 'lucide-react';
 
 const FEATURES = [
-  { icon: BookOpen, title: 'telc C1 exam prep', desc: 'Reading, listening, writing, speaking — all exam sections with 980+ exercises.' },
+  { icon: BookOpen, title: 'telc C1 exam prep', desc: 'Reading, listening, writing, speaking — all exam sections with 1100+ exercises.' },
   { icon: PenLine, title: 'Writing with AI feedback', desc: 'Write essays and get them evaluated by Claude (Anthropic) using telc grading criteria.' },
   { icon: Monitor, title: 'IT German', desc: '200+ nouns with articles, verbs, collocations, idioms, dialogues, podcasts, and user stories from 12 industries.' },
   { icon: Mic, title: 'Audio for everything', desc: 'Every example sentence voiced with Google Cloud Neural2 TTS — no robot voice.' },

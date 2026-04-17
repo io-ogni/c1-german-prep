@@ -65,7 +65,7 @@ export default function ITRedewendungenPage() {
   const getUrls = useCallback(() => filtered.map(i => getIdiomAudioUrl(i.id)).filter(Boolean) as string[], [filtered]);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <Monitor className="h-6 w-6" />

@@ -93,12 +93,10 @@ export function PraepositionenContent() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <SelectionHint hintKey="praepositionen" />
-        <div className="flex items-center gap-2">
-          <StarredButton active={starredOnly} onClick={() => setStarredOnly(prev => !prev)} />
-          <PlayAllButton color="blue" player={player} getUrls={() => filtered.map(item => getTtsUrl(item._i)).filter(Boolean) as string[]} />
-        </div>
+      <SelectionHint hintKey="praepositionen" />
+      <div className="flex items-center justify-end gap-2 -mt-2">
+        <StarredButton active={starredOnly} onClick={() => setStarredOnly(prev => !prev)} />
+        <PlayAllButton color="blue" player={player} getUrls={() => filtered.map(item => getTtsUrl(item._i)).filter(Boolean) as string[]} />
       </div>
 
       {/* Desktop */}

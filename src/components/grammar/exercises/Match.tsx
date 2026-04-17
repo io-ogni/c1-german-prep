@@ -136,7 +136,7 @@ function PairsMatch({ content, solution, instructions, explanation, answered, on
                 )}
                 onClick={() => handleLeftClick(i)} disabled={answered}
               >
-                {!isMobile && <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{i + 1}</kbd>}
+                {!isMobile && <span className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold w-5 h-5 shrink-0 mr-2">{i + 1}</span>}
                 <span lang="de" style={{ hyphens: 'auto' }}>{w}</span>
               </Button>
             );
@@ -158,7 +158,7 @@ function PairsMatch({ content, solution, instructions, explanation, answered, on
                 onClick={() => handleRightClick(i)}
                 disabled={answered || isMatched}
               >
-                {!isMobile && <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{RIGHT_LABELS[i]}</kbd>}
+                {!isMobile && <span className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold w-5 h-5 shrink-0 mr-2">{RIGHT_LABELS[i]}</span>}
                 <span lang="de" style={{ hyphens: 'auto' }}>{d.text}</span>
               </Button>
             );
@@ -259,7 +259,7 @@ function ArrayMatch({ content, solution, instructions, explanation, answered, on
                 )}
                 onClick={() => handleLeftClick(i)} disabled={answered}
               >
-                {!isMobile && <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{i + 1}</kbd>}
+                {!isMobile && <span className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold w-5 h-5 shrink-0 mr-2">{i + 1}</span>}
                 <span lang="de" style={{ hyphens: 'auto' }}>{item}</span>
               </Button>
             );
@@ -279,7 +279,7 @@ function ArrayMatch({ content, solution, instructions, explanation, answered, on
                 )}
                 onClick={() => handleRightClick(i)} disabled={answered || isMatched}
               >
-                {!isMobile && <kbd className="font-mono text-[10px] opacity-50 mr-2 shrink-0">{RIGHT_LABELS[i]}</kbd>}
+                {!isMobile && <span className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold w-5 h-5 shrink-0 mr-2">{RIGHT_LABELS[i]}</span>}
                 <span lang="de" style={{ hyphens: 'auto' }}>{item}</span>
               </Button>
             );
