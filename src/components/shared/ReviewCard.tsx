@@ -1,12 +1,13 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Eye, CheckCircle, XCircle, RotateCcw, Check, X } from 'lucide-react';
+import { Eye, CheckCircle, XCircle, RotateCcw, Check, X, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { track } from '@/lib/posthog';
+import { getFlashcardAudioUrl } from '@/lib/flashcardAudio';
 
 interface VocabWord {
   id: string;
@@ -167,6 +168,16 @@ export function ReviewCard({ dueCards, onCardReviewed, compact }: ReviewCardProp
 
   const currentCard = dueCards[reviewIndex];
   const minH = compact ? 'min-h-[200px]' : 'min-h-[260px]';
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const ttsUrl = getFlashcardAudioUrl(currentCard.source_type, currentCard.word_de);
+
+  const playAudio = useCallback((url: string) => {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    const audio = new Audio(url);
+    audioRef.current = audio;
+    audio.onended = () => { audioRef.current = null; };
+    audio.play().catch(() => { audioRef.current = null; });
+  }, []);
 
   return (
     <div className="flex flex-col items-center gap-4 relative rounded-2xl border border-border bg-muted/30 p-4 sm:p-6">
@@ -223,6 +234,14 @@ export function ReviewCard({ dueCards, onCardReviewed, compact }: ReviewCardProp
               )}
             </div>
             <p className={`${compact ? 'text-xl' : 'text-2xl'} font-bold text-foreground`}>{currentCard.word_de}</p>
+            {ttsUrl && (
+              <button
+                onClick={(e) => { e.stopPropagation(); playAudio(ttsUrl); }}
+                className="mt-3 text-muted-foreground hover:text-primary transition-colors"
+              >
+                <Volume2 className="h-5 w-5" />
+              </button>
+            )}
           </div>
 
           {/* Back */}
