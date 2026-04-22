@@ -16,7 +16,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, PenLine, AlertCircle, Copy, CheckCheck, Filter, MessagesSquare, PlayCircle, AlignLeft, CheckCircle, Braces, Link2, Volume2 } from 'lucide-react';
+import { Loader2, PenLine, AlertCircle, Copy, CheckCheck, Filter, MessagesSquare, PlayCircle, AlignLeft, CheckCircle, Braces, Link2, Volume2, BookOpen, Edit3 } from 'lucide-react';
 import { usePlayAll } from '@/hooks/usePlayAll';
 import { PlayAllButton } from '@/components/PlayAllButton';
 import { toast } from '@/hooks/use-toast';
@@ -29,6 +29,7 @@ import { StarredButton } from '@/components/shared/StarredButton';
 import { SelectionHint, markHintInteraction } from '@/components/shared/SelectionHint';
 import { TertiaryNav } from '@/components/shared/TertiaryNav';
 import type { TertiaryNavItem } from '@/components/shared/TertiaryNav';
+import { ClickableExampleText } from '@/components/writing/ClickableExampleText';
 import type { Tables } from '@/integrations/supabase/types';
 
 // ─── TTS Audio ───
@@ -771,14 +772,34 @@ function WritingInterface({
   const { profile } = useRequiredAuth();
   const lang = profile?.ui_language || 'de';
 
+  const exampleTexts = (prompt as any).example_texts as { title: string; text: string }[] | null;
+  const hasExamples = !!exampleTexts && exampleTexts.length > 0;
+
+  const [activeView, setActiveView] = useState<'beispiele' | 'schreiben'>(hasExamples ? 'beispiele' : 'schreiben');
+  const [exampleIndex, setExampleIndex] = useState(0);
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [evaluation, setEvaluation] = useState<EvaluationResponse | null>(null);
   const [copied, setCopied] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
 
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
   const context = lang === 'de' ? prompt.context_de : prompt.context_en;
   const starterQuotes = (prompt.starter_quotes as unknown as { text: string; source: string }[] | null) ?? [];
+
+  const speakExample = () => {
+    if (speaking) { speechSynthesis.cancel(); setSpeaking(false); return; }
+    if (!exampleTexts?.[exampleIndex]) return;
+    const u = new SpeechSynthesisUtterance(exampleTexts[exampleIndex].text);
+    u.lang = 'de-DE';
+    u.rate = 0.95;
+    u.onend = () => setSpeaking(false);
+    setSpeaking(true);
+    speechSynthesis.speak(u);
+  };
+
+  // Stop TTS when switching examples or views
+  useEffect(() => { speechSynthesis.cancel(); setSpeaking(false); }, [exampleIndex, activeView]);
 
   const handleSubmit = async () => {
     if (!hasApiKey) {
@@ -831,6 +852,11 @@ function WritingInterface({
     }
   };
 
+  const viewNav: TertiaryNavItem[] = [
+    ...(hasExamples ? [{ value: 'beispiele', label: 'Beispiele', icon: BookOpen }] : []),
+    { value: 'schreiben', label: 'Schreiben', icon: Edit3 },
+  ];
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -858,87 +884,138 @@ function WritingInterface({
 
       {!hasApiKey && <ApiKeyBanner />}
 
-      {/* Context box + quotes */}
-      <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-4">
-        <p className="text-sm text-foreground whitespace-pre-wrap">{context}</p>
-        {starterQuotes.length > 0 && (
-          <div className="space-y-2 rounded-lg bg-muted/50 p-3">
-            {starterQuotes.map((q, i) => (
-              <p key={i} className="text-sm italic text-foreground">
-                „{q.text}"{q.source ? ` — ${q.source}` : ''}
-              </p>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Target info */}
-      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-        <span>{t('writing_target')}: ~{prompt.target_word_count} {t('writing_word_count')}</span>
-        {hasApiKey && <span>{t('writing_cost_note')}</span>}
-      </div>
-
-      {/* Textarea */}
-      {!evaluation && (
-        <>
-          <Textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={lang === 'de' ? 'Schreibe hier deinen Text...' : 'Write your text here...'}
-            className="min-h-[200px] resize-y text-base bg-white dark:bg-card"
-          />
-
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <span className="text-sm text-muted-foreground">
-              {t('writing_word_count')}: {wordCount}/{prompt.target_word_count}
-            </span>
-            <div className="flex items-center gap-2">
-              {hasApiKey && (
-                <Button
-                  onClick={handleSubmit}
-                  disabled={submitting || wordCount < 10}
-                  className="shrink-0"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {t('writing_evaluating')}
-                    </>
-                  ) : (
-                    t('writing_submit')
-                  )}
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                className="text-xs sm:text-sm"
-                onClick={() => {
-                  navigator.clipboard.writeText(buildCopyPrompt(prompt, text));
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 2000);
-                  toast({ title: t('writing_copied') });
-                }}
-                disabled={wordCount < 10}
-              >
-                {copied ? (
-                  <><CheckCheck className="mr-2 h-4 w-4" />{t('writing_copied')}</>
-                ) : (
-                  <><Copy className="mr-2 h-4 w-4 shrink-0" /><span className="truncate">{t('writing_copy_prompt')}</span></>
-                )}
-              </Button>
-            </div>
-          </div>
-        </>
+      {/* Beispiele / Schreiben toggle */}
+      {hasExamples && (
+        <TertiaryNav
+          items={viewNav}
+          activeValue={activeView}
+          onChange={(v) => setActiveView(v as 'beispiele' | 'schreiben')}
+          color="blue"
+        />
       )}
 
-      {/* Results */}
-      {evaluation && <EvaluationDisplay evaluation={evaluation} />}
+      {/* ─── Beispiele View ─── */}
+      {activeView === 'beispiele' && hasExamples && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <Select value={String(exampleIndex)} onValueChange={(v) => setExampleIndex(Number(v))}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {exampleTexts!.map((ex, i) => (
+                  <SelectItem key={i} value={String(i)}>Beispiel {i + 1}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      {evaluation && (
-        <div className="flex gap-3">
-          <Button variant="outline" onClick={() => { setEvaluation(null); setText(''); }}>
-            {t('exercise_try_again')}
-          </Button>
+          <SelectionHint hintKey="writing-beispiele" variant="reading" />
+
+          <Card className="p-5 sm:p-8">
+            <div className="flex justify-end mb-2">
+              <button
+                onClick={speakExample}
+                className="inline-flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
+              >
+                <Volume2 className="h-4 w-4" />
+                {speaking ? 'Stopp' : 'Text anhören'}
+              </button>
+            </div>
+            <ClickableExampleText
+              text={exampleTexts![exampleIndex].text}
+              promptId={prompt.id}
+            />
+          </Card>
+        </div>
+      )}
+
+      {/* ─── Schreiben View ─── */}
+      {activeView === 'schreiben' && (
+        <div className="space-y-4">
+          {/* Context box + quotes */}
+          <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-4">
+            <p className="text-sm text-foreground whitespace-pre-wrap">{context}</p>
+            {starterQuotes.length > 0 && (
+              <div className="space-y-2 rounded-lg bg-muted/50 p-3">
+                {starterQuotes.map((q, i) => (
+                  <p key={i} className="text-sm italic text-foreground">
+                    „{q.text}"{q.source ? ` — ${q.source}` : ''}
+                  </p>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Target info */}
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span>{t('writing_target')}: ~{prompt.target_word_count} {t('writing_word_count')}</span>
+            {hasApiKey && <span>{t('writing_cost_note')}</span>}
+          </div>
+
+          {/* Textarea */}
+          {!evaluation && (
+            <>
+              <Textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder={lang === 'de' ? 'Schreibe hier deinen Text...' : 'Write your text here...'}
+                className="min-h-[200px] resize-y text-base bg-white dark:bg-card"
+              />
+
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <span className="text-sm text-muted-foreground">
+                  {t('writing_word_count')}: {wordCount}/{prompt.target_word_count}
+                </span>
+                <div className="flex items-center gap-2">
+                  {hasApiKey && (
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={submitting || wordCount < 10}
+                      className="shrink-0"
+                    >
+                      {submitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          {t('writing_evaluating')}
+                        </>
+                      ) : (
+                        t('writing_submit')
+                      )}
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    className="text-xs sm:text-sm"
+                    onClick={() => {
+                      navigator.clipboard.writeText(buildCopyPrompt(prompt, text));
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                      toast({ title: t('writing_copied') });
+                    }}
+                    disabled={wordCount < 10}
+                  >
+                    {copied ? (
+                      <><CheckCheck className="mr-2 h-4 w-4" />{t('writing_copied')}</>
+                    ) : (
+                      <><Copy className="mr-2 h-4 w-4 shrink-0" /><span className="truncate">{t('writing_copy_prompt')}</span></>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Results */}
+          {evaluation && <EvaluationDisplay evaluation={evaluation} />}
+
+          {evaluation && (
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => { setEvaluation(null); setText(''); }}>
+                {t('exercise_try_again')}
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>
