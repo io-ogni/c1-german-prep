@@ -8,7 +8,11 @@ These are hard-won rules from actual bugs and lost work. Follow them.
 
 The single most important rule. If you build something that works, commit it immediately. Don't wait for "the right moment." Don't batch changes. Days of work have been lost because a session ended without committing. If in doubt, commit.
 
-## 2. Test locally first
+## 2. Save before context compression
+
+When a session is getting long and context compression is approaching, save all work immediately — commit code, note what's in progress, what's left to do. Context compression silently drops details. Don't let uncommitted work or unfinished plans disappear.
+
+## 3. Test locally first
 
 Always start the Vite dev server (`npm run dev`) and test on localhost before pushing. Pushing triggers a slow build/deploy cycle. Iterate locally.
 

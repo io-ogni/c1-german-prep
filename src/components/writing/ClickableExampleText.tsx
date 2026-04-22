@@ -14,6 +14,7 @@ import { track } from '@/lib/posthog';
 interface Props {
   text: string;
   promptId: string;
+  wordAnnotations?: Record<string, { de: string; en: string }>;
 }
 
 function stripPunctuation(word: string): string {
@@ -32,7 +33,7 @@ function getSentenceAtPosition(text: string, charPos: number): string {
 
 type WordKey = `${number}-${number}`;
 
-export function ClickableExampleText({ text, promptId }: Props) {
+export function ClickableExampleText({ text, promptId, wordAnnotations }: Props) {
   const { t } = useTranslation();
   const { profile } = useRequiredAuth();
   const isMobile = useIsMobile();
@@ -86,15 +87,21 @@ export function ClickableExampleText({ text, promptId }: Props) {
     setSelectedWord(cleanWord);
   };
 
+  const annotation = selectedWord
+    ? wordAnnotations?.[selectedWord.toLowerCase()] ?? wordAnnotations?.[selectedWord] ?? null
+    : null;
+
   const addToVocabulary = async () => {
     if (!profile || !selectedWord) return;
 
     const sentence = getSentenceAtPosition(text, text.toLowerCase().indexOf(selectedWord.toLowerCase()));
+    const wordDe = annotation?.de || selectedWord;
+    const translationEn = annotation?.en || '';
 
     const { error } = await supabase.from('personal_vocabulary').insert({
       user_id: profile.user_id,
-      word_de: selectedWord,
-      translation_en: '',
+      word_de: wordDe,
+      translation_en: translationEn,
       source_type: 'schreiben-beispiel',
       source_id: promptId,
       example_sentence: sentence,
@@ -105,7 +112,7 @@ export function ClickableExampleText({ text, promptId }: Props) {
       toast.error(error.message);
     } else {
       markHintInteraction('writing-beispiele');
-      track('vocab_saved', { word_de: selectedWord, source_type: 'schreiben-beispiel', source_page: 'writing' });
+      track('vocab_saved', { word_de: wordDe, source_type: 'schreiben-beispiel', source_page: 'writing' });
       toast.success(t('word_added'));
       clearSelection();
     }
@@ -117,7 +124,15 @@ export function ClickableExampleText({ text, promptId }: Props) {
     <>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="font-semibold text-sm text-foreground break-words">{selectedWord}</p>
+          <p className="font-semibold text-sm text-foreground break-words">
+            {annotation?.de || selectedWord}
+          </p>
+          {annotation?.en && (
+            <p className="text-xs text-muted-foreground mt-1">{annotation.en}</p>
+          )}
+          {!annotation && (
+            <p className="text-xs text-muted-foreground mt-1 italic">Keine Übersetzung verfügbar</p>
+          )}
         </div>
         <Button variant="ghost" size="sm" className="h-6 w-6 p-0 shrink-0" onClick={clearSelection}>
           <X className="h-3.5 w-3.5" />
@@ -137,7 +152,7 @@ export function ClickableExampleText({ text, promptId }: Props) {
 
   return (
     <div ref={containerRef} className="relative">
-      <div className="space-y-4 leading-relaxed text-foreground text-[15px]">
+      <div className="space-y-5 leading-[1.8] text-foreground text-base sm:text-lg">
         {paragraphs.map((para, pIdx) => {
           const words = para.split(/(\s+)/);
           return (

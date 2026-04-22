@@ -772,7 +772,7 @@ function WritingInterface({
   const { profile } = useRequiredAuth();
   const lang = profile?.ui_language || 'de';
 
-  const exampleTexts = (prompt as any).example_texts as { title: string; text: string }[] | null;
+  const exampleTexts = (prompt as any).example_texts as { title: string; text: string; word_annotations?: Record<string, { de: string; en: string }> }[] | null;
   const hasExamples = !!exampleTexts && exampleTexts.length > 0;
 
   const [activeView, setActiveView] = useState<'beispiele' | 'schreiben'>(hasExamples ? 'beispiele' : 'schreiben');
@@ -868,6 +868,20 @@ function WritingInterface({
 
       {!hasApiKey && <ApiKeyBanner />}
 
+      {/* Context box + quotes — above both tabs */}
+      <div className="rounded-lg bg-primary/5 border border-primary/20 px-3 py-2.5 space-y-2">
+        <p className="text-xs text-foreground whitespace-pre-wrap leading-relaxed">{context}</p>
+        {starterQuotes.length > 0 && (
+          <div className="space-y-1 rounded bg-muted/50 px-2.5 py-2">
+            {starterQuotes.map((q, i) => (
+              <p key={i} className="text-xs italic text-foreground leading-relaxed">
+                „{q.text}"{q.source ? ` — ${q.source}` : ''}
+              </p>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Beispiele / Schreiben toggle */}
       {hasExamples && (
         <TertiaryNav
@@ -900,6 +914,7 @@ function WritingInterface({
             <ClickableExampleText
               text={exampleTexts![exampleIndex].text}
               promptId={prompt.id}
+              wordAnnotations={exampleTexts![exampleIndex].word_annotations}
             />
           </Card>
         </div>
@@ -908,20 +923,6 @@ function WritingInterface({
       {/* ─── Schreiben View ─── */}
       {activeView === 'schreiben' && (
         <div className="space-y-4">
-          {/* Context box + quotes */}
-          <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-4">
-            <p className="text-sm text-foreground whitespace-pre-wrap">{context}</p>
-            {starterQuotes.length > 0 && (
-              <div className="space-y-2 rounded-lg bg-muted/50 p-3">
-                {starterQuotes.map((q, i) => (
-                  <p key={i} className="text-sm italic text-foreground">
-                    „{q.text}"{q.source ? ` — ${q.source}` : ''}
-                  </p>
-                ))}
-              </div>
-            )}
-          </div>
-
           {/* Target info */}
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span>{t('writing_target')}: ~{prompt.target_word_count} {t('writing_word_count')}</span>
