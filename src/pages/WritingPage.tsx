@@ -56,6 +56,12 @@ type WritingPrompt = Tables<'writing_prompts'>;
 type WritingSubmission = Tables<'writing_submissions'>;
 type WritingLevel = 'rusty' | 'solid_b2' | 'almost_c1';
 
+const TEXT_TYPE_LABELS: Record<string, string> = {
+  eroerterung: 'Erörterung',
+  stellungnahme: 'Stellungnahme',
+  formeller_brief: 'Formeller Brief',
+};
+
 interface CriterionResult {
   grade: string;
   feedback_de: string;
@@ -850,7 +856,7 @@ function WritingInterface({
             {lang === 'de' ? prompt.title_de : prompt.title_en}
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            <span className="capitalize">{prompt.text_type.replace(/_/g, ' ')}</span>
+            {TEXT_TYPE_LABELS[prompt.text_type] || prompt.text_type.replace(/_/g, ' ')}
             {prompt.exam_format === 'telc' && <> | telc</>}
             {' '}| ~{prompt.target_word_count} {t('writing_word_count')}
           </p>
@@ -1062,8 +1068,8 @@ function LevelPromptList({
                   </div>
                 </div>
                 <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-                  <Badge variant="secondary" className="text-[10px] sm:text-xs capitalize">
-                    {p.text_type.replace(/_/g, ' ')}
+                  <Badge variant="secondary" className="text-[10px] sm:text-xs">
+                    {TEXT_TYPE_LABELS[p.text_type] || p.text_type.replace(/_/g, ' ')}
                   </Badge>
                   {p.exam_format === 'telc' && <TelcBadge />}
                   <span>~{p.target_word_count} {t('writing_word_count')}</span>
