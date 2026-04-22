@@ -1,42 +1,40 @@
 # CLAUDE.md — C1 Werkstatt
 
+## Rule #1: COMMIT YOUR WORK
+If you build something that works, commit it immediately. Days of work have been lost to uncommitted sessions. Don't batch. Don't wait. Commit.
+
+## Reference Docs (read before making changes)
+- `docs/PROJECT_STRUCTURE.md` — Full architecture, routing, tables, hooks, patterns
+- `docs/CODING_RULES.md` — Engineering rules, migration gotchas, non-negotiable practices
+
 ## Git & Branch Strategy
 
-- **`production`** is the working branch. All development happens here. This is what gets deployed.
-- **`main`** is Lovable's branch. Lovable pushes here automatically. Never commit to it manually.
-- **Never merge `main` into `production` wholesale.** The branches are intentionally diverged.
-- Cherry-pick only: when Ioana finds something good on Lovable's `main`, read it with `git show origin/main:<path>` and manually port the relevant parts into `production`.
-- Lovable should only be used to build **new pages or components** — not to modify files we've heavily customized on `production`.
+- **`production`** is the working branch. All development happens here. Deployed via GitHub Pages.
+- **`main`** is Lovable's branch. Never commit to it manually. Never merge `main` into `production`.
+- Lovable may still push to `main`. It was used for AI-generated images only. May be disconnected soon.
+- Always test on localhost:8080 before pushing to production.
 
 ## Heavily Customized Files (do not overwrite from main)
 
-- `src/pages/ITDeutschPage.tsx`
-- `src/pages/ITVokabularPage.tsx`
-- `src/pages/ITRedewendungenPage.tsx`
-- `src/pages/ITUebungenPage.tsx`
-- `src/components/reading/ClickableText.tsx`
-- `src/components/reading/ReadingInterface.tsx`
+- `src/pages/ITDeutschPage.tsx`, `ITVokabularPage.tsx`, `ITRedewendungenPage.tsx`, `ITUebungenPage.tsx`
+- `src/components/reading/ClickableText.tsx`, `ReadingInterface.tsx`
 - `src/components/reading/questions/TextrekonstruktionQuestions.tsx`
-- `src/components/layout/Navbar.tsx`
-- `src/components/layout/ITDeutschNav.tsx`
-- `src/pages/WelcomePage.tsx`
-- `src/pages/LoginPage.tsx`
-- `src/pages/HomePage.tsx`
-- `src/App.tsx`
-- `index.html`
-
-## Tech Stack
-
-- React + TypeScript + Vite
-- Tailwind CSS + ShadCN UI components
-- Supabase (auth, database, storage)
-- React Router, TanStack Query
-- framer-motion for animations
+- `src/components/layout/Navbar.tsx`, `ITDeutschNav.tsx`
+- `src/pages/WelcomePage.tsx`, `LoginPage.tsx`, `HomePage.tsx`
+- `src/App.tsx`, `index.html`
 
 ## IT Deutsch Section
 
 - Fuchsia/pink branding (not primary blue)
-- Sub-nav: Medien | Übungen | IT-Vokabular | Redewendungen | Lernkarten
-- Media files served from Supabase Storage bucket `Media IT`
-- 72 idiom illustrations in `src/assets/idioms/`
-- Exercise data stored in Supabase with `area = 'berufssprache_it'`
+- Sub-nav: Ubungen | Medien | IT-Vokabular | Redewendungen | Lernkarten
+- Media files from Supabase Storage bucket `Media IT`
+- Exercise data: `area = 'berufssprache_it'` in Supabase
+
+## Quick Reminders
+
+- Mobile-first (iPhone 16 is primary device)
+- German text: validate ä/ö/ü/ß before DB insert
+- Never display .env or credentials
+- Exercises must use existing vocabulary arrays, not invent new terms
+- `supabase db push` is broken — use `npx supabase db query --linked` instead
+- If you disagree with a change, say so before executing it

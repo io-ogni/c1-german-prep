@@ -858,21 +858,19 @@ function WritingInterface({
 
       {!hasApiKey && <ApiKeyBanner />}
 
-      {/* Context box */}
-      <div className="rounded-lg bg-primary/5 border border-primary/20 p-4">
+      {/* Context box + quotes */}
+      <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-4">
         <p className="text-sm text-foreground whitespace-pre-wrap">{context}</p>
+        {starterQuotes.length > 0 && (
+          <div className="space-y-2 rounded-lg bg-muted/50 p-3">
+            {starterQuotes.map((q, i) => (
+              <p key={i} className="text-sm italic text-foreground">
+                „{q.text}"{q.source ? ` — ${q.source}` : ''}
+              </p>
+            ))}
+          </div>
+        )}
       </div>
-
-      {/* Starter quotes */}
-      {starterQuotes.length > 0 && (
-        <div className="space-y-2 rounded-lg border border-border bg-muted/50 p-4">
-          {starterQuotes.map((q, i) => (
-            <blockquote key={i} className="border-l-2 border-primary pl-3 text-sm italic text-foreground">
-              „{q.text}" — <span className="not-italic text-muted-foreground">{q.source}</span>
-            </blockquote>
-          ))}
-        </div>
-      )}
 
       {/* Target info */}
       <div className="flex items-center gap-4 text-sm text-muted-foreground">
