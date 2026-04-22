@@ -781,25 +781,9 @@ function WritingInterface({
   const [submitting, setSubmitting] = useState(false);
   const [evaluation, setEvaluation] = useState<EvaluationResponse | null>(null);
   const [copied, setCopied] = useState(false);
-  const [speaking, setSpeaking] = useState(false);
-
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
   const context = lang === 'de' ? prompt.context_de : prompt.context_en;
   const starterQuotes = (prompt.starter_quotes as unknown as { text: string; source: string }[] | null) ?? [];
-
-  const speakExample = () => {
-    if (speaking) { speechSynthesis.cancel(); setSpeaking(false); return; }
-    if (!exampleTexts?.[exampleIndex]) return;
-    const u = new SpeechSynthesisUtterance(exampleTexts[exampleIndex].text);
-    u.lang = 'de-DE';
-    u.rate = 0.95;
-    u.onend = () => setSpeaking(false);
-    setSpeaking(true);
-    speechSynthesis.speak(u);
-  };
-
-  // Stop TTS when switching examples or views
-  useEffect(() => { speechSynthesis.cancel(); setSpeaking(false); }, [exampleIndex, activeView]);
 
   const handleSubmit = async () => {
     if (!hasApiKey) {
@@ -913,15 +897,6 @@ function WritingInterface({
           <SelectionHint hintKey="writing-beispiele" variant="reading" />
 
           <Card className="p-5 sm:p-8">
-            <div className="flex justify-end mb-2">
-              <button
-                onClick={speakExample}
-                className="inline-flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
-              >
-                <Volume2 className="h-4 w-4" />
-                {speaking ? 'Stopp' : 'Text anhören'}
-              </button>
-            </div>
             <ClickableExampleText
               text={exampleTexts![exampleIndex].text}
               promptId={prompt.id}

@@ -35,6 +35,7 @@ If you build something that works, commit it immediately. Days of work have been
 - Mobile-first (iPhone 16 is primary device)
 - German text: validate ä/ö/ü/ß before DB insert
 - Never display .env or credentials
+- Audio: Google Cloud TTS only (de-DE-Neural2-D), never browser SpeechSynthesis
 - Exercises must use existing vocabulary arrays, not invent new terms
 - `supabase db push` is broken — use `npx supabase db query --linked` instead
 - If you disagree with a change, say so before executing it

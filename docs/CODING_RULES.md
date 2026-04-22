@@ -58,7 +58,10 @@ npx supabase migration repair --status applied YYYYMMDDHHMMSS
 
 Do NOT try to "fix" the migration history.
 
-## 13. Mobile-first
+## 13. Audio: Google Cloud TTS only
+Never use browser SpeechSynthesis for TTS. All audio in this app uses Google Cloud TTS (de-DE-Neural2-D, rate 0.95). If a feature needs audio, generate MP3s via the Google Cloud TTS API and store them in `src/assets/audio/`. See `scripts/generate-schreiben-tts.py` for the pattern.
+
+## 14. Mobile-first
 
 iPhone 16 is the primary device. All UI work must be considered at mobile viewport widths first.
 
