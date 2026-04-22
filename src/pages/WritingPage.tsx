@@ -16,14 +16,11 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, PenLine, AlertCircle, Copy, CheckCheck, Filter, MessagesSquare, PlayCircle, AlignLeft, CheckCircle, Braces, Link2, Volume2, BookOpen, Edit3 } from 'lucide-react';
+import { Loader2, PenLine, AlertCircle, Copy, CheckCheck, Filter, MessagesSquare, PlayCircle, AlignLeft, CheckCircle, Braces, Link2, Volume2, BookOpen, Edit3, ArrowLeft } from 'lucide-react';
 import { usePlayAll } from '@/hooks/usePlayAll';
 import { PlayAllButton } from '@/components/PlayAllButton';
 import { toast } from '@/hooks/use-toast';
 import { Link, useSearchParams } from 'react-router-dom';
-import {
-  Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
 import { useHighlightedPhrases } from '@/hooks/useHighlightedPhrases';
 import { StarredButton } from '@/components/shared/StarredButton';
 import { SelectionHint, markHintInteraction } from '@/components/shared/SelectionHint';
@@ -843,26 +840,20 @@ function WritingInterface({
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="space-y-1">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink className="cursor-pointer" onClick={onBack}>
-                {t('page_writing')}
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>{lang === 'de' ? prompt.title_de : prompt.title_en}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-        <div className="flex items-center gap-2">
-          <h2 className="text-xl font-bold text-foreground">
+      {/* Header — same pattern as ReadingInterface */}
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" onClick={onBack} className="shrink-0">
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-base sm:text-xl font-bold text-foreground">
             {lang === 'de' ? prompt.title_de : prompt.title_en}
-          </h2>
-          {prompt.exam_format === 'telc' && <TelcBadge />}
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            <span className="capitalize">{prompt.text_type.replace(/_/g, ' ')}</span>
+            {prompt.exam_format === 'telc' && <> | telc</>}
+            {' '}| ~{prompt.target_word_count} {t('writing_word_count')}
+          </p>
         </div>
       </div>
 
