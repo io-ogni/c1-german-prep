@@ -31,6 +31,14 @@ import type { Tables } from '@/integrations/supabase/types';
 
 // ─── TTS Audio ───
 
+// ─── Beispiele Audio ───
+const beispieleAudio = import.meta.glob('/src/assets/audio/schreiben-beispiele/*.mp3', { eager: true, import: 'default' }) as Record<string, string>;
+
+function getBeispielAudioUrl(sortOrder: number, beispielIndex: number): string | undefined {
+  const padded = String(sortOrder).padStart(2, '0');
+  return beispieleAudio[`/src/assets/audio/schreiben-beispiele/${padded}-beispiel-${beispielIndex + 1}.mp3`];
+}
+
 const ttsAudio: Record<string, Record<string, string>> = {
   'schreiben-einleitung': import.meta.glob('/src/assets/audio/schreiben-einleitung/*.mp3', { eager: true, import: 'default' }) as Record<string, string>,
   'schreiben-hauptteil': import.meta.glob('/src/assets/audio/schreiben-hauptteil/*.mp3', { eager: true, import: 'default' }) as Record<string, string>,
@@ -780,13 +788,41 @@ function WritingInterface({
 
   const [activeView, setActiveView] = useState<'beispiele' | 'schreiben'>(hasExamples ? 'beispiele' : 'schreiben');
   const [exampleIndex, setExampleIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [evaluation, setEvaluation] = useState<EvaluationResponse | null>(null);
   const [copied, setCopied] = useState(false);
+  const sortOrder = (prompt as any).sort_order as number | undefined;
+
+  const toggleBeispielAudio = useCallback(() => {
+    if (isPlaying && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+      setIsPlaying(false);
+      return;
+    }
+    if (!sortOrder) return;
+    const url = getBeispielAudioUrl(sortOrder, exampleIndex);
+    if (!url) return;
+    const audio = new Audio(url);
+    audioRef.current = audio;
+    audio.onended = () => { setIsPlaying(false); audioRef.current = null; };
+    setIsPlaying(true);
+    audio.play();
+  }, [isPlaying, sortOrder, exampleIndex]);
+
+  // Stop audio on example/view switch
+  useEffect(() => {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; setIsPlaying(false); }
+  }, [exampleIndex, activeView]);
+
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
   const context = lang === 'de' ? prompt.context_de : prompt.context_en;
   const starterQuotes = (prompt.starter_quotes as unknown as { text: string; source: string }[] | null) ?? [];
+  const beispielAudioUrl = sortOrder ? getBeispielAudioUrl(sortOrder, exampleIndex) : undefined;
 
   const handleSubmit = async () => {
     if (!hasApiKey) {
@@ -908,6 +944,17 @@ function WritingInterface({
           <SelectionHint hintKey="writing-beispiele" variant="reading" />
 
           <Card className="p-5 sm:p-8">
+            {beispielAudioUrl && (
+              <div className="flex justify-end mb-3">
+                <button
+                  onClick={toggleBeispielAudio}
+                  className="inline-flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
+                >
+                  <Volume2 className="h-4 w-4" />
+                  {isPlaying ? 'Stopp' : 'Text anhören'}
+                </button>
+              </div>
+            )}
             <ClickableExampleText
               text={exampleTexts![exampleIndex].text}
               promptId={prompt.id}
