@@ -142,7 +142,7 @@ export function ClickableExampleText({ text, promptId, wordAnnotations }: Props)
         onClick={addToVocabulary}
       >
         <Plus className="h-3 w-3" />
-        {t('add_to_vocabulary')}
+        {t('word_add_to_vocabulary')}
       </Button>
     </>
   ) : null;
