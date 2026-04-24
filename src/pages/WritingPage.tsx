@@ -987,12 +987,12 @@ function WritingInterface({
                 <span className="text-sm text-muted-foreground">
                   {t('writing_word_count')}: {wordCount}/{prompt.target_word_count}
                 </span>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   {hasApiKey && (
                     <Button
                       onClick={handleSubmit}
                       disabled={submitting || wordCount < 10}
-                      className="shrink-0"
+                      className="w-full sm:w-auto"
                     >
                       {submitting ? (
                         <>
