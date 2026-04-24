@@ -130,9 +130,6 @@ export function ClickableExampleText({ text, promptId, wordAnnotations }: Props)
           {annotation?.en && (
             <p className="text-xs text-muted-foreground mt-1">{annotation.en}</p>
           )}
-          {!annotation && (
-            <p className="text-xs text-muted-foreground mt-1 italic">Keine Übersetzung verfügbar</p>
-          )}
         </div>
         <Button variant="ghost" size="sm" className="h-6 w-6 p-0 shrink-0" onClick={clearSelection}>
           <X className="h-3.5 w-3.5" />
