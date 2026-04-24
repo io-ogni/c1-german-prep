@@ -33,6 +33,49 @@ function getSentenceAtPosition(text: string, charPos: number): string {
 
 type WordKey = `${number}-${number}`;
 
+// Words that shouldn't be clickable — basic function words a learner doesn't need to save
+const SKIP_WORDS = new Set([
+  'der', 'die', 'das', 'den', 'dem', 'des', 'ein', 'eine', 'einem', 'einen', 'einer', 'eines',
+  'ich', 'du', 'er', 'sie', 'es', 'wir', 'ihr', 'mich', 'mir', 'dich', 'dir', 'ihm', 'ihn',
+  'uns', 'euch', 'sich', 'man', 'dies', 'diese', 'dieser', 'diesem', 'diesen', 'dieses',
+  'jeder', 'jede', 'jedem', 'jeden', 'jedes', 'alle', 'allem', 'allen', 'aller', 'alles',
+  'ist', 'sind', 'war', 'hat', 'haben', 'wird', 'werden', 'kann', 'muss', 'soll', 'will',
+  'und', 'oder', 'aber', 'dass', 'wenn', 'weil', 'ob', 'als', 'wie', 'so', 'da',
+  'in', 'auf', 'an', 'von', 'mit', 'zu', 'für', 'bei', 'nach', 'aus', 'um', 'über', 'unter',
+  'vor', 'zwischen', 'durch', 'gegen', 'ohne', 'bis', 'seit', 'während', 'zum', 'zur', 'im', 'am',
+  'nicht', 'kein', 'keine', 'keinem', 'keinen', 'keiner',
+  'auch', 'noch', 'schon', 'nur', 'ja', 'doch', 'sehr', 'mehr', 'dann', 'hier', 'dort',
+]);
+
+function findAnnotation(
+  word: string,
+  annotations?: Record<string, { de: string; en: string }>
+): { de: string; en: string } | null {
+  if (!annotations) return null;
+  const lower = word.toLowerCase();
+  // Direct match
+  if (annotations[lower]) return annotations[lower];
+  // Try without trailing 's' (genitive), 'n', 'en', 'er', 'es', 'em'
+  for (const suffix of ['s', 'es', 'en', 'n', 'er', 'em', 'e']) {
+    if (lower.length > suffix.length + 2) {
+      const stem = lower.slice(0, -suffix.length);
+      if (annotations[stem]) return annotations[stem];
+    }
+  }
+  // Try last part of hyphenated compound (e.g., "Social-Media-Verbots" → "verbots" → "verbot")
+  if (lower.includes('-')) {
+    const lastPart = lower.split('-').pop()!;
+    if (annotations[lastPart]) return annotations[lastPart];
+    for (const suffix of ['s', 'es', 'en', 'n', 'er', 'em', 'e']) {
+      if (lastPart.length > suffix.length + 2) {
+        const stem = lastPart.slice(0, -suffix.length);
+        if (annotations[stem]) return annotations[stem];
+      }
+    }
+  }
+  return null;
+}
+
 export function ClickableExampleText({ text, promptId, wordAnnotations }: Props) {
   const { t } = useTranslation();
   const { profile } = useRequiredAuth();
@@ -87,9 +130,7 @@ export function ClickableExampleText({ text, promptId, wordAnnotations }: Props)
     setSelectedWord(cleanWord);
   };
 
-  const annotation = selectedWord
-    ? wordAnnotations?.[selectedWord.toLowerCase()] ?? wordAnnotations?.[selectedWord] ?? null
-    : null;
+  const annotation = selectedWord ? findAnnotation(selectedWord, wordAnnotations) : null;
 
   const addToVocabulary = async () => {
     if (!profile || !selectedWord) return;
@@ -158,6 +199,9 @@ export function ClickableExampleText({ text, promptId, wordAnnotations }: Props)
                 if (/^\s+$/.test(word)) return <span key={wIdx}>{word}</span>;
                 const clean = stripPunctuation(word);
                 if (!clean) return <span key={wIdx}>{word}</span>;
+
+                const isSkipped = SKIP_WORDS.has(clean.toLowerCase());
+                if (isSkipped) return <span key={wIdx}>{word}</span>;
 
                 const key: WordKey = `${pIdx}-${wIdx}`;
                 const selected = selectedKey === key;
