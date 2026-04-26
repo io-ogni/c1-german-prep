@@ -71,7 +71,7 @@ export function FeedbackButton() {
   const form = (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        This app is for you — tell me how to make it better.
+        Help me build the best tool for your C1 journey: share your feedback, ideas, or bug reports.
       </p>
       <Textarea
         ref={textareaRef}
