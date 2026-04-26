@@ -162,20 +162,21 @@ export default function SignupPage() {
               <Input id="signup-confirm-password" type="password" autoComplete="new-password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="h-11 rounded-xl" />
             </div>
 
-            <label className="flex items-start gap-2.5 cursor-pointer">
+            <div className="flex items-start gap-2.5">
               <input
                 type="checkbox"
+                id="accept-privacy"
                 checked={acceptedPrivacy}
                 onChange={(e) => setAcceptedPrivacy(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-border accent-primary"
+                className="mt-0.5 h-4 w-4 rounded border-border accent-primary cursor-pointer"
               />
-              <span className="text-xs text-muted-foreground leading-relaxed">
+              <label htmlFor="accept-privacy" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
                 Ich akzeptiere die{' '}
-                <Link to="/datenschutz" target="_blank" className="text-primary hover:underline">Datenschutzerklärung</Link>
+                <a href="/datenschutz" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>Datenschutzerklärung</a>
                 {' '}und die{' '}
-                <Link to="/nutzungsbedingungen" target="_blank" className="text-primary hover:underline">Nutzungsbedingungen</Link>.
-              </span>
-            </label>
+                <a href="/nutzungsbedingungen" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>Nutzungsbedingungen</a>.
+              </label>
+            </div>
 
             {TURNSTILE_SITE_KEY && (
               <Turnstile
