@@ -233,10 +233,10 @@ export default function HomePage() {
                 <button
                   key={opt.minutes}
                   onClick={() => navigate(`/daily-practice?minutes=${opt.minutes}`)}
-                  className={`relative flex flex-col items-center justify-center gap-1 rounded-xl aspect-square sm:aspect-auto sm:py-4 transition-all border text-center cursor-pointer ${
+                  className={`relative flex flex-col items-center justify-center gap-1 rounded-xl aspect-square sm:aspect-auto sm:py-4 transition-all border text-center cursor-pointer hover:-translate-y-0.5 ${
                     isRec
-                      ? 'border-primary bg-primary text-primary-foreground shadow-md'
-                      : 'border-border/30 bg-white/80 hover:border-primary/40 hover:shadow-sm dark:bg-card/80 dark:hover:bg-primary/10'
+                      ? 'border-primary bg-primary text-primary-foreground hover:bg-primary/90 shadow-md'
+                      : 'border-border bg-card hover:border-primary/40 hover:bg-primary/5 hover:shadow-md'
                   }`}
                 >
                   {isRec && (
@@ -245,7 +245,7 @@ export default function HomePage() {
                       <span className="hidden sm:inline">TOP</span>
                     </span>
                   )}
-                  <Icon className={`h-5 w-5 sm:h-6 sm:w-6 ${isRec ? 'text-primary-foreground' : 'text-primary'}`} />
+                  <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${isRec ? 'text-primary-foreground' : 'text-primary'}`} />
                   <span className={`text-base sm:text-xl font-bold leading-none ${isRec ? '' : 'text-foreground'}`}>
                     {opt.minutes}<span className="text-[10px] sm:text-sm font-medium">m</span>
                   </span>
