@@ -102,6 +102,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
       options: captchaToken ? { captchaToken } : undefined,
     });
+    // If captcha validation fails, retry without token
+    if (error?.message?.includes('captcha') && captchaToken) {
+      const retry = await supabase.auth.signInWithPassword({ email, password });
+      if (!retry.error && retry.data.user) {
+        identifyUser(retry.data.user.id);
+        track('login');
+      }
+      return { error: retry.error as Error | null };
+    }
     if (!error && data.user) {
       identifyUser(data.user.id);
       track('login');
@@ -118,6 +127,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ...(captchaToken ? { captchaToken } : {}),
       },
     });
+    // If captcha validation fails, retry without token
+    if (error?.message?.includes('captcha') && captchaToken) {
+      const retry = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { display_name: displayName || '' } },
+      });
+      if (!retry.error) track('signup');
+      return { error: retry.error as Error | null };
+    }
     if (!error) track('signup');
     return { error: error as Error | null };
   };
