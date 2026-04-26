@@ -65,7 +65,23 @@ Do NOT try to "fix" the migration history.
 ## 13. Audio: Google Cloud TTS only
 Never use browser SpeechSynthesis for TTS. All audio in this app uses Google Cloud TTS (de-DE-Neural2-D, rate 0.95). If a feature needs audio, generate MP3s via the Google Cloud TTS API and store them in `src/assets/audio/`. See `scripts/generate-schreiben-tts.py` for the pattern.
 
-## 14. Mobile-first
+## 14. Turnstile CAPTCHA — disable/enable procedure
+
+Cloudflare Turnstile can break without warning (key invalidation, outage). When it does, ALL auth is blocked.
+
+**To disable (emergency):**
+1. Supabase Dashboard → Project Settings → Auth → CAPTCHA → toggle **off**, save
+2. `.github/workflows/deploy.yml` → comment out `VITE_TURNSTILE_SITE_KEY` line
+3. Push → deploy builds without the widget, no token sent
+
+**To re-enable:**
+1. Uncomment `VITE_TURNSTILE_SITE_KEY` in `deploy.yml`, push
+2. Supabase Dashboard → CAPTCHA → toggle **on**, paste secret key, save
+3. If tokens are rejected: rotate secret key in Cloudflare Turnstile dashboard, paste new one in Supabase
+
+**Fallback in code:** `AuthContext.tsx` has auto-retry — if captcha error, retries without token. But this only helps if the widget loads; if Cloudflare itself is down (Error 600010), the widget won't render and no token is generated, so the env var must be removed.
+
+## 15. Mobile-first
 
 iPhone 16 is the primary device. All UI work must be considered at mobile viewport widths first.
 
