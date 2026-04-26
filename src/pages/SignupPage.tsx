@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Sparkles, BookOpen, Headphones, PenLine } from 'lucide-react';
+import { ArrowLeft, Sparkles, BookOpen, Headphones, PenLine, Code } from 'lucide-react';
 
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
@@ -104,15 +104,28 @@ export default function SignupPage() {
             className="mt-12 flex gap-4"
           >
             {[
-              { icon: BookOpen, label: 'Lesen & Hören' },
-              { icon: PenLine, label: 'Schreiben mit AI' },
-              { icon: Headphones, label: 'IT-Deutsch' },
+              { num: '7', label: 'Bereiche' },
+              { num: '1100+', label: 'Übungen' },
+              { num: 'AI', label: 'Feedback' },
             ].map((s) => (
-              <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 flex items-center gap-2">
-                <s.icon className="h-4 w-4" />
-                <p className="text-xs text-white/90">{s.label}</p>
+              <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3">
+                <p className="text-2xl font-bold">{s.num}</p>
+                <p className="text-xs text-white/70">{s.label}</p>
               </div>
             ))}
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            className="mt-8 flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 max-w-xs"
+          >
+            <Code className="h-5 w-5 shrink-0" />
+            <div>
+              <p className="font-bold text-sm">Deutsch für IT-ler</p>
+              <p className="text-xs text-white/70">265+ Phrasen für Meetings & Refinements</p>
+            </div>
           </motion.div>
         </div>
       </div>
