@@ -1110,6 +1110,11 @@ export default function WritingPage() {
   const [activeTab, setActiveTab] = useState<string>(searchParams.get('tab') || 'almost_c1');
   const [selectedPrompt, setSelectedPrompt] = useState<WritingPrompt | null>(null);
 
+  const selectPrompt = (p: WritingPrompt | null) => {
+    setSelectedPrompt(p);
+    window.scrollTo(0, 0);
+  };
+
   const hasApiKey = !!profile?.api_key_encrypted;
 
   const currentTabConfig = LEVEL_TABS.find(l => l.value === activeTab);
@@ -1121,7 +1126,7 @@ export default function WritingPage() {
         prompt={selectedPrompt}
         hasApiKey={hasApiKey}
         levelLabel={levelLabel}
-        onBack={() => setSelectedPrompt(null)}
+        onBack={() => selectPrompt(null)}
         onSubmitted={() => {}}
       />
     );
@@ -1172,7 +1177,7 @@ export default function WritingPage() {
             <LevelPromptList
               levels={tab.levels}
               hasApiKey={hasApiKey}
-              onSelectPrompt={setSelectedPrompt}
+              onSelectPrompt={selectPrompt}
             />
           </TabsContent>
         ))}
