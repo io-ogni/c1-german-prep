@@ -177,11 +177,11 @@ export function OnboardingOverlay() {
                       </div>
 
                       {/* Image — desktop only */}
-                      <div className="hidden md:block border-b overflow-hidden">
+                      <div className="hidden md:block border-b overflow-hidden max-h-[200px]">
                         <img
                           src={slide.image}
                           alt={slide.title}
-                          className="w-full"
+                          className="w-full object-cover object-top"
                         />
                       </div>
 
