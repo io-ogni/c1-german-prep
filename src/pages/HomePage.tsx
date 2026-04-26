@@ -195,8 +195,10 @@ export default function HomePage() {
       </div>
 
       {/* Tagesplan */}
-      <Card className="border-border/40 bg-gradient-to-br from-slate-50 via-blue-50/30 to-violet-50/20 dark:from-slate-950/50 dark:via-blue-950/20 dark:to-violet-950/10">
-        <CardContent className="px-5 py-5 space-y-4">
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/5 via-background to-background p-4 sm:p-8">
+        <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+        <div aria-hidden="true" className="pointer-events-none absolute -bottom-32 -left-16 h-64 w-64 rounded-full bg-orange-500/5 blur-3xl" />
+        <div className="relative space-y-4">
           {/* Header: label + streak */}
           <div className="flex items-center justify-between">
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
@@ -261,8 +263,8 @@ export default function HomePage() {
               ? `Bleib dran — Tag ${streak + 1} wartet auf dich.`
               : 'Starte deine erste Runde — du schaffst das.'}
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Progress Cards */}
       <div>
