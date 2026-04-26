@@ -200,8 +200,7 @@ export function ClickableExampleText({ text, promptId, wordAnnotations }: Props)
                 const clean = stripPunctuation(word);
                 if (!clean) return <span key={wIdx}>{word}</span>;
 
-                const isSkipped = SKIP_WORDS.has(clean.toLowerCase());
-                const hasAnnotation = !isSkipped && !!findAnnotation(clean, wordAnnotations);
+                const hasAnnotation = !!findAnnotation(clean, wordAnnotations);
                 if (!hasAnnotation) return <span key={wIdx}>{word}</span>;
 
                 const key: WordKey = `${pIdx}-${wIdx}`;
