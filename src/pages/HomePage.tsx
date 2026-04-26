@@ -225,7 +225,7 @@ export default function HomePage() {
           </div>
 
           {/* Duration cards */}
-          <div className="grid grid-cols-5 gap-1.5 sm:gap-3">
+          <div className="grid grid-cols-5 gap-2 sm:gap-3">
             {DURATION_OPTIONS.map((opt) => {
               const Icon = opt.icon;
               const isRec = 'recommended' in opt && opt.recommended;
@@ -233,22 +233,23 @@ export default function HomePage() {
                 <button
                   key={opt.minutes}
                   onClick={() => navigate(`/daily-practice?minutes=${opt.minutes}`)}
-                  className={`relative flex flex-col items-center gap-0.5 rounded-xl py-2 sm:py-3.5 transition-all border text-center cursor-pointer ${
+                  className={`relative flex flex-col items-center justify-center gap-1 rounded-xl aspect-square sm:aspect-auto sm:py-4 transition-all border text-center cursor-pointer ${
                     isRec
                       ? 'border-primary bg-primary text-primary-foreground shadow-md'
-                      : 'border-border/50 bg-white hover:border-primary/40 hover:shadow-sm dark:bg-card dark:hover:bg-primary/10'
+                      : 'border-border/30 bg-white/80 hover:border-primary/40 hover:shadow-sm dark:bg-card/80 dark:hover:bg-primary/10'
                   }`}
                 >
                   {isRec && (
-                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-bold text-white leading-none">
-                      TOP
+                    <span className="absolute -top-2 -right-2 sm:-top-2.5 sm:left-1/2 sm:-translate-x-1/2 sm:right-auto flex items-center justify-center h-5 w-5 sm:h-auto sm:w-auto rounded-full bg-orange-500 sm:px-2 sm:py-0.5 text-[10px] font-bold text-white leading-none">
+                      <Star className="h-3 w-3 sm:hidden fill-white" />
+                      <span className="hidden sm:inline">TOP</span>
                     </span>
                   )}
-                  <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${isRec ? 'text-primary-foreground' : 'text-primary'}`} />
-                  <span className={`text-sm sm:text-lg font-bold ${isRec ? '' : 'text-foreground'}`}>
-                    {opt.minutes}<span className="text-[10px] sm:text-xs font-medium">min</span>
+                  <Icon className={`h-5 w-5 sm:h-6 sm:w-6 ${isRec ? 'text-primary-foreground' : 'text-primary'}`} />
+                  <span className={`text-base sm:text-xl font-bold leading-none ${isRec ? '' : 'text-foreground'}`}>
+                    {opt.minutes}<span className="text-[10px] sm:text-sm font-medium">m</span>
                   </span>
-                  <span className={`text-[8px] sm:text-[10px] font-semibold tracking-wider ${isRec ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                  <span className={`hidden sm:block text-[10px] font-semibold tracking-wider ${isRec ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                     {opt.label}
                   </span>
                 </button>
