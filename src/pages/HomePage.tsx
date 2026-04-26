@@ -195,7 +195,7 @@ export default function HomePage() {
       </div>
 
       {/* Tagesplan */}
-      <Card className="border-border/60 dark:border-border/40">
+      <Card className="border-border/40 bg-gradient-to-br from-slate-50 via-blue-50/30 to-violet-50/20 dark:from-slate-950/50 dark:via-blue-950/20 dark:to-violet-950/10">
         <CardContent className="px-5 py-5 space-y-4">
           {/* Header: label + streak */}
           <div className="flex items-center justify-between">
@@ -203,12 +203,15 @@ export default function HomePage() {
               <Sparkles className="h-3.5 w-3.5" />
               Tagesplan
             </span>
-            {streak > 0 && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 dark:bg-orange-900/30 px-2.5 py-0.5 text-xs font-semibold text-orange-600 dark:text-orange-400">
-                <Flame className="h-3 w-3" />
-                {streak} {streak === 1 ? 'TAG' : 'TAGE'}
-              </span>
-            )}
+            <span className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-sm font-bold ${
+              streak > 0
+                ? 'border-orange-200 bg-orange-50 text-orange-600 dark:border-orange-800 dark:bg-orange-950/40 dark:text-orange-400'
+                : 'border-border/60 bg-background text-muted-foreground dark:bg-card'
+            }`}>
+              <Flame className={`h-4 w-4 ${streak > 0 ? 'text-orange-500' : 'text-muted-foreground/50'}`} />
+              <span className="text-lg font-black">{streak}</span>
+              <span className="text-[10px] font-semibold tracking-wider">TAG{streak !== 1 ? 'E' : ''}</span>
+            </span>
           </div>
 
           {/* Heading */}
@@ -228,10 +231,10 @@ export default function HomePage() {
                 <button
                   key={opt.minutes}
                   onClick={() => navigate(`/daily-practice?minutes=${opt.minutes}`)}
-                  className={`relative flex flex-col items-center gap-0.5 sm:gap-1.5 rounded-xl py-3 sm:py-5 transition-all border text-center cursor-pointer ${
+                  className={`relative flex flex-col items-center gap-0.5 rounded-xl py-2 sm:py-3.5 transition-all border text-center cursor-pointer ${
                     isRec
                       ? 'border-primary bg-primary text-primary-foreground shadow-md'
-                      : 'border-border/60 bg-background hover:border-primary/40 hover:bg-primary/5 dark:bg-card dark:hover:bg-primary/10'
+                      : 'border-border/50 bg-white hover:border-primary/40 hover:shadow-sm dark:bg-card dark:hover:bg-primary/10'
                   }`}
                 >
                   {isRec && (
@@ -239,7 +242,7 @@ export default function HomePage() {
                       TOP
                     </span>
                   )}
-                  <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${isRec ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
+                  <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${isRec ? 'text-primary-foreground' : 'text-primary'}`} />
                   <span className={`text-sm sm:text-lg font-bold ${isRec ? '' : 'text-foreground'}`}>
                     {opt.minutes}<span className="text-[10px] sm:text-xs font-medium">min</span>
                   </span>
