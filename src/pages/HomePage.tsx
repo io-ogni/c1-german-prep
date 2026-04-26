@@ -3,7 +3,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { useRequiredAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, PenLine, BookOpenCheck, Headphones, Languages, Flame, Monitor } from 'lucide-react';
+import { BookOpen, PenLine, BookOpenCheck, Headphones, Languages, Flame, Monitor, Zap, Coffee, Star, Clock, Trophy, Sparkles, ArrowRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ProgressBar } from '@/components/shared/ProgressBar';
@@ -32,7 +32,13 @@ interface HomeData {
   dueReviewCount: number;
 }
 
-const TIME_OPTIONS = [5, 10, 15, 20, 30];
+const DURATION_OPTIONS = [
+  { minutes: 5,  label: 'SCHNELL',   icon: Zap },
+  { minutes: 10, label: 'KAFFEE',    icon: Coffee },
+  { minutes: 15, label: 'EMPFOHLEN', icon: Star, recommended: true },
+  { minutes: 20, label: 'FOKUS',     icon: Clock },
+  { minutes: 30, label: 'MARATHON',  icon: Trophy },
+] as const;
 
 const SUBTITLES = [
   'Ready to slay some Nebensätze today?',
@@ -188,41 +194,70 @@ export default function HomePage() {
         <p className="text-sm text-muted-foreground mt-1">{getTodaysSubtitle()}</p>
       </div>
 
-      {/* Session Builder */}
-      <Card className="bg-gradient-to-r from-blue-100/70 via-violet-100/70 to-fuchsia-100/70 dark:from-blue-950/30 dark:via-violet-950/30 dark:to-fuchsia-950/30 border-blue-200/50 dark:border-violet-900/40">
-        <CardContent className="px-5 py-5 space-y-3">
+      {/* Tagesplan */}
+      <Card className="border-border/60 dark:border-border/40">
+        <CardContent className="px-5 py-5 space-y-4">
+          {/* Header: label + streak */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-orange-100 dark:bg-orange-900/30">
-                <Flame className={`h-5 w-5 ${streak > 0 ? 'text-orange-500' : 'text-orange-300'}`} />
-              </div>
-              <div>
-                {streak > 0 ? (
-                  <>
-                    <p className="font-bold text-foreground text-lg leading-tight">{streak} {streak === 1 ? 'Tag' : 'Tage'} am Stück!</p>
-                    <p className="text-xs text-muted-foreground">5 min = gefährlich gut. 30 min = unstoppable.</p>
-                  </>
-                ) : (
-                  <>
-                    <p className="font-bold text-foreground leading-tight">Tägliches Training</p>
-                    <p className="text-xs text-muted-foreground">Wähle eine Dauer und starte eine Übungsrunde — Grammatik, Wortschatz und mehr, zufällig gemischt.</p>
-                  </>
-                )}
-              </div>
-            </div>
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
+              <Sparkles className="h-3.5 w-3.5" />
+              Tagesplan
+            </span>
+            {streak > 0 && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 dark:bg-orange-900/30 px-2.5 py-0.5 text-xs font-semibold text-orange-600 dark:text-orange-400">
+                <Flame className="h-3 w-3" />
+                {streak} {streak === 1 ? 'TAG' : 'TAGE'}
+              </span>
+            )}
           </div>
-          <div className="flex items-center gap-2">
-            {TIME_OPTIONS.map((min) => (
-              <Button
-                key={min}
-                size="sm"
-                className="min-w-[2.5rem] h-8 text-xs"
-                onClick={() => navigate(`/daily-practice?minutes=${min}`)}
-              >
-                {min} min
-              </Button>
-            ))}
+
+          {/* Heading */}
+          <div className="space-y-1">
+            <h2 className="text-lg font-bold text-foreground">Wie viel Zeit hast du?</h2>
+            <p className="text-sm text-muted-foreground">
+              Wähle eine Dauer — dein Plan wird automatisch zusammengestellt.
+            </p>
           </div>
+
+          {/* Duration cards */}
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide sm:justify-center sm:flex-wrap">
+            {DURATION_OPTIONS.map((opt) => {
+              const Icon = opt.icon;
+              const isRec = 'recommended' in opt && opt.recommended;
+              return (
+                <button
+                  key={opt.minutes}
+                  onClick={() => navigate(`/daily-practice?minutes=${opt.minutes}`)}
+                  className={`relative flex flex-col items-center gap-1 rounded-xl px-3 py-3 min-w-[4.5rem] transition-all border text-center cursor-pointer shrink-0 ${
+                    isRec
+                      ? 'border-primary bg-primary text-primary-foreground shadow-md'
+                      : 'border-border/60 bg-background hover:border-primary/40 hover:bg-primary/5 dark:bg-card dark:hover:bg-primary/10'
+                  }`}
+                >
+                  {isRec && (
+                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-bold text-white leading-none">
+                      TOP
+                    </span>
+                  )}
+                  <Icon className={`h-5 w-5 ${isRec ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
+                  <span className={`text-base font-bold ${isRec ? '' : 'text-foreground'}`}>
+                    {opt.minutes}<span className="text-xs font-medium">m</span>
+                  </span>
+                  <span className={`text-[10px] font-semibold tracking-wider ${isRec ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                    {opt.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Motivational footer */}
+          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <ArrowRight className="h-3 w-3" />
+            {streak > 0
+              ? `Bleib dran — Tag ${streak + 1} wartet auf dich.`
+              : 'Starte deine erste Runde — du schaffst das.'}
+          </p>
         </CardContent>
       </Card>
 
