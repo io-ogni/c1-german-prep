@@ -42,12 +42,18 @@ export default function NutzungsbedingungenPage() {
             Die App ist ein Lernwerkzeug und kein Ersatz für einen Sprachkurs oder eine offizielle Prüfungsvorbereitung.
             Die Bewertung von Schreibübungen durch KI ist ein Hilfsmittel und entspricht nicht der offiziellen telc-Bewertung.
           </p>
+          <p>
+            Die Web-App steht in keiner geschäftlichen oder organisatorischen Verbindung zur telc gGmbH.
+            „telc" ist eine geschützte Marke der telc gGmbH.
+          </p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">3. Registrierung und Konto</h2>
           <p>
             Für die Nutzung ist eine Registrierung mit E-Mail-Adresse und Passwort erforderlich.
+            Die Nutzung ist Personen ab 16 Jahren gestattet. Jüngere Nutzer benötigen die Zustimmung
+            der Erziehungsberechtigten.
             Du bist für die Sicherheit deiner Zugangsdaten verantwortlich.
             Das Konto kann jederzeit in den Einstellungen gelöscht werden — dabei werden alle
             gespeicherten Daten unwiderruflich entfernt.
@@ -61,6 +67,9 @@ export default function NutzungsbedingungenPage() {
             API-Schlüssel hinterlegen. Dieser wird verschlüsselt gespeichert (AES-256-GCM) und
             ausschließlich für die Bewertung deiner Texte verwendet.
             Du trägst die Kosten, die durch die Nutzung deines API-Schlüssels bei dem jeweiligen Anbieter entstehen.
+            Du bist dafür verantwortlich, API-Limits beim Drittanbieter so zu konfigurieren, dass keine
+            unerwarteten Kosten entstehen. Die Betreiberin haftet nicht für Missbrauch oder Kosten, die
+            durch eine unsachgemäße Handhabung des Schlüssels entstehen.
           </p>
         </section>
 
@@ -91,7 +100,8 @@ export default function NutzungsbedingungenPage() {
           <p>
             Die Nutzung der App erfolgt auf eigenes Risiko. Die Betreiberin übernimmt keine Gewähr
             für die Richtigkeit, Vollständigkeit oder Aktualität der Lerninhalte.
-            Insbesondere stellt die KI-Bewertung keine verbindliche Leistungseinschätzung dar.
+            Die KI-basierten Korrekturen basieren auf Wahrscheinlichkeitsmodellen und können Fehler enthalten.
+            Ein Bestehen der tatsächlichen telc-Prüfung kann durch die Nutzung der App nicht garantiert werden.
           </p>
         </section>
 
