@@ -907,12 +907,12 @@ function WritingInterface({
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <Select value={String(exampleIndex)} onValueChange={(v) => setExampleIndex(Number(v))}>
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-[160px] hover:border-primary/50 hover:text-primary transition-colors">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {exampleTexts!.map((ex, i) => (
-                  <SelectItem key={i} value={String(i)}>Beispiel {i + 1}</SelectItem>
+                  <SelectItem key={i} value={String(i)} className="focus:bg-primary/10 focus:text-primary">Beispiel {i + 1}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
