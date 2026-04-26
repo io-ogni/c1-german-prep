@@ -24,9 +24,14 @@ export default function SignupPage() {
   const [sent, setSent] = useState(false);
   const captchaRef = useRef<TurnstileInstance>(null);
   const [captchaToken, setCaptchaToken] = useState<string>();
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!acceptedPrivacy) {
+      toast.error('Bitte akzeptiere die Datenschutzerklärung und Nutzungsbedingungen.');
+      return;
+    }
     if (password !== confirmPassword) {
       toast.error(t('auth_passwords_no_match'));
       return;
@@ -157,6 +162,21 @@ export default function SignupPage() {
               <Input id="signup-confirm-password" type="password" autoComplete="new-password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="h-11 rounded-xl" />
             </div>
 
+            <label className="flex items-start gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={acceptedPrivacy}
+                onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-border accent-primary"
+              />
+              <span className="text-xs text-muted-foreground leading-relaxed">
+                Ich akzeptiere die{' '}
+                <Link to="/datenschutz" target="_blank" className="text-primary hover:underline">Datenschutzerklärung</Link>
+                {' '}und die{' '}
+                <Link to="/nutzungsbedingungen" target="_blank" className="text-primary hover:underline">Nutzungsbedingungen</Link>.
+              </span>
+            </label>
+
             {TURNSTILE_SITE_KEY && (
               <Turnstile
                 siteKey={TURNSTILE_SITE_KEY}
@@ -170,7 +190,7 @@ export default function SignupPage() {
             <Button
               type="submit"
               className="w-full h-11 rounded-xl text-base font-semibold shadow-lg shadow-primary/20"
-              disabled={loading}
+              disabled={loading || !acceptedPrivacy}
             >
               {loading ? t('common_loading') : t('auth_signup')}
             </Button>

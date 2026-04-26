@@ -36,6 +36,7 @@ import FlashcardsPage from "@/pages/FlashcardsPage";
 import ITUserStoriesPage from "@/pages/ITUserStoriesPage";
 import AboutPage from "@/pages/AboutPage";
 import DatenschutzPage from "@/pages/DatenschutzPage";
+import NutzungsbedingungenPage from "@/pages/NutzungsbedingungenPage";
 import WelcomePage from "@/pages/WelcomePage";
 import NotFound from "@/pages/NotFound";
 import { RootRoute } from "@/components/RootRoute";
@@ -66,6 +67,7 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/datenschutz" element={<DatenschutzPage />} />
+            <Route path="/nutzungsbedingungen" element={<NutzungsbedingungenPage />} />
 
             {/* Protected routes with layout */}
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>

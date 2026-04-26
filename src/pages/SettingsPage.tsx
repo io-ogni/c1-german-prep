@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { FunctionsHttpError } from '@supabase/supabase-js';
-import { Key, CheckCircle, Loader2, ShieldCheck, Trash2, Lock, Type, User } from 'lucide-react';
+import { Key, CheckCircle, Loader2, ShieldCheck, Trash2, Lock, Type, User, Download } from 'lucide-react';
 import { track, resetUser } from '@/lib/posthog';
 import { useTextSize, type TextSize } from '@/hooks/useTextSize';
 
@@ -307,6 +307,56 @@ export default function SettingsPage() {
               </button>
             ))}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Data Export (GDPR Art. 20) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            Meine Daten exportieren
+          </CardTitle>
+          <CardDescription>
+            Lade alle deine gespeicherten Daten als JSON-Datei herunter (Vokabeln, Texte, Fortschritt).
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              const userId = user.id;
+              const [vocab, reading, exercises, writing, sessions] = await Promise.all([
+                supabase.from('personal_vocabulary').select('*').eq('user_id', userId),
+                supabase.from('reading_progress').select('*').eq('user_id', userId),
+                supabase.from('exercise_progress').select('*').eq('user_id', userId),
+                supabase.from('writing_submissions').select('*').eq('user_id', userId),
+                supabase.from('daily_sessions').select('*').eq('user_id', userId),
+              ]);
+              const exportData = {
+                exported_at: new Date().toISOString(),
+                profile: { display_name: profile?.display_name, ui_language: profile?.ui_language },
+                personal_vocabulary: vocab.data ?? [],
+                reading_progress: reading.data ?? [],
+                exercise_progress: exercises.data ?? [],
+                writing_submissions: writing.data ?? [],
+                daily_sessions: sessions.data ?? [],
+              };
+              const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `c1-werkstatt-export-${new Date().toISOString().slice(0, 10)}.json`;
+              a.click();
+              URL.revokeObjectURL(url);
+              toast.success('Daten exportiert');
+              track('data_exported');
+            }}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Daten herunterladen
+          </Button>
         </CardContent>
       </Card>
 

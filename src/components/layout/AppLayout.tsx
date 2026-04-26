@@ -16,6 +16,7 @@ export function AppLayout() {
           <nav className="flex flex-wrap justify-center gap-x-5 gap-y-1.5 text-xs">
             <Link to="/about" className="text-primary hover:underline">About this app</Link>
             <Link to="/datenschutz" className="text-primary hover:underline">Datenschutz</Link>
+            <Link to="/nutzungsbedingungen" className="text-primary hover:underline">Nutzungsbedingungen</Link>
             <a href="https://ioana-ognibeni.eu/impressum/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Impressum</a>
           </nav>
           <p className="text-center text-xs text-muted-foreground">

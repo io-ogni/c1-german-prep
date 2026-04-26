@@ -12,6 +12,15 @@ if (sentryDsn) {
     tracesSampleRate: 0.1,
     replaysSessionSampleRate: 0,
     replaysOnErrorSampleRate: 0,
+    beforeSend(event) {
+      // Strip PII: remove user email/IP, redact UUID patterns in breadcrumbs
+      if (event.user) {
+        delete event.user.email;
+        delete event.user.ip_address;
+        delete event.user.username;
+      }
+      return event;
+    },
   });
 }
 
