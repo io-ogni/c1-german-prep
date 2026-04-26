@@ -348,8 +348,13 @@ export default function SettingsPage() {
               const a = document.createElement('a');
               a.href = url;
               a.download = `c1-werkstatt-export-${new Date().toISOString().slice(0, 10)}.json`;
+              a.style.display = 'none';
+              document.body.appendChild(a);
               a.click();
-              URL.revokeObjectURL(url);
+              setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+              }, 100);
               toast.success('Daten exportiert');
               track('data_exported');
             }}
