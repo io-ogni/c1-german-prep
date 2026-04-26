@@ -201,10 +201,12 @@ export default function HomePage() {
         <div className="relative space-y-4">
           {/* Header: label + streak */}
           <div className="flex items-center justify-between">
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
-              <Sparkles className="h-3.5 w-3.5" />
-              Tagesplan
-            </span>
+            <div className="hidden sm:flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                <Sparkles className="h-3 w-3" />
+                Tagesplan
+              </span>
+            </div>
             <span className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-sm font-bold ${
               streak > 0
                 ? 'border-orange-200 bg-orange-50 text-orange-600 dark:border-orange-800 dark:bg-orange-950/40 dark:text-orange-400'
@@ -218,8 +220,11 @@ export default function HomePage() {
 
           {/* Heading */}
           <div className="space-y-1">
-            <h2 className="text-lg font-bold text-foreground">Wie viel Zeit hast du?</h2>
-            <p className="text-sm text-muted-foreground">
+            <h2 className="text-base font-bold text-foreground sm:text-2xl">
+              <span className="sm:hidden">Tagesplan</span>
+              <span className="hidden sm:inline">Wie viel Zeit hast du?</span>
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Wähle eine Dauer — dein Plan wird automatisch zusammengestellt.
             </p>
           </div>
