@@ -220,7 +220,7 @@ export default function HomePage() {
           </div>
 
           {/* Duration cards */}
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide sm:justify-center sm:flex-wrap">
+          <div className="grid grid-cols-5 gap-1.5 sm:gap-3">
             {DURATION_OPTIONS.map((opt) => {
               const Icon = opt.icon;
               const isRec = 'recommended' in opt && opt.recommended;
@@ -228,7 +228,7 @@ export default function HomePage() {
                 <button
                   key={opt.minutes}
                   onClick={() => navigate(`/daily-practice?minutes=${opt.minutes}`)}
-                  className={`relative flex flex-col items-center gap-1 rounded-xl px-3 py-3 min-w-[4.5rem] transition-all border text-center cursor-pointer shrink-0 ${
+                  className={`relative flex flex-col items-center gap-0.5 sm:gap-1.5 rounded-xl py-3 sm:py-5 transition-all border text-center cursor-pointer ${
                     isRec
                       ? 'border-primary bg-primary text-primary-foreground shadow-md'
                       : 'border-border/60 bg-background hover:border-primary/40 hover:bg-primary/5 dark:bg-card dark:hover:bg-primary/10'
@@ -239,11 +239,11 @@ export default function HomePage() {
                       TOP
                     </span>
                   )}
-                  <Icon className={`h-5 w-5 ${isRec ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
-                  <span className={`text-base font-bold ${isRec ? '' : 'text-foreground'}`}>
-                    {opt.minutes}<span className="text-xs font-medium">m</span>
+                  <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${isRec ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
+                  <span className={`text-sm sm:text-lg font-bold ${isRec ? '' : 'text-foreground'}`}>
+                    {opt.minutes}<span className="text-[10px] sm:text-xs font-medium">min</span>
                   </span>
-                  <span className={`text-[10px] font-semibold tracking-wider ${isRec ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                  <span className={`text-[8px] sm:text-[10px] font-semibold tracking-wider ${isRec ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                     {opt.label}
                   </span>
                 </button>
