@@ -326,7 +326,8 @@ export default function SettingsPage() {
             variant="outline"
             size="sm"
             onClick={async () => {
-              const userId = user.id;
+              const userId = profile?.user_id;
+              if (!userId) return;
               const [vocab, reading, exercises, writing, sessions] = await Promise.all([
                 supabase.from('personal_vocabulary').select('*').eq('user_id', userId),
                 supabase.from('reading_progress').select('*').eq('user_id', userId),
