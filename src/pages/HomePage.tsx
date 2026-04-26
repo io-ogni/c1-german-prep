@@ -240,9 +240,8 @@ export default function HomePage() {
                   }`}
                 >
                   {isRec && (
-                    <span className="absolute -top-2 -right-2 sm:-top-2.5 sm:left-1/2 sm:-translate-x-1/2 sm:right-auto flex items-center justify-center h-5 w-5 sm:h-auto sm:w-auto rounded-full bg-orange-500 sm:px-2 sm:py-0.5 text-[10px] font-bold text-white leading-none">
-                      <Star className="h-3 w-3 sm:hidden fill-white" />
-                      <span className="hidden sm:inline">TOP</span>
+                    <span className="absolute -top-2 -right-2 flex items-center justify-center h-5 w-5 rounded-full bg-orange-500 shadow-sm">
+                      <Star className="h-3 w-3 fill-white text-white" />
                     </span>
                   )}
                   <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${isRec ? 'text-primary-foreground' : 'text-primary'}`} />
