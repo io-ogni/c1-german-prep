@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, PenLine, AlertCircle, Copy, CheckCheck, Filter, MessagesSquare, PlayCircle, AlignLeft, CheckCircle, Braces, Link2, Volume2, BookOpen, Edit3, ArrowLeft } from 'lucide-react';
+// Note: Volume2 still used in Redemittel speak(), PlayCircle/AlignLeft/CheckCircle/Braces/Link2 in Redemittel nav
 import { usePlayAll } from '@/hooks/usePlayAll';
 import { PlayAllButton } from '@/components/PlayAllButton';
 import { toast } from '@/hooks/use-toast';
@@ -27,6 +28,7 @@ import { SelectionHint, markHintInteraction } from '@/components/shared/Selectio
 import { TertiaryNav } from '@/components/shared/TertiaryNav';
 import type { TertiaryNavItem } from '@/components/shared/TertiaryNav';
 import { ClickableExampleText } from '@/components/writing/ClickableExampleText';
+import { TextAudioPlayer } from '@/components/shared/TextAudioPlayer';
 import type { Tables } from '@/integrations/supabase/types';
 
 // ─── TTS Audio ───
@@ -788,36 +790,11 @@ function WritingInterface({
 
   const [activeView, setActiveView] = useState<'beispiele' | 'schreiben'>(hasExamples ? 'beispiele' : 'schreiben');
   const [exampleIndex, setExampleIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [evaluation, setEvaluation] = useState<EvaluationResponse | null>(null);
   const [copied, setCopied] = useState(false);
   const sortOrder = (prompt as any).sort_order as number | undefined;
-
-  const toggleBeispielAudio = useCallback(() => {
-    if (isPlaying && audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
-      setIsPlaying(false);
-      return;
-    }
-    if (!sortOrder) return;
-    const url = getBeispielAudioUrl(sortOrder, exampleIndex);
-    if (!url) return;
-    const audio = new Audio(url);
-    audioRef.current = audio;
-    audio.onended = () => { setIsPlaying(false); audioRef.current = null; };
-    setIsPlaying(true);
-    audio.play();
-  }, [isPlaying, sortOrder, exampleIndex]);
-
-  // Stop audio on example/view switch
-  useEffect(() => {
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; setIsPlaying(false); }
-  }, [exampleIndex, activeView]);
 
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
   const context = lang === 'de' ? prompt.context_de : prompt.context_en;
@@ -944,17 +921,9 @@ function WritingInterface({
           <SelectionHint hintKey="writing-beispiele" variant="reading" />
 
           <Card className="p-5 sm:p-8">
-            {beispielAudioUrl && (
-              <div className="flex justify-end mb-3">
-                <button
-                  onClick={toggleBeispielAudio}
-                  className="inline-flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
-                >
-                  <Volume2 className="h-4 w-4" />
-                  {isPlaying ? 'Stopp' : 'Text anhören'}
-                </button>
-              </div>
-            )}
+            <div className="mb-3">
+              <TextAudioPlayer audioUrl={beispielAudioUrl} />
+            </div>
             <ClickableExampleText
               text={exampleTexts![exampleIndex].text}
               promptId={prompt.id}
