@@ -140,6 +140,8 @@ export default function MyVocabularyPage() {
       localStorage.removeItem('it-redewendungen-highlights');
       localStorage.removeItem('speaking-highlights');
       localStorage.removeItem('writing-tips-highlights');
+      localStorage.removeItem(`nv-verbindungen-highlights-${userId}`);
+      localStorage.removeItem(`praepositionen-highlights-${userId}`);
       toast.success(lang === 'de' ? 'Alle Wörter und Sätze gelöscht' : 'All words and sentences deleted');
       fetchData();
     }
