@@ -72,7 +72,7 @@ export function FeedbackButton() {
     <div className="flex flex-col items-center gap-3 py-6">
       <CheckCircle className="h-10 w-10 text-primary" />
       <p className="text-sm font-medium text-foreground">Danke für dein Feedback!</p>
-      <p className="text-xs text-muted-foreground">Jerry liest alles.</p>
+      <p className="text-xs text-muted-foreground">Jerry liest alles. 🐕</p>
     </div>
   ) : (
     <div className="space-y-4">
