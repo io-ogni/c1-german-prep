@@ -250,6 +250,7 @@ export function ClickableText({
     const handler = (e: MouseEvent) => {
       const target = e.target as Node;
       if (containerRef.current?.contains(target) || popupRef.current?.contains(target)) return;
+      if ((target as HTMLElement).closest?.('[data-vaul-drawer]')) return;
       clearSelection();
     };
     document.addEventListener('mousedown', handler);
