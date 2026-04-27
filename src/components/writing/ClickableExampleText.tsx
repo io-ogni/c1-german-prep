@@ -105,6 +105,8 @@ export function ClickableExampleText({ text, promptId, wordAnnotations }: Props)
     const handler = (e: MouseEvent) => {
       const target = e.target as Node;
       if (containerRef.current?.contains(target) || popupRef.current?.contains(target)) return;
+      // Don't close if clicking inside a Drawer (portal)
+      if ((target as HTMLElement).closest?.('[data-vaul-drawer]')) return;
       clearSelection();
     };
     document.addEventListener('mousedown', handler);
