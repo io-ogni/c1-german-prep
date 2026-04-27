@@ -4,8 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { MessageCircle, Send, CheckCircle } from 'lucide-react';
+import { MessageCircle, Send, CheckCircle, X } from 'lucide-react';
 import { track } from '@/lib/posthog';
 
 const MAX_PER_DAY = 10;
@@ -27,7 +26,6 @@ export function FeedbackButton() {
     setSending(true);
 
     try {
-      // Rate limit check
       const today = new Date().toISOString().slice(0, 10);
       const { count } = await supabase
         .from('feedback' as any)
@@ -41,7 +39,6 @@ export function FeedbackButton() {
         return;
       }
 
-      // Capture visible context: active tabs, headings, exercise titles
       const activeTab = document.querySelector('[data-state="active"]')?.textContent?.trim() ?? '';
       const heading = document.querySelector('h1, h2')?.textContent?.trim() ?? '';
       const pageContext = [location.pathname, activeTab, heading].filter(Boolean).join(' — ');
@@ -57,7 +54,7 @@ export function FeedbackButton() {
       track('feedback_submitted', { page: location.pathname, length: message.trim().length });
       setMessage('');
       setSent(true);
-      setTimeout(() => { setSent(false); setOpen(false); }, 2000);
+      setTimeout(() => { setSent(false); setOpen(false); }, 2500);
     } catch (err: any) {
       setMessage(prev => prev || 'Fehler beim Senden — bitte versuche es nochmal.');
     } finally {
@@ -65,63 +62,56 @@ export function FeedbackButton() {
     }
   };
 
-  const form = sent ? (
-    <div className="flex flex-col items-center gap-3 py-6">
-      <CheckCircle className="h-10 w-10 text-primary" />
-      <p className="text-sm font-medium text-foreground">Danke für dein Feedback!</p>
-      <p className="text-xs text-muted-foreground">Jerry liest alles. 🐕</p>
-    </div>
-  ) : (
-    <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        Help me build the best tool for your C1 journey: share your feedback, ideas, or bug reports.
-      </p>
-      <Textarea
-        ref={textareaRef}
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Schreib los..."
-        maxLength={MAX_LENGTH}
-        className="min-h-[120px] resize-none bg-white dark:bg-card ph-no-capture"
-      />
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">{message.length}/{MAX_LENGTH}</span>
-        <Button onClick={handleSubmit} disabled={sending || !message.trim()} size="sm" className="gap-1">
-          <Send className="h-3.5 w-3.5" />
-          {sending ? 'Senden...' : 'Senden'}
-        </Button>
-      </div>
-    </div>
-  );
-
   return (
-    <>
-      {/* Desktop: floating FAB */}
-      <button
-        onClick={() => setOpen(true)}
-        className="hidden lg:flex fixed bottom-6 right-6 z-40 h-12 w-12 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white shadow-lg hover:shadow-xl transition-all items-center justify-center"
-        aria-label="Feedback geben"
-      >
-        <MessageCircle className="h-5 w-5" />
-      </button>
+    <div className="w-full">
+      {!open && (
+        <button
+          onClick={() => { setOpen(true); setSent(false); }}
+          className="flex items-center justify-center gap-2 w-full py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+        >
+          <MessageCircle className="h-4 w-4 text-primary" />
+          Give feedback
+        </button>
+      )}
 
-      {/* Mobile: static bar at bottom of page */}
-      <button
-        onClick={() => setOpen(true)}
-        className="lg:hidden flex items-center justify-center gap-2 w-full py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-      >
-        <MessageCircle className="h-4 w-4 text-primary" />
-        Give feedback
-      </button>
-
-      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setSent(false); }}>
-        <DialogContent className="sm:max-w-md max-w-[calc(100vw-2rem)]">
-          <DialogHeader>
-            <DialogTitle>Feedback</DialogTitle>
-          </DialogHeader>
-          {form}
-        </DialogContent>
-      </Dialog>
-    </>
+      {open && (
+        <div className="rounded-lg border border-border bg-card p-4 space-y-3">
+          {sent ? (
+            <div className="flex flex-col items-center gap-2 py-4">
+              <CheckCircle className="h-8 w-8 text-primary" />
+              <p className="text-sm font-medium text-foreground">Danke für dein Feedback!</p>
+              <p className="text-xs text-muted-foreground">Jerry liest alles. 🐕</p>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-foreground">Feedback</p>
+                <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Help me build the best tool for your C1 journey: share your feedback, ideas, or bug reports.
+              </p>
+              <Textarea
+                ref={textareaRef}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Schreib los..."
+                maxLength={MAX_LENGTH}
+                className="min-h-[100px] resize-none bg-white dark:bg-background ph-no-capture"
+              />
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">{message.length}/{MAX_LENGTH}</span>
+                <Button onClick={handleSubmit} disabled={sending || !message.trim()} size="sm" className="gap-1">
+                  <Send className="h-3.5 w-3.5" />
+                  {sending ? 'Senden...' : 'Senden'}
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
