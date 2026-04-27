@@ -130,6 +130,15 @@ export function ReviewCard({ dueCards, onCardReviewed, compact }: ReviewCardProp
     return () => window.removeEventListener('keydown', handler);
   }, [flipped, reviewIndex, dueCards.length, handleReview]);
 
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playAudio = useCallback((url: string) => {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    const audio = new Audio(url);
+    audioRef.current = audio;
+    audio.onended = () => { audioRef.current = null; };
+    audio.play().catch(() => { audioRef.current = null; });
+  }, []);
+
   if (dueCards.length === 0 || reviewIndex >= dueCards.length) {
     const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
     return (
@@ -168,16 +177,7 @@ export function ReviewCard({ dueCards, onCardReviewed, compact }: ReviewCardProp
 
   const currentCard = dueCards[reviewIndex];
   const minH = compact ? 'min-h-[200px]' : 'min-h-[260px]';
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const ttsUrl = getFlashcardAudioUrl(currentCard.source_type, currentCard.word_de);
-
-  const playAudio = useCallback((url: string) => {
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
-    const audio = new Audio(url);
-    audioRef.current = audio;
-    audio.onended = () => { audioRef.current = null; };
-    audio.play().catch(() => { audioRef.current = null; });
-  }, []);
 
   return (
     <div className="flex flex-col items-center gap-4 relative rounded-2xl border border-border bg-muted/30 p-4 sm:p-6">
