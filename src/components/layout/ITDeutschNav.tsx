@@ -10,7 +10,7 @@ type NavItem = { value: string; icon?: LucideIcon; label: string; labelKey?: str
 const NAV_ITEMS: NavItem[] = [
   { value: '/it-deutsch/uebungen', label: 'Übungen' },
   { value: '/it-deutsch/vokabular', icon: Table2, label: 'IT-Vokabular' },
-  { value: '/it-deutsch', icon: Play, label: 'Medien' },
+  { value: '/it-deutsch/medien', icon: Play, label: 'Medien' },
   { value: '/it-deutsch/redewendungen', icon: Drama, labelKey: 'it_redewendungen', label: '' },
 ];
 
@@ -20,10 +20,8 @@ export function ITDeutschNav() {
   const { t } = useTranslation();
 
   const activePath = NAV_ITEMS.find(item =>
-    item.value === '/it-deutsch'
-      ? location.pathname === '/it-deutsch'
-      : location.pathname.startsWith(item.value)
-  )?.value ?? '/it-deutsch';
+    location.pathname.startsWith(item.value)
+  )?.value ?? '/it-deutsch/uebungen';
 
   return (
     <ScrollNav>

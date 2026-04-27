@@ -85,6 +85,7 @@ const App = () => (
               <Route path="/my-texts" element={<MyTextsPage />} />
               <Route path="/daily-practice" element={<DailyPracticePage />} />
               <Route path="/it-deutsch" element={<Navigate to="/it-deutsch/uebungen" replace />} />
+              <Route path="/it-deutsch/medien" element={<ITDeutschPage />} />
               <Route path="/it-deutsch/uebungen" element={<ITUebungenPage />} />
 
               <Route path="/it-deutsch/redewendungen" element={<ITRedewendungenPage />} />
