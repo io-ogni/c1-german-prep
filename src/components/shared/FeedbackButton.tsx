@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
 import { MessageCircle, Send } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { track } from '@/lib/posthog';
 
@@ -39,7 +39,7 @@ export function FeedbackButton() {
         .gte('created_at', `${today}T00:00:00`);
 
       if ((count ?? 0) >= MAX_PER_DAY) {
-        toast.error('Du hast heute schon 3x Feedback gegeben — morgen wieder!');
+        toast({ title: 'Du hast heute schon 3x Feedback gegeben — morgen wieder!', variant: 'destructive' });
         setSending(false);
         return;
       }
@@ -58,11 +58,11 @@ export function FeedbackButton() {
       if (error) throw error;
 
       track('feedback_submitted', { page: location.pathname, length: message.trim().length });
-      toast.success('Danke für dein Feedback! Jerry 🐕 liest alles.', { duration: 4000 });
+      toast({ title: 'Danke für dein Feedback! Jerry liest alles.' });
       setMessage('');
       setOpen(false);
     } catch (err: any) {
-      toast.error(err.message || 'Fehler beim Senden');
+      toast({ title: err.message || 'Fehler beim Senden', variant: 'destructive' });
     } finally {
       setSending(false);
     }
