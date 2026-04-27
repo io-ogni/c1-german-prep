@@ -208,7 +208,7 @@ export function Navbar() {
               <FileText className="h-4 w-4" /> {t('nav_my_texts')}
             </Link>
             <Link to="/exam-prep" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
-              <ClipboardCheck className="h-4 w-4" /> {t('nav_exam_prep')}
+              <GraduationCap className="h-4 w-4" /> {t('nav_exam_prep')}
             </Link>
             <Link to="/settings" onClick={() => setMobileOpen(false)} className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
               {t('nav_settings')}
