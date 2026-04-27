@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown, BookOpen, FileText, ClipboardCheck, Monitor, MessageCircle } from 'lucide-react';
+import { Menu, X, ChevronDown, BookOpen, BookOpenCheck, FileText, GraduationCap, Monitor, Languages, PenLine, Headphones, Mic } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useRequiredAuth } from '@/contexts/AuthContext';
 import {
@@ -14,12 +14,12 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const examLinks = [
-  { key: 'nav_vocabulary' as const, path: '/vocabulary' },
-  { key: 'nav_grammar' as const, path: '/grammar' },
-  { key: 'nav_writing' as const, path: '/writing' },
-  { key: 'nav_reading' as const, path: '/reading' },
-  { key: 'nav_listening' as const, path: '/listening' },
-  { key: 'nav_speaking' as const, path: '/speaking' },
+  { key: 'nav_vocabulary' as const, path: '/vocabulary', icon: Languages },
+  { key: 'nav_grammar' as const, path: '/grammar', icon: BookOpen },
+  { key: 'nav_writing' as const, path: '/writing', icon: PenLine },
+  { key: 'nav_reading' as const, path: '/reading', icon: BookOpenCheck },
+  { key: 'nav_listening' as const, path: '/listening', icon: Headphones },
+  { key: 'nav_speaking' as const, path: '/speaking', icon: Mic },
 ];
 
 const itLinks = [
@@ -115,7 +115,6 @@ export function Navbar() {
                 : 'text-fuchsia-600/80 dark:text-fuchsia-400/80 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-900/20'
             )}
           >
-            <Monitor className="h-3.5 w-3.5 inline-block mr-1" />
             {t('nav_it_deutsch')}
           </Link>
         </div>
@@ -143,7 +142,7 @@ export function Navbar() {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/exam-prep" className="flex items-center gap-2">
-                  <ClipboardCheck className="h-4 w-4" />
+                  <GraduationCap className="h-4 w-4" />
                   {t('nav_exam_prep')}
                 </Link>
               </DropdownMenuItem>
@@ -168,21 +167,25 @@ export function Navbar() {
         <div className="fixed inset-0 top-14 z-[998] bg-black/50 lg:hidden" onClick={() => setMobileOpen(false)} />
         <div className="fixed top-14 left-0 right-0 z-[999] border-t border-border bg-card px-4 pb-6 pt-2 shadow-xl lg:hidden max-h-[80vh] overflow-y-auto">
           <div className="flex flex-col gap-1">
-            {examLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  'rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                  isActive(link.path)
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                )}
-              >
-                {t(link.key)}
-              </Link>
-            ))}
+            {examLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setMobileOpen(false)}
+                  className={cn(
+                    'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                    isActive(link.path)
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {t(link.key)}
+                </Link>
+              );
+            })}
             <div className="my-2 border-t border-border" />
             <Link
               to="/it-deutsch"
