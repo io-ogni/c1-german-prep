@@ -241,7 +241,7 @@ export default function SettingsPage() {
             </Button>
           </div>
           {hasKey && (
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button variant="outline" size="sm" onClick={handleTestKey} disabled={testingKey}>
                 {testingKey ? <Loader2 className="h-4 w-4 animate-spin" /> : t('settings_test_key')}
               </Button>
