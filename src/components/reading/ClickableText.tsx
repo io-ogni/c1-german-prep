@@ -140,7 +140,7 @@ function InlineGap({
         <span
           ref={dropdownRef}
           className={cn(
-            'z-50 rounded-xl bg-blue-200 dark:bg-blue-900 p-0.5 space-y-0.5 shadow-2xl scrollbar-visible overflow-y-auto overflow-x-hidden',
+            'z-50 rounded-xl bg-primary/15 dark:bg-primary/20 p-1 space-y-px shadow-2xl scrollbar-visible overflow-y-auto overflow-x-hidden',
             dropdownStyle.position === 'fixed' ? 'fixed' : 'absolute left-0 top-full mt-1 w-[min(28rem,85vw)] max-h-[320px]'
           )}
           style={dropdownStyle.position === 'fixed' ? dropdownStyle : undefined}
