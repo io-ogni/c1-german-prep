@@ -6,8 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
-import { MessageCircle, Send } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { MessageCircle, Send, CheckCircle } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { track } from '@/lib/posthog';
 
@@ -21,6 +20,7 @@ export function FeedbackButton() {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   if (!auth?.user) return null;
@@ -39,7 +39,7 @@ export function FeedbackButton() {
         .gte('created_at', `${today}T00:00:00`);
 
       if ((count ?? 0) >= MAX_PER_DAY) {
-        toast({ title: 'Du hast heute schon 3x Feedback gegeben — morgen wieder!', variant: 'destructive' });
+        setMessage('Du hast heute schon 3x Feedback gegeben — morgen wieder!');
         setSending(false);
         return;
       }
@@ -58,17 +58,23 @@ export function FeedbackButton() {
       if (error) throw error;
 
       track('feedback_submitted', { page: location.pathname, length: message.trim().length });
-      toast({ title: 'Danke für dein Feedback! Jerry liest alles.' });
       setMessage('');
-      setOpen(false);
+      setSent(true);
+      setTimeout(() => { setSent(false); setOpen(false); }, 2000);
     } catch (err: any) {
-      toast({ title: err.message || 'Fehler beim Senden', variant: 'destructive' });
+      setMessage(prev => prev || 'Fehler beim Senden — bitte versuche es nochmal.');
     } finally {
       setSending(false);
     }
   };
 
-  const form = (
+  const form = sent ? (
+    <div className="flex flex-col items-center gap-3 py-6">
+      <CheckCircle className="h-10 w-10 text-primary" />
+      <p className="text-sm font-medium text-foreground">Danke für dein Feedback!</p>
+      <p className="text-xs text-muted-foreground">Jerry liest alles.</p>
+    </div>
+  ) : (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
         Help me build the best tool for your C1 journey: share your feedback, ideas, or bug reports.
