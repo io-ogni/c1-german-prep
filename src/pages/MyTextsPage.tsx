@@ -97,10 +97,10 @@ export default function MyTextsPage() {
 
                   {/* Grades row */}
                   <div className="flex gap-4 text-xs">
-                    <span>A: <GradeBadge grade={sub.score_aufgabengerechtheit} /></span>
-                    <span>K: <GradeBadge grade={sub.score_korrektheit} /></span>
-                    <span>R: <GradeBadge grade={sub.score_repertoire} /></span>
-                    <span>KG: <GradeBadge grade={sub.score_kommunikative_gestaltung} /></span>
+                    <span>Aufgabe: <GradeBadge grade={sub.score_aufgabengerechtheit} /></span>
+                    <span>Korrektheit: <GradeBadge grade={sub.score_korrektheit} /></span>
+                    <span>Repertoire: <GradeBadge grade={sub.score_repertoire} /></span>
+                    <span>Gestaltung: <GradeBadge grade={sub.score_kommunikative_gestaltung} /></span>
                   </div>
 
                   {expanded && (
