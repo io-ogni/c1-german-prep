@@ -234,7 +234,11 @@ export function ReviewCard({ dueCards, onCardReviewed, compact }: ReviewCardProp
                 </Badge>
               )}
             </div>
-            <p className={`${compact ? 'text-xl' : 'text-2xl'} font-bold text-foreground`}>{currentCard.word_de}</p>
+            <p className={`font-bold text-foreground ${
+              currentCard.word_de.length > 60 ? (compact ? 'text-sm' : 'text-base') :
+              currentCard.word_de.length > 30 ? (compact ? 'text-base' : 'text-lg') :
+              compact ? 'text-xl' : 'text-2xl'
+            }`}>{currentCard.word_de}</p>
             {ttsUrl && (
               <button
                 onClick={(e) => { e.stopPropagation(); playAudio(ttsUrl); }}
@@ -255,8 +259,15 @@ export function ReviewCard({ dueCards, onCardReviewed, compact }: ReviewCardProp
                 Antwort
               </span>
             </div>
-            <p className={`${compact ? 'text-lg' : 'text-xl'} font-bold text-foreground mb-3`}>{currentCard.word_de}</p>
-            <p className={`${compact ? 'text-base' : 'text-lg'} text-foreground`}>→ {currentCard.translation_en}</p>
+            <p className={`font-bold text-foreground mb-3 ${
+              currentCard.word_de.length > 60 ? (compact ? 'text-xs' : 'text-sm') :
+              currentCard.word_de.length > 30 ? (compact ? 'text-sm' : 'text-base') :
+              compact ? 'text-lg' : 'text-xl'
+            }`}>{currentCard.word_de}</p>
+            <p className={`text-foreground ${
+              currentCard.translation_en.length > 60 ? (compact ? 'text-xs' : 'text-sm') :
+              compact ? 'text-base' : 'text-lg'
+            }`}>→ {currentCard.translation_en}</p>
             {currentCard.translation_custom && (
               <p className="text-sm text-muted-foreground mt-1">→ {currentCard.translation_custom}</p>
             )}
