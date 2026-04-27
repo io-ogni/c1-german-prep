@@ -58,7 +58,7 @@ export function FeedbackButton() {
       if (error) throw error;
 
       track('feedback_submitted', { page: location.pathname, length: message.trim().length });
-      toast.success('Danke für dein Feedback! Jerry 🐕 liest alles.');
+      toast.success('Danke für dein Feedback! Jerry 🐕 liest alles.', { duration: 4000 });
       setMessage('');
       setOpen(false);
     } catch (err: any) {
@@ -112,7 +112,10 @@ export function FeedbackButton() {
       </button>
 
       {isMobile ? (
-        <Drawer open={open} onOpenChange={setOpen} preventScrollRestoration>
+        <Drawer open={open} onOpenChange={(v) => {
+          setOpen(v);
+          if (!v) setTimeout(() => { document.body.style.overflow = ''; document.body.style.pointerEvents = ''; }, 100);
+        }}>
           <DrawerContent className="px-4 pb-6">
             <DrawerTitle className="text-lg font-semibold mb-4">Feedback</DrawerTitle>
             {form}
