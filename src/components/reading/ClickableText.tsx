@@ -140,7 +140,7 @@ function InlineGap({
         <span
           ref={dropdownRef}
           className={cn(
-            'z-50 rounded-xl bg-blue-100 dark:bg-blue-950 p-0.5 space-y-0.5 shadow-2xl scrollbar-visible overflow-y-auto overflow-x-hidden',
+            'z-50 rounded-xl bg-gray-100 dark:bg-gray-800 p-1 space-y-0.5 shadow-2xl scrollbar-visible overflow-y-auto overflow-x-hidden',
             dropdownStyle.position === 'fixed' ? 'fixed' : 'absolute left-0 top-full mt-1 w-[min(28rem,85vw)] max-h-[320px]'
           )}
           style={dropdownStyle.position === 'fixed' ? dropdownStyle : undefined}
@@ -148,7 +148,7 @@ function InlineGap({
           {options.map(opt => (
             <button
               key={opt.id}
-              className="w-full text-left rounded-lg px-3 py-2 text-sm text-popover-foreground bg-white dark:bg-card hover:bg-accent transition-colors break-words"
+              className="w-full text-left rounded-md px-3 py-2 text-sm text-popover-foreground bg-white dark:bg-card hover:bg-accent transition-colors break-words"
               onClick={(e) => { e.stopPropagation(); onSelect(opt.id); setDropdownOpen(false); }}
             >
               <span className="line-clamp-3">{opt.text}</span>
