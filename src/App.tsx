@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PostHogPageTracker } from "@/components/PostHogPageTracker";
@@ -84,7 +84,7 @@ const App = () => (
               <Route path="/my-vocabulary" element={<MyVocabularyPage />} />
               <Route path="/my-texts" element={<MyTextsPage />} />
               <Route path="/daily-practice" element={<DailyPracticePage />} />
-              <Route path="/it-deutsch" element={<ITDeutschPage />} />
+              <Route path="/it-deutsch" element={<Navigate to="/it-deutsch/uebungen" replace />} />
               <Route path="/it-deutsch/uebungen" element={<ITUebungenPage />} />
 
               <Route path="/it-deutsch/redewendungen" element={<ITRedewendungenPage />} />
