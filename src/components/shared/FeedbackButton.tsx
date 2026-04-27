@@ -120,7 +120,10 @@ export function FeedbackButton() {
       {isMobile ? (
         <Drawer open={open} onOpenChange={(v) => {
           setOpen(v);
-          if (!v) setTimeout(() => { document.body.style.overflow = ''; document.body.style.pointerEvents = ''; }, 100);
+          setSent(false);
+          if (!v) setTimeout(() => {
+            document.body.removeAttribute('style');
+          }, 150);
         }}>
           <DrawerContent className="px-4 pb-6">
             <DrawerTitle className="text-lg font-semibold mb-4">Feedback</DrawerTitle>
