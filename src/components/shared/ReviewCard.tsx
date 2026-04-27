@@ -225,6 +225,7 @@ export function ReviewCard({ dueCards, onCardReviewed, compact }: ReviewCardProp
             className="absolute inset-0 rounded-2xl border-2 border-border bg-card p-6 flex flex-col items-center justify-center text-center shadow-lg"
             style={{ backfaceVisibility: 'hidden' }}
           >
+            <span className="absolute top-3 left-3 text-[10px] italic text-muted-foreground/70">Was bedeutet es?</span>
             <div className="absolute top-3 right-3 flex items-center gap-1.5">
               <span className="text-[10px] text-muted-foreground">Box {currentCard.box_number}/6</span>
               {currentCard.source_type !== 'manual' && (
