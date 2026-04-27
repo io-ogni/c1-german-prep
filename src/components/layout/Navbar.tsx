@@ -85,7 +85,7 @@ export function Navbar() {
       hidden && !mobileOpen && "lg:translate-y-0 -translate-y-full"
     )}>
       <div className="container mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link to="/home" className="flex items-center gap-2 font-bold text-lg text-foreground">
+        <Link to="/home" onClick={() => setMobileOpen(false)} className="relative z-[1000] flex items-center gap-2 font-bold text-lg text-foreground">
           <img src="/logo.png" alt="C1" className="h-7 w-7 rounded-md" />
           <span className="hidden sm:inline bg-gradient-to-r from-blue-600 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent">Werkstatt</span>
         </Link>
