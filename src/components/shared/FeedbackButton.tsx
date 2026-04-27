@@ -5,9 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
 import { MessageCircle, Send, CheckCircle } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { track } from '@/lib/posthog';
 
 const MAX_PER_DAY = 10;
@@ -16,7 +14,6 @@ const MAX_LENGTH = 1000;
 export function FeedbackButton() {
   const auth = useAuth();
   const location = useLocation();
-  const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -117,26 +114,14 @@ export function FeedbackButton() {
         Give feedback
       </button>
 
-      {isMobile ? (
-        <Drawer open={open} onOpenChange={(v) => {
-          setOpen(v);
-          if (!v) setSent(false);
-        }}>
-          <DrawerContent className="px-4 pb-6 max-w-[100vw] overflow-x-hidden">
-            <DrawerTitle className="text-lg font-semibold mb-4">Feedback</DrawerTitle>
-            {form}
-          </DrawerContent>
-        </Drawer>
-      ) : (
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Feedback</DialogTitle>
-            </DialogHeader>
-            {form}
-          </DialogContent>
-        </Dialog>
-      )}
+      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setSent(false); }}>
+        <DialogContent className="sm:max-w-md max-w-[calc(100vw-2rem)]">
+          <DialogHeader>
+            <DialogTitle>Feedback</DialogTitle>
+          </DialogHeader>
+          {form}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
