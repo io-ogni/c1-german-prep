@@ -197,7 +197,7 @@ export default function SignupPage() {
                 ref={captchaRef}
                 onSuccess={setCaptchaToken}
                 onExpire={() => setCaptchaToken(undefined)}
-                options={{ size: 'flexible' }}
+                options={{ size: 'compact' }}
               />
             )}
 
