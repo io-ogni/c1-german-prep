@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
 import { SelectableText } from '@/components/shared/SelectableText';
 import { Input } from '@/components/ui/input';
@@ -178,11 +178,21 @@ function MultiSentenceFillIn({
   } else {
     correctAnswer = String(rawAnswer);
   }
+
+  // Shuffle options once per sentence change
+  const shuffledOptions = useMemo(() => {
+    const opts = [...(current.options ?? [])];
+    for (let i = opts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [opts[i], opts[j]] = [opts[j], opts[i]];
+    }
+    return opts;
+  }, [subIndex, sentences]);
   const isLast = subIndex === sentences.length - 1;
 
   const handleSelect = (idx: number) => {
     if (subAnswered || parentAnswered) return;
-    const isCorrect = current.options?.[idx]?.toLowerCase() === correctAnswer.toLowerCase();
+    const isCorrect = shuffledOptions[idx]?.toLowerCase() === correctAnswer.toLowerCase();
     setSelected(idx);
 
     if (isCorrect) {
@@ -207,7 +217,7 @@ function MultiSentenceFillIn({
     setEliminated(new Set());
   };
 
-  const isCorrect = selected !== null && current.options?.[selected]?.toLowerCase() === correctAnswer.toLowerCase();
+  const isCorrect = selected !== null && shuffledOptions[selected]?.toLowerCase() === correctAnswer.toLowerCase();
 
   return (
     <ExerciseCard
@@ -224,9 +234,9 @@ function MultiSentenceFillIn({
       }
     >
       <SelectableText text={current?.text ?? ''} className="py-2" />
-      {current.options && (
+      {shuffledOptions.length > 0 && (
         <div className="grid gap-2 sm:grid-cols-2">
-          {current.options.map((opt, idx) => (
+          {shuffledOptions.map((opt, idx) => (
             <Button
               key={idx}
               variant="outline"

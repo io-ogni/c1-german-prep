@@ -140,9 +140,19 @@ function MultiStepMC({
   const correctAnswer = current?.correct ?? answers[subIndex] ?? '';
   const isLast = subIndex === questions.length - 1;
 
+  // Shuffle options per question
+  const shuffledOpts = useMemo(() => {
+    const opts = [...(current.options ?? [])];
+    for (let i = opts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [opts[i], opts[j]] = [opts[j], opts[i]];
+    }
+    return opts;
+  }, [subIndex, questions]);
+
   const handleSelect = useCallback((idx: number) => {
     if (subAnswered || parentAnswered) return;
-    const opt = current.options[idx];
+    const opt = shuffledOpts[idx];
     const isCorrect = opt?.toLowerCase() === correctAnswer.toLowerCase();
     setSelected(idx);
 
@@ -159,7 +169,7 @@ function MultiStepMC({
     }
   }, [subAnswered, parentAnswered, current, correctAnswer, correctCount, isLast, onAnswer, eliminated]);
 
-  useNumberKeys(handleSelect, current.options.length, subAnswered || parentAnswered);
+  useNumberKeys(handleSelect, shuffledOpts.length, subAnswered || parentAnswered);
 
   const handleNext = () => {
     setSubIndex(i => i + 1);
@@ -168,7 +178,7 @@ function MultiStepMC({
     setEliminated(new Set());
   };
 
-  const isCorrect = selected !== null && current.options[selected]?.toLowerCase() === correctAnswer.toLowerCase();
+  const isCorrect = selected !== null && shuffledOpts[selected]?.toLowerCase() === correctAnswer.toLowerCase();
 
   return (
     <ExerciseCard
@@ -177,7 +187,7 @@ function MultiStepMC({
     >
       <SelectableText text={questionText} className="py-2" />
       <div className="grid gap-2 sm:grid-cols-2">
-        {current.options.map((opt, idx) => (
+        {shuffledOpts.map((opt, idx) => (
           <Button
             key={idx}
             variant="outline"
