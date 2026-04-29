@@ -21,7 +21,6 @@ const TECH = [
   { name: 'Claude Code + Lovable', role: 'Development' },
   { name: 'Google Cloud TTS (Neural2)', role: 'Audio generation' },
   { name: 'NotebookLM', role: 'Podcast generation' },
-  { name: 'Cloudflare Turnstile', role: 'Bot protection' },
   { name: 'PostHog (EU Cloud)', role: 'Anonymous analytics' },
   { name: 'GitHub Pages', role: 'Hosting' },
 ];
