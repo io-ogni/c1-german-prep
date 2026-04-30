@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { ExerciseCard } from '@/components/shared/ExerciseCard';
 import { SelectableText } from '@/components/shared/SelectableText';
 import { Button } from '@/components/ui/button';
@@ -18,17 +18,30 @@ interface Props {
 export function FillIn({ content, solution, instructions, explanation, answered, onAnswer }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const { t } = useTranslation();
-  const isCorrect = selected === solution.correct;
+
+  const options = content?.options ?? [];
+  const correctValue = options[solution.correct] ?? '';
+
+  // Shuffle options once per mount
+  const shuffled = useMemo(() => {
+    const opts = [...options];
+    for (let i = opts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [opts[i], opts[j]] = [opts[j], opts[i]];
+    }
+    return opts;
+  }, [content]);
+
+  const correctIdx = shuffled.indexOf(correctValue);
+  const isCorrect = selected === correctIdx;
 
   const handleSelect = useCallback((idx: number) => {
     if (answered) return;
     setSelected(idx);
-    onAnswer(idx === solution.correct);
-  }, [answered, solution.correct, onAnswer]);
+    onAnswer(idx === correctIdx);
+  }, [answered, correctIdx, onAnswer]);
 
-  const options = content?.options ?? [];
-
-  useNumberKeys(handleSelect, options.length, answered);
+  useNumberKeys(handleSelect, shuffled.length, answered);
 
   return (
     <ExerciseCard
@@ -46,14 +59,14 @@ export function FillIn({ content, solution, instructions, explanation, answered,
     >
       <SelectableText text={content?.sentence ?? ''} className="py-2" />
       <div className="grid gap-2 sm:grid-cols-2">
-        {options.map((opt, idx) => (
+        {shuffled.map((opt, idx) => (
           <Button
             key={idx}
             variant="outline"
             className={cn(
               'justify-start text-left h-auto py-3 hover:border-primary/40 hover:bg-primary/5',
-              answered && idx === solution.correct && 'border-primary bg-primary/10 text-primary',
-              answered && selected === idx && idx !== solution.correct && 'border-destructive bg-destructive/10 text-destructive'
+              answered && idx === correctIdx && 'border-primary bg-primary/10 text-primary',
+              answered && selected === idx && idx !== correctIdx && 'border-destructive bg-destructive/10 text-destructive'
             )}
             onClick={() => handleSelect(idx)}
             disabled={answered}
