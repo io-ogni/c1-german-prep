@@ -167,7 +167,7 @@ function MultiStepMC({
       setEliminated(prev => new Set(prev).add(idx));
       setTimeout(() => setSelected(null), 400);
     }
-  }, [subAnswered, parentAnswered, current, correctAnswer, correctCount, isLast, onAnswer, eliminated]);
+  }, [subAnswered, parentAnswered, current, correctAnswer, correctCount, isLast, onAnswer]);
 
   useNumberKeys(handleSelect, shuffledOpts.length, subAnswered || parentAnswered);
 
