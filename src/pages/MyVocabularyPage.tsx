@@ -197,7 +197,7 @@ export default function MyVocabularyPage() {
             <div className="text-center py-8 space-y-3">
               <Languages className="h-10 w-10 mx-auto text-muted-foreground/30" />
               <p className="text-sm text-muted-foreground">Noch keine Wörter gesammelt</p>
-              <p className="text-xs text-muted-foreground/70">Markiere Wörter in <Link to="/it-deutsch/vokabular" className="text-primary hover:underline">IT-Vokabular</Link>, <Link to="/speaking" className="text-primary hover:underline">Sprechen</Link> oder tippe auf ein Wort in einem <Link to="/reading" className="text-primary hover:underline">Lesetext</Link>.</p>
+              <p className="text-xs text-muted-foreground/70">Markiere Wörter in <Link to="/writing?tab=redemittel" className="text-primary hover:underline">Redemittel</Link>, <Link to="/speaking" className="text-primary hover:underline">Sprechen</Link> oder tippe auf ein Wort in einem <Link to="/reading" className="text-primary hover:underline">Lesetext</Link>.</p>
             </div>
           ) : (
             <ReviewCard dueCards={dueCards} />
@@ -247,7 +247,7 @@ export default function MyVocabularyPage() {
               <div className="text-center py-8 space-y-3">
                 <Languages className="h-10 w-10 mx-auto text-muted-foreground/30" />
                 <p className="text-sm text-muted-foreground">Noch leer — aber nicht lange.</p>
-                <p className="text-xs text-muted-foreground/70">Markiere Wörter in <Link to="/it-deutsch/vokabular" className="text-primary hover:underline">IT-Vokabular</Link>, <Link to="/speaking" className="text-primary hover:underline">Sprechen</Link> oder tippe auf ein Wort in einem <Link to="/reading" className="text-primary hover:underline">Lesetext</Link>.</p>
+                <p className="text-xs text-muted-foreground/70">Markiere Wörter in <Link to="/writing?tab=redemittel" className="text-primary hover:underline">Redemittel</Link>, <Link to="/speaking" className="text-primary hover:underline">Sprechen</Link> oder tippe auf ein Wort in einem <Link to="/reading" className="text-primary hover:underline">Lesetext</Link>.</p>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground py-4 text-center">{lang === 'de' ? 'Keine Ergebnisse.' : 'No results.'}</p>

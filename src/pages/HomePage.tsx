@@ -351,7 +351,7 @@ export default function HomePage() {
               <Languages className="h-10 w-10 mx-auto text-muted-foreground/30" />
               <p className="text-sm text-muted-foreground">Noch keine Wörter gesammelt</p>
               <p className="text-xs text-muted-foreground/70">Markiere Wörter in Übungen, Redewendungen oder Lesetexten — sie erscheinen hier zum Wiederholen.</p>
-              <Link to="/it-deutsch/vokabular" className="inline-block text-xs text-primary hover:underline mt-1">Jetzt starten →</Link>
+              <Link to="/writing?tab=redemittel" className="inline-block text-xs text-primary hover:underline mt-1">Jetzt starten →</Link>
             </CardContent>
           </Card>
         )}
