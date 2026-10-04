@@ -185,7 +185,10 @@ export default function DailyPracticePage() {
     const [vocabRes, progressRes, exercisesRes] = await Promise.all([
       supabase.from('personal_vocabulary').select('id, word_de, translation_en, translation_custom, example_sentence, box_number, review_count').eq('user_id', profile.user_id).lte('next_review_at', new Date().toISOString()).order('next_review_at').limit(50),
       supabase.from('exercise_progress').select('exercise_id, completed, attempts').eq('user_id', profile.user_id),
-      supabase.from('exercises').select('id, area, exercise_type, difficulty, sort_order, title_de, title_en, instructions_de, instructions_en, content, solution, explanation_de, explanation_en').neq('area', 'sprachbausteine').neq('area', 'listening'),
+      // Daily Practice is general German (grammar + vocabulary). IT exercises
+      // (berufssprache_it, ~27% of the pool) are too niche for the general mix —
+      // they live on their own page (/it-deutsch/uebungen) for those who want them.
+      supabase.from('exercises').select('id, area, exercise_type, difficulty, sort_order, title_de, title_en, instructions_de, instructions_en, content, solution, explanation_de, explanation_en').neq('area', 'sprachbausteine').neq('area', 'listening').neq('area', 'berufssprache_it'),
     ]);
 
     // Deduplicate vocab cards by word_de (same word can exist from multiple sources)

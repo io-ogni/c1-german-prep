@@ -16,7 +16,7 @@ const INFO_SLIDES = [
     title: 'Daily Practice',
     image: '/guide-daily.png',
     points: [
-      'Your most important tool — a timed mix of grammar, vocabulary, and IT exercises.',
+      'Your most important tool — a timed mix of grammar and vocabulary exercises.',
       'Tailored to what you haven\'t mastered yet, or what you want to keep rehearsing. Failed exercises come back first.',
       'Use it every day, even just 5 minutes. That\'s how you build your streak.',
     ],
